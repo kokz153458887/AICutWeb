@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import './App.css'
 import TabBar from './components/TabBar'
 import Home from './pages/Home'
@@ -23,26 +23,29 @@ const ContentContainer: React.FC = () => {
   );
 };
 
-function App() {
+// 主应用容器组件
+const AppContainer: React.FC = () => {
   useEffect(() => {
     // 初始化设备信息收集
     initDeviceInfo();
   }, []);
 
   return (
-    <Router>
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<>
-            <ContentContainer />
-            <TabBar />
-          </>} />
-          <Route path="*" element={<Navigate to="/?tab=home" replace />} />
-        </Routes>
-        {debugConfig.showDebugConsole && <DebugConsole />}
-      </div>
-    </Router>
-  )
+    <div className="container">
+      <Routes>
+        <Route path="/" element={<>
+          <ContentContainer />
+          <TabBar />
+        </>} />
+        <Route path="*" element={<Navigate to="/?tab=home" replace />} />
+      </Routes>
+      {debugConfig.showDebugConsole && <DebugConsole />}
+    </div>
+  );
+};
+
+function App() {
+  return <AppContainer />;
 }
 
 export default App

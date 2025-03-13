@@ -9,8 +9,25 @@ const TabBar: React.FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab') || 'home';
   
+  // 修改handleTabChange函数，保留homebar参数
   const handleTabChange = (tab: string) => {
-    navigate(`/?tab=${tab}`, { replace: true });
+    // 创建新的URLSearchParams对象，基于当前URL参数
+    const newParams = new URLSearchParams(location.search);
+    
+    // 设置新的tab参数
+    newParams.set('tab', tab);
+    
+    // 如果正在切换到home页面并且当前没有homebar参数
+    if (tab === 'home' && !newParams.has('homebar')) {
+      // 检查本地存储中是否有保存的homebar值
+      const savedHomebar = localStorage.getItem('lastHomebar');
+      if (savedHomebar) {
+        newParams.set('homebar', savedHomebar);
+      }
+    }
+    
+    // 使用新参数进行导航
+    navigate(`/?${newParams.toString()}`, { replace: true });
   };
   
   return (

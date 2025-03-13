@@ -1,8 +1,8 @@
 .home-top-bar {
   display: flex;
   background-color: #222222;
-  padding: 8px 12px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 28px;
   overflow: hidden;
   margin: 12px;
 }
@@ -10,7 +10,7 @@
 .top-bar-item {
   flex: 1;
   text-align: center;
-  padding: 8px 16px;
+  padding: 5px 16px;
   border-radius: 20px;
   color: #FFFFFF;
   font-size: 16px;

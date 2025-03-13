@@ -28,6 +28,16 @@ console.log('加载的数据库内容:', JSON.stringify(db, null, 2));
 const router = jsonServer.router(db);
 const middlewares = jsonServer.defaults();
 
+// 添加禁用缓存的中间件（放在最前面）
+server.use((req, res, next) => {
+  // 设置响应头，禁用所有缓存
+  res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.header('Pragma', 'no-cache');
+  res.header('Expires', '0');
+  res.header('ETag', Date.now().toString()); // 每次请求生成不同的ETag
+  next();
+});
+
 // 添加请求日志中间件
 server.use((req, res, next) => {
   console.log('收到请求:', {

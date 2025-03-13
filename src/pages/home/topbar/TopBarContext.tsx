@@ -17,16 +17,26 @@ export const TopBarProvider: React.FC<TopBarProviderProps> = ({
   const [searchParams] = useSearchParams();
   const homebarId = searchParams.get('homebar') || 'recommend';
   
-  const [items] = useState<TopBarItem[]>(initialItems);
+  // 将items也变成状态，这样可以响应initialItems的变化
+  const [items, setItems] = useState<TopBarItem[]>(initialItems);
   const [currentItem, setCurrentItem] = useState<TopBarItem>(
     items.find(item => item.id === homebarId) || items[0]
   );
 
-  // 当URL参数变化时更新currentItem
+  // 当initialItems变化时更新items状态
+  useEffect(() => {
+    console.log('[TopBarProvider] 收到新的导航项数据:', initialItems);
+    setItems(initialItems);
+  }, [initialItems]);
+
+  // 当URL参数或items变化时更新currentItem
   useEffect(() => {
     const newCurrentItem = items.find(item => item.id === homebarId) || items[0];
-    setCurrentItem(newCurrentItem);
-  }, [homebarId, items]);
+    if (newCurrentItem.id !== currentItem.id || newCurrentItem.text !== currentItem.text) {
+      console.log('[TopBarProvider] 更新当前选中项:', newCurrentItem);
+      setCurrentItem(newCurrentItem);
+    }
+  }, [homebarId, items, currentItem.id, currentItem.text]);
 
   const value = {
     items,

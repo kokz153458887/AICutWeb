@@ -1,18 +1,23 @@
 import * as React from 'react';
-import { useHomeData } from './useHomeData';
+import { HomeTopBar, TopBarProvider, useTopBar, DEFAULT_TOPBAR_ITEMS } from './topbar';
+import HomeContent from './content/HomeContent';
 import './Home.css';
 
-const Home: React.FC = () => {
-  const { homeData, loading, error } = useHomeData();
+// 顶部导航栏组件
+const TopBarContainer: React.FC = () => {
+  const { items } = useTopBar();
+  return <HomeTopBar items={items} />;
+};
 
+// 主页组件
+const Home: React.FC = () => {
   return (
-    <div className="home-container">
-      {loading && <p className="loading-text">加载中...</p>}
-      {error && <p className="error-text">{error}</p>}
-      {!loading && !error && homeData && homeData.content && homeData.content.length > 0 ? (
-        <p className="content-text">{homeData.content[0].text}</p>
-      ) : null}
-    </div>
+    <TopBarProvider initialItems={DEFAULT_TOPBAR_ITEMS}>
+      <div className="home-container">
+        <TopBarContainer />
+        <HomeContent />
+      </div>
+    </TopBarProvider>
   );
 };
 

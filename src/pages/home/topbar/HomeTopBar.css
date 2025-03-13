@@ -1,0 +1,25 @@
+.home-top-bar {
+  display: flex;
+  background-color: #222222;
+  padding: 8px 12px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 12px;
+}
+
+.top-bar-item {
+  flex: 1;
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #FFFFFF;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.top-bar-item.active {
+  background-color: #00D9A3; /* 绿色背景 */
+  color: #000000; /* 选中时文字为黑色 */
+  font-weight: 500;
+} 

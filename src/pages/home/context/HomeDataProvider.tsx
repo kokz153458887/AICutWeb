@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useHomeData } from '../useHomeData';
+import { useHomeData } from '../api';
 import { HomeDataContext } from './homeDataContext';
 
 /**

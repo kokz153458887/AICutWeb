@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { HomeApiResponse, HomeApiParams } from './homeApiModel';
 
+/**
+ * 首页API服务类
+ * 负责处理首页相关的所有API请求
+ */
 export class HomeApiService {
   /**
    * 获取首页数据

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { HomeData } from '../../../services/api/home/homeApiModel';
+import { HomeData } from '../api/homeApiModel';
 
 /**
  * 首页数据上下文接口

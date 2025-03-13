@@ -26,4 +26,4 @@ export interface ContentItem {
 // 定义首页接口请求参数类型
 export interface HomeApiParams {
   topbar: string;
-}
+} 

@@ -9,7 +9,6 @@ import { useHomeDataContext } from '../context';
 const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   // 使用共享的HomeDataContext，而不是直接调用useHomeData
   const { homeData, loading, error, refetch } = useHomeDataContext();
-  const loadedRef = React.useRef(false);
   const prevLoadingRef = React.useRef(loading);
   
   // 组件初次渲染时输出日志
@@ -34,20 +33,12 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   
   // 使用useCallback包装refetch函数，确保引用稳定性
   const stableRefetch = React.useCallback(() => {
-    console.log(`[TabContent] 开始加载数据: ${id}`);
+    console.log(`[TabContent] 手动触发数据刷新: ${id}`);
     refetch(id);
   }, [id, refetch]);
   
-  // 只在组件首次渲染时加载数据，移除refetch依赖，防止重复加载
-  React.useEffect(() => {
-    if (!loadedRef.current) {
-      console.log(`[TabContent] ${id} 首次加载数据，loadedRef = ${loadedRef.current}`);
-      stableRefetch();
-      loadedRef.current = true;
-    } else {
-      console.log(`[TabContent] ${id} 已经加载过数据，跳过加载，loadedRef = ${loadedRef.current}`);
-    }
-  }, [id, stableRefetch]); // 只依赖id变化，避免因refetch引用变化导致重新执行
+  // 移除自动调用refetch的useEffect，只使用来自Context的数据
+  // 这样可以防止重复请求
 
   // 检查是否有内容可显示
   const hasContent = !loading && !error && homeData?.content && homeData.content.length > 0;
@@ -72,6 +63,14 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
       ) : (
         !loading && !error && <p className="empty-text">暂无内容</p>
       )}
+      {/* 添加手动刷新按钮，用于需要时手动刷新数据 */}
+      <button 
+        onClick={stableRefetch} 
+        className="refresh-button"
+        style={{ display: 'none' }} // 默认隐藏，需要时可以显示
+      >
+        刷新数据
+      </button>
     </div>
   );
 });

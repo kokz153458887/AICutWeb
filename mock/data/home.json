@@ -1,0 +1,34 @@
+{
+  "getHomeData": {
+    "status": "success",
+    "msg": "success",
+    "data": {
+      "topbar": [
+        {
+          "id": "recommend",
+          "text": "推荐"
+        },
+        {
+          "id": "useful",
+          "text": "常用"
+        }
+      ],
+      "content": [
+        {
+          "styleId": "918234",
+          "styleName": "横屏-漫剪-龙猫-治愈系",
+          "text": "这是一段示例文案内容，展示在首页中间位置",
+          "cover": "http://example.com/image1.jpg",
+          "stars": "2178"
+        },
+        {
+          "styleId": "918235",
+          "styleName": "竖屏-短视频-搞笑-活力",
+          "text": "这是另一段示例文案内容，适合制作搞笑短视频",
+          "cover": "http://example.com/image2.jpg",
+          "stars": "1856"
+        }
+      ]
+    }
+  }
+} 

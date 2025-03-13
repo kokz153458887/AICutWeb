@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { getMockServerUrl } from './scripts/config';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   build: {
@@ -12,6 +12,14 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom']
         }
+      }
+    }
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: getMockServerUrl(),
+        changeOrigin: true,
       }
     }
   },

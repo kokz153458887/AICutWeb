@@ -17,9 +17,20 @@ const ContentContainer: React.FC = () => {
 
   return (
     <div className="content">
-      {currentTab === 'home' && <Home />}
-      {currentTab === 'mine' && <Mine />}
-      {currentTab === 'add' && <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>添加新内容</div>}
+      <div style={{ display: currentTab === 'home' ? 'block' : 'none', height: '100%' }}>
+        <Home />
+      </div>
+      <div style={{ display: currentTab === 'mine' ? 'block' : 'none', height: '100%' }}>
+        <Mine />
+      </div>
+      <div style={{ 
+        display: currentTab === 'add' ? 'flex' : 'none', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100%'
+      }}>
+        添加新内容
+      </div>
     </div>
   );
 };

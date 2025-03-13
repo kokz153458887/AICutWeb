@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useHomeData } from '../useHomeData';
+import { useHomeDataContext } from '../context';
 
 /**
  * 单个Tab的内容组件，负责展示特定标签页的内容
@@ -7,7 +7,8 @@ import { useHomeData } from '../useHomeData';
  * @param id 标签ID
  */
 const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
-  const { homeData, loading, error, refetch } = useHomeData();
+  // 使用共享的HomeDataContext，而不是直接调用useHomeData
+  const { homeData, loading, error, refetch } = useHomeDataContext();
   const loadedRef = React.useRef(false);
   const prevLoadingRef = React.useRef(loading);
   

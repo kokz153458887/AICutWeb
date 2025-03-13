@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, ReactNode, useEffect } from 'react';
 import { TopBarItem } from './types';
-import { DEFAULT_TOPBAR_ITEMS } from './topbarData';
+import { DEFAULT_TOPBAR_ITEMS } from '../context/constants';
 import { useSearchParams } from 'react-router-dom';
 import { TopBarContext } from './context';
 

@@ -1,6 +1,9 @@
-import { TopBarItem } from './types';
+import { TopBarItem } from '../topbar/types';
 
-// 根据截图提供的三个选项卡
+/**
+ * 默认顶部导航项配置
+ * 在数据加载前或加载失败时使用
+ */
 export const DEFAULT_TOPBAR_ITEMS: TopBarItem[] = [
   {
     id: 'recommend',
@@ -10,4 +13,4 @@ export const DEFAULT_TOPBAR_ITEMS: TopBarItem[] = [
     id: 'useful',
     text: '常用'
   }
-];
+]; 

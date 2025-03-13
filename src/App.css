@@ -18,22 +18,26 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding-bottom: 70px; /* 为底部导航栏留出空间 */
 }
 
 .tabbar {
-  height: calc(60px + env(safe-area-inset-bottom));
-  background-color: #ffffff;
+  height: 60px;
+  background-color: #2a2a2a;
   display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  border-top: 1px solid #e5e5e5;
-  padding-top: 8px;
-  padding-bottom: env(safe-area-inset-bottom);
+  justify-content: space-between;
+  align-items: center;
+  border-top: none;
+  padding: 0 20px;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
   z-index: 100;
+  border-radius: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .tabbar-item {
@@ -44,22 +48,55 @@
   justify-content: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  padding: 8px 0;
+  height: 50px;
 }
 
-.emoji {
-  font-size: 1.25rem;
-  color: #333;
+.tabbar-item-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  position: relative;
+}
+
+.add-button {
+  width: 45px;
+  height: 45px;
+  background-color: #00d6c9; /* 蓝绿色 */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.plus-icon {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.icon-home, .icon-user {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+  margin-bottom: 3px;
+  width: 24px;
+  height: 24px;
 }
 
 .label {
-  margin-top: 0.125rem;
-  font-size: 0.875rem;
-  color: #333;
+  font-size: 0.75rem;
+  color: #999;
 }
 
-.emoji.active,
+.icon-home.active,
+.icon-user.active,
 .label.active {
-  color: #1677ff;
+  color: #ffffff;
 }
 
 /* 移动端优化 */

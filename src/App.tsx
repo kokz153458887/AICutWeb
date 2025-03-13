@@ -19,6 +19,7 @@ const ContentContainer: React.FC = () => {
     <div className="content">
       {currentTab === 'home' && <Home />}
       {currentTab === 'mine' && <Mine />}
+      {currentTab === 'add' && <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>添加新内容</div>}
     </div>
   );
 };

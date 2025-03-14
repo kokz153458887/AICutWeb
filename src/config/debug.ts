@@ -6,11 +6,13 @@ export interface DebugConfig {
   showDebugConsole: boolean;
 }
 
-// 从环境变量中获取配置
+import { projectConfig } from './project';
+
+// 从项目配置和环境变量中获取配置
 const getDebugConfig = (): DebugConfig => {
   return {
-    enableLogging: import.meta.env.VITE_ENABLE_LOGGING !== 'false',
-    showDebugConsole: import.meta.env.VITE_SHOW_DEBUG_CONSOLE !== 'false',
+    enableLogging: projectConfig.debug?.enableLogging ?? (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_ENABLE_LOGGING !== 'false' : true),
+    showDebugConsole: projectConfig.debug?.showDebugConsole ?? import.meta.env.VITE_SHOW_DEBUG_CONSOLE !== 'false',
   };
 };
 

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHomeDataContext } from '../context';
+import LoadingView from '../../../components/LoadingView';
+import ErrorView from '../../../components/ErrorView';
 
 /**
  * 单个Tab的内容组件，负责展示特定标签页的内容
@@ -10,6 +12,7 @@ import { useHomeDataContext } from '../context';
 const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   // 使用共享的HomeDataContext，而不是直接调用useHomeData
   const { homeData, loading, error, refetch } = useHomeDataContext();
+  const [isRetrying, setIsRetrying] = React.useState(false);
   const prevLoadingRef = React.useRef(loading);
   // 使用navigate进行路由跳转
   const navigate = useNavigate();
@@ -21,9 +24,11 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   
   // 跟踪loading状态变化
   React.useEffect(() => {
-    if (prevLoadingRef.current !== loading) {
-      console.log(`[TabContent] ${id} loading状态变化: ${prevLoadingRef.current} -> ${loading}`);
-      prevLoadingRef.current = loading;
+    if (loading) {
+      console.log(`[TabContent] ${id} 正在加载数据`);
+    } else {
+      console.log(`[TabContent] ${id} 数据加载完成`);
+      setIsRetrying(false); // 加载完成时重置重试状态
     }
   }, [loading, id]);
   
@@ -35,10 +40,17 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   }, [homeData, id]);
   
   // 使用useCallback包装refetch函数，确保引用稳定性
-  const stableRefetch = React.useCallback(() => {
-    console.log(`[TabContent] 手动触发数据刷新: ${id}`);
-    refetch(id);
+  const handleRetry = React.useCallback(async () => {
+    console.log(`[TabContent] ${id} 开始重试`);
+    setIsRetrying(true);
+    try {
+      await refetch(id);
+    } catch (err) {
+      console.error(`[TabContent] ${id} 重试失败:`, err);
+      setIsRetrying(false);
+    }
   }, [id, refetch]);
+
   
   // 处理内容项点击，跳转到视频播放页
   const handleContentClick = React.useCallback((itemId: string) => {
@@ -50,13 +62,17 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   const hasContent = !loading && !error && homeData?.content && homeData.content.length > 0;
   
   React.useEffect(() => {
-    console.log(`[TabContent] ${id} 渲染状态: loading=${loading}, error=${!!error}, hasContent=${hasContent}`);
-  }, [loading, error, hasContent, id]);
+    console.log(`[TabContent] ${id} 渲染状态: loading=${loading}, error=${!!error}, hasContent=${hasContent}, isRetrying=${isRetrying}`);
+  }, [loading, error, hasContent, id, isRetrying]);
   
   return (
     <div className="tab-content">
-      {loading && <p className="loading-text">加载中...</p>}
-      {error && <p className="error-text">{error}</p>}
+      {loading && <LoadingView />}
+      {error && !loading && (
+        <ErrorView 
+          onRetry={handleRetry}
+        />
+      )}
       {hasContent ? (
         <div className="content-list">
           {homeData!.content.map((item, index) => (
@@ -69,21 +85,13 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
               <p className="content-text">{item.text}</p>
               {item.cover && <img src={item.cover} alt={item.text} className="content-image" />}
             </div>
-          ))}
+          ))}        
         </div>
       ) : (
         !loading && !error && <p className="empty-text">暂无内容</p>
       )}
-      {/* 添加手动刷新按钮，用于需要时手动刷新数据 */}
-      <button 
-        onClick={stableRefetch} 
-        className="refresh-button"
-        style={{ display: 'none' }} // 默认隐藏，需要时可以显示
-      >
-        刷新数据
-      </button>
     </div>
   );
 });
 
-export default TabContent; 
+export default TabContent;

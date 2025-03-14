@@ -54,15 +54,12 @@ export const useHomeData = (): UseHomeDataResult => {
     if (manager) {
       const tabId = id || searchParams.get('homebar') || 'recommend';
       
-      // 只在tab ID真正变化时才发起请求
-      if (currentTabIdRef.current !== tabId) {
-        // 更新当前tab ID
-        currentTabIdRef.current = tabId;
-        
-        // 发起新的数据请求
-        console.log(`[useHomeData] 请求数据: ${tabId}`);
-        await manager.fetchHomeData(tabId);
-      }
+      // 更新当前tab ID
+      currentTabIdRef.current = tabId;
+      
+      // 发起新的数据请求
+      console.log(`[useHomeData] 请求数据: ${tabId}`);
+      await manager.fetchHomeData(tabId);
     }
   }, [manager, searchParams]);
   

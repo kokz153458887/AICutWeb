@@ -1,0 +1,21 @@
+{
+  "getVideoDetail": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "template": {
+        "styleId": "91823114",
+        "styleName": "横屏-漫剪-龙猫-治愈系",
+        "styles": {}
+      },
+      "content": {
+        "videoUrl": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+        "text": "这是一段示例文案内容，展示在首页中间位置。这是一段示例文案内容，展示在首页中间位置。这是一段示例文案内容，展示在首页中间位置。",
+        "cover": "https://picsum.photos/800/450",
+        "stars": "2178",
+        "ratio": "16:9",
+        "navUrl": "https://example.com"
+      }
+    }
+  }
+} 

@@ -6,6 +6,7 @@ import TabBar from './components/TabBar'
 import Home from './pages/home/Home'
 import Mine from './pages/mine/Mine'
 import DebugConsole from './components/DebugConsole'
+import { VideoDetail } from './detail'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 
@@ -49,6 +50,8 @@ const AppContainer: React.FC = () => {
           <ContentContainer />
           <TabBar />
         </>} />
+        {/* 视频播放页路由 */}
+        <Route path="/video/:id" element={<VideoDetail />} />
         <Route path="*" element={<Navigate to="/?tab=home" replace />} />
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}

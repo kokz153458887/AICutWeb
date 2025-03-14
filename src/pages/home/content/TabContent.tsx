@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useHomeDataContext } from '../context';
 
 /**
@@ -10,6 +11,8 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
   // 使用共享的HomeDataContext，而不是直接调用useHomeData
   const { homeData, loading, error, refetch } = useHomeDataContext();
   const prevLoadingRef = React.useRef(loading);
+  // 使用navigate进行路由跳转
+  const navigate = useNavigate();
   
   // 组件初次渲染时输出日志
   React.useEffect(() => {
@@ -37,9 +40,12 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
     refetch(id);
   }, [id, refetch]);
   
-  // 移除自动调用refetch的useEffect，只使用来自Context的数据
-  // 这样可以防止重复请求
-
+  // 处理内容项点击，跳转到视频播放页
+  const handleContentClick = React.useCallback((itemId: string) => {
+    console.log(`[TabContent] 点击内容项，跳转到视频播放页: ${itemId}`);
+    navigate(`/video/${itemId}`);
+  }, [navigate]);
+  
   // 检查是否有内容可显示
   const hasContent = !loading && !error && homeData?.content && homeData.content.length > 0;
   
@@ -54,7 +60,12 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
       {hasContent ? (
         <div className="content-list">
           {homeData!.content.map((item, index) => (
-            <div key={item.styleId || index} className="content-item">
+            <div 
+              key={item.styleId || index} 
+              className="content-item"
+              onClick={() => handleContentClick(item.styleId || `${index}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <p className="content-text">{item.text}</p>
               {item.cover && <img src={item.cover} alt={item.text} className="content-image" />}
             </div>

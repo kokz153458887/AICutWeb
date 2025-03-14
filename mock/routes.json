@@ -1,4 +1,5 @@
 {
   "/api/*": "/data/*",
-  "^/api/home/getHomeData": "/home/getHomeData"
+  "^/api/home/getHomeData": "/home/getHomeData",
+  "^/api/video/getVideoDetail": "/video/getVideoDetail"
 }

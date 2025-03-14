@@ -1,0 +1,196 @@
+/* 视频播放页样式 */
+.video-detail-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 顶部操作区样式 */
+.video-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+/* 返回按钮样式 */
+.back-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* 分享按钮样式 */
+.share-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* 视频容器样式 */
+.video-container {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #000;
+}
+
+/* 视频播放器样式 */
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 视频封面样式 */
+.video-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background-color: #000;
+}
+
+.video-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 用户信息区域样式 */
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  flex: 1;
+}
+
+.follow-button {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  padding: 5px 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* 视频文案区域样式 */
+.video-text {
+  padding: 15px;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.5;
+  background-color: #000;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.video-question {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+/* 底部操作栏样式 */
+.video-bottom-bar {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 点赞按钮样式 */
+.like-button {
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.like-icon-container {
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
+}
+
+.like-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.like-count {
+  font-size: 16px;
+}
+
+/* 做同款按钮样式 */
+.make-same-button {
+  background-color: #fff;
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 加载中样式 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #fff;
+  font-size: 16px;
+  background-color: #000;
+} 

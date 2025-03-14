@@ -6,6 +6,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import './VideoDetail.css';
 import { getVideoDetail, VideoDetailData } from './api';
+import VideoTopBar from '../components/VideoTopBar';
+import VideoBottomBar from './VideoBottomBar';
 
 const VideoDetail: React.FC = () => {
   // 状态管理
@@ -110,18 +112,10 @@ const VideoDetail: React.FC = () => {
   return (
     <div className="video-detail-container">
       {/* 顶部操作区 */}
-      <div className="video-top-bar">
-        <div className="back-button" onClick={handleBackClick}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <div className="share-button" onClick={handleShareClick}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12548 15.0077 5.24917 15.0227 5.37061L8.08261 9.84066C7.54305 9.32015 6.80891 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15C6.80891 15 7.54305 14.6798 8.08261 14.1593L15.0227 18.6294C15.0077 18.7508 15 18.8745 15 19C15 20.6569 16.3431 22 18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C17.1911 16 16.457 16.3202 15.9174 16.8407L8.97733 12.3706C8.99229 12.2492 9 12.1255 9 12C9 11.8745 8.99229 11.7508 8.97733 11.6294L15.9174 7.15934C16.457 7.67985 17.1911 8 18 8Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
+      <VideoTopBar 
+        onBackClick={handleBackClick} 
+        onShareClick={handleShareClick} 
+      />
       
       {/* 视频播放区域 */}
       <div 
@@ -162,19 +156,10 @@ const VideoDetail: React.FC = () => {
       </div>
 
       {/* 底部操作栏 */}
-      <div className="video-bottom-bar">
-        <div className="like-button">
-          <div className="like-icon-container">
-            <svg className="like-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.03L12 21.35Z" fill="#FF4757"/>
-            </svg>
-          </div>
-          <span className="like-count">{data.content.stars}</span>
-        </div>
-        <button className="make-same-button" onClick={handleNavClick}>
-          做同款
-        </button>
-      </div>
+      <VideoBottomBar 
+        stars={data.content.stars} 
+        onNavClick={handleNavClick} 
+      />
     </div>
   );
 };

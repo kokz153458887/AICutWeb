@@ -6,18 +6,18 @@
       "topbar": [
         {
           "id": "recommend",
-          "text": "推荐4"
+          "text": "推荐1"
         },
         {
           "id": "useful",
-          "text": "测试5"
+          "text": "测试10"
         }
       ],
       "content": [
         {
           "styleId": "91823114",
           "styleName": "横屏-漫剪-龙猫-治愈系",
-          "text": "55这是一段示例文案内容，展示在首页中间位置",
+          "text": "222提升这是一段示例文案内容，展示在首页中间位置",
           "cover": "http://example.com/image1.jpg",
           "stars": "2178"
         },

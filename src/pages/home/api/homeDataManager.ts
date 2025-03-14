@@ -6,11 +6,11 @@ import { HomeApiService } from './homeApi';
  * 负责获取、缓存和管理首页数据的所有逻辑
  */
 export class HomeDataManager {
-  // 数据缓存，存储已获取的数据
-  private static dataCache: Record<string, HomeData> = {};
+  // 数据缓存，存储已获取的数据，使用Map以支持更好的缓存管理
+  private static dataCache: Map<string, HomeData> = new Map();
   
   // 进行中的请求记录
-  private static pendingRequests: Record<string, Promise<{data: HomeData}>> = {};
+  private static pendingRequests: Map<string, Promise<{data: HomeData}>> = new Map();
   
   // 全局请求计数器
   private static globalRequestCount: number = 0;
@@ -88,21 +88,6 @@ export class HomeDataManager {
   }
   
   /**
-   * 检查并使用缓存数据
-   * @param cacheKey 缓存键
-   * @param topbar 标签ID
-   * @returns 如果使用了缓存则返回true，否则返回false
-   */
-  private checkAndUseCache(cacheKey: string, topbar: string): boolean {
-    if (HomeDataManager.dataCache[cacheKey]) {
-      console.log(`[HomeDataManager] 使用缓存数据: ${topbar}`);
-      this.safeSetState(HomeDataManager.dataCache[cacheKey], false, null);
-      return true;
-    }
-    return false;
-  }
-  
-  /**
    * 尝试复用正在进行的请求
    * @param cacheKey 缓存键
    * @param topbar 标签ID
@@ -110,7 +95,7 @@ export class HomeDataManager {
    * @returns 如果成功复用请求则返回true，否则返回false
    */
   private async tryReuseExistingRequest(cacheKey: string, topbar: string, requestId: number): Promise<boolean> {
-    const existingRequest = HomeDataManager.pendingRequests[cacheKey];
+    const existingRequest = HomeDataManager.pendingRequests.get(cacheKey);
     if (!existingRequest) return false;
 
     console.log(`[HomeDataManager] 复用正在进行的请求: ${topbar}`);
@@ -128,7 +113,6 @@ export class HomeDataManager {
       
       // 检查响应有效性
       if (response && response.data) {
-        HomeDataManager.dataCache[cacheKey] = response.data;
         this.safeSetState(response.data, false, null);
       }
     } catch (err) {
@@ -156,13 +140,13 @@ export class HomeDataManager {
     
     // 创建请求并存储到pendingRequests
     const request = HomeApiService.getHomeData({ topbar });
-    HomeDataManager.pendingRequests[cacheKey] = request;
+    HomeDataManager.pendingRequests.set(cacheKey, request);
     
     try {
       const response = await request;
       
       // 请求完成后从pendingRequests中删除
-      delete HomeDataManager.pendingRequests[cacheKey];
+      HomeDataManager.pendingRequests.delete(cacheKey);
       
       // 检查请求ID是否仍然是当前请求
       if (requestId !== this.requestIdRef.current) {
@@ -177,9 +161,8 @@ export class HomeDataManager {
       }
       
       if (response && response.data) {
-        // 保存数据到缓存
-        HomeDataManager.dataCache[cacheKey] = response.data;
-        console.log(`[HomeDataManager] 数据已缓存: ${topbar}`);
+        // 更新缓存
+        HomeDataManager.dataCache.set(cacheKey, response.data);
         this.safeSetState(response.data, false, null);
       } else {
         throw new Error('返回数据格式不正确');
@@ -190,7 +173,7 @@ export class HomeDataManager {
       console.error('[HomeDataManager] 获取首页数据失败:', err);
       
       // 出错时也要从pendingRequests中删除
-      delete HomeDataManager.pendingRequests[cacheKey];
+      HomeDataManager.pendingRequests.delete(cacheKey);
     }
   }
   
@@ -204,10 +187,8 @@ export class HomeDataManager {
       this.requestIdRef.current = (this.requestIdRef.current || 0) + 1;
       const currentRequestId = this.requestIdRef.current;
       
-      // 获取URL参数中的homebar值，默认为recommend
-      const homebarParam = this.searchParams.get('homebar') || 'recommend';
-      // 使用传入的id或从URL获取的值
-      const topbar = id || homebarParam;
+      // 使用传入的id作为topbar参数
+      const topbar = id || this.searchParams.get('homebar') || 'recommend';
       
       // 更新当前加载的tab ID
       this.currentTabIdRef.current = topbar;
@@ -215,31 +196,30 @@ export class HomeDataManager {
       // 创建缓存键
       const cacheKey = this.createCacheKey(topbar);
       
-      console.log(`[HomeDataManager] 开始处理请求: ${topbar}, 请求ID: ${currentRequestId}`);
-      
-      // 先检查缓存
-      if (this.checkAndUseCache(cacheKey, topbar)) {
+      // 检查缓存
+      const cachedData = HomeDataManager.dataCache.get(cacheKey);
+      if (cachedData) {
+        console.log(`[HomeDataManager] 使用缓存数据: ${topbar}`);
+        this.safeSetState(cachedData, false, null);
         return;
       }
       
-      // 再尝试复用现有请求
-      if (await this.tryReuseExistingRequest(cacheKey, topbar, currentRequestId)) {
-        return;
-      }
+      // 尝试复用正在进行的请求
+      const hasReusedRequest = await this.tryReuseExistingRequest(cacheKey, topbar, currentRequestId);
+      if (hasReusedRequest) return;
       
-      // 如果没有缓存也没有现有请求，发送新请求
+      // 发送新请求
       await this.sendNewRequest(cacheKey, topbar, currentRequestId);
     } catch (err) {
-      console.error('[HomeDataManager] 处理请求出错:', err);
+      console.error('[HomeDataManager] fetchHomeData出错:', err);
+      this.safeSetState(null, false, '获取数据失败');
     }
   }
-  
+
   /**
    * 清理资源
-   * 在组件卸载时调用
    */
   public cleanup(): void {
-    console.log('[HomeDataManager] 组件卸载，清理资源');
     this.isMountedRef.current = false;
   }
   
@@ -248,7 +228,8 @@ export class HomeDataManager {
    * 用于测试或强制刷新时
    */
   public static resetCache(): void {
-    HomeDataManager.dataCache = {};
+    HomeDataManager.dataCache.clear();
+    HomeDataManager.pendingRequests.clear();
     console.log('[HomeDataManager] 已重置缓存');
   }
-} 
+}

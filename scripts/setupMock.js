@@ -5,6 +5,7 @@ import { dirname, join } from 'path';
 import fs from 'fs';
 import { HomeRoutes } from './routes/homeRoutes.js';
 import { MOCK_SERVER } from './config.js';
+import express from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,6 +13,7 @@ const __dirname = dirname(__filename);
 const server = jsonServer.create();
 const mockDir = join(__dirname, '../mock');
 const dataDir = join(mockDir, 'data');
+const publicDir = join(__dirname, '../public');
 
 // 合并所有数据文件
 const db = {};
@@ -51,10 +53,14 @@ server.use((req, res, next) => {
 
 // 添加延迟模拟真实网络请求
 server.use((req, res, next) => {
-  setTimeout(next, 3000);
+  setTimeout(next, 300); // 减少延迟时间，方便测试
 });
 
 server.use(middlewares);
+
+// 提供静态资源
+server.use('/data', express.static(join(publicDir, 'data')));
+console.log('提供静态资源目录:', join(publicDir, 'data'));
 
 // 读取路由配置
 const routesPath = join(mockDir, 'routes.json');

@@ -20,6 +20,12 @@ const VideoDetail: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  
+  // 从URL参数中获取标题、文案和视频比例
+  const searchParams = new URLSearchParams(location.search);
+  const urlTitle = searchParams.get('title') || '视频标题';
+  const urlText = searchParams.get('text') || '视频文案加载中...';
+  const urlRatio = searchParams.get('ratio') || '16:9'; // 默认16:9比例
 
   // 获取视频数据
   useEffect(() => {
@@ -33,7 +39,17 @@ const VideoDetail: React.FC = () => {
       try {
         setLoading(true);
         const videoData = await getVideoDetail(id);
-        setData(videoData);
+        
+        // 检查文案是否有变化，只有在文案有变化时才更新数据
+        const hasTextChanged = !data || data.content.text !== videoData.content.text;
+        
+        if (hasTextChanged) {
+          console.log('文案有变化，更新数据');
+          setData(videoData);
+        } else {
+          console.log('文案无变化，保持当前UI状态');
+        }
+        
         setError(null);
       } catch (err) {
         console.error('获取视频数据失败:', err);
@@ -44,7 +60,7 @@ const VideoDetail: React.FC = () => {
     };
 
     fetchData();
-  }, [id, location]);
+  }, [id, location.pathname]);
 
   // 处理视频播放事件
   const handleVideoPlay = () => {
@@ -87,60 +103,89 @@ const VideoDetail: React.FC = () => {
 
   // 计算视频容器高度
   const calculateVideoHeight = (): string => {
-    if (!data?.content.ratio) return 'auto';
+    // 优先使用URL参数中的ratio
+    const ratioToUse = urlRatio || (data?.content.ratio || '16:9');
     
-    const [width, height] = data.content.ratio.split(':').map(Number);
-    if (!width || !height) return 'auto';
+    console.log(`使用视频比例: ${ratioToUse}`);
     
-    // 根据屏幕宽度和视频比例计算高度
+    const [width, height] = ratioToUse.split(':').map(Number);
+    if (width && height) {
+      // 根据屏幕宽度和视频比例计算高度
+      const screenWidth = window.innerWidth;
+      return `${(screenWidth * height) / width}px`;
+    }
+    
+    // 默认16:9比例
     const screenWidth = window.innerWidth;
-    return `${(screenWidth * height) / width}px`;
+    return `${(screenWidth * 9) / 16}px`;
   };
 
-  if (loading) {
-    return <div className="loading">加载中...</div>;
-  }
+  // 获取要显示的标题和文案
+  const getDisplayTitle = () => {
+    return data?.content.text.split('.')[0] || urlTitle;
+  };
 
-  if (error) {
-    return <div className="loading">{error}</div>;
-  }
+  const getDisplayText = () => {
+    return data?.content.text || urlText;
+  };
 
-  if (!data) {
-    return <div className="loading">视频数据不存在</div>;
-  }
+  // 获取要显示的点赞数
+  const getDisplayStars = () => {
+    return data?.content.stars || '';
+  };
 
+  // 渲染视频内容
+  const renderVideoContent = () => {
+    if (data) {
+      return (
+        <div 
+          className="video-container" 
+          style={{ height: calculateVideoHeight() }}
+        >
+          <video
+            ref={videoRef}
+            className="video-player"
+            src={data.content.videoUrl}
+            onPlay={handleVideoPlay}
+            onLoadedData={handleVideoLoaded}
+            playsInline
+            muted // 移动端自动播放通常需要静音
+          />
+          
+          {/* 视频封面 */}
+          {showCover && (
+            <div className="video-cover">
+              <img src={data.content.cover} alt="视频封面" />
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // 数据未加载时显示占位区域
+    return (
+      <div 
+        className="video-container placeholder" 
+        style={{ height: calculateVideoHeight() }}
+      >
+        <div className="video-placeholder">视频加载中...</div>
+      </div>
+    );
+  };
+
+  // 即使在加载中或出错时，也渲染基本UI结构
   return (
     <div className="video-detail-container">
-      {/* 顶部操作区 */}
+      {/* 顶部操作区 - 始终渲染 */}
       <VideoTopBar 
         onBackClick={handleBackClick} 
         onShareClick={handleShareClick} 
       />
       
       {/* 视频播放区域 */}
-      <div 
-        className="video-container" 
-        style={{ height: calculateVideoHeight() }}
-      >
-        <video
-          ref={videoRef}
-          className="video-player"
-          src={data.content.videoUrl}
-          onPlay={handleVideoPlay}
-          onLoadedData={handleVideoLoaded}
-          playsInline
-          muted // 移动端自动播放通常需要静音
-        />
-        
-        {/* 视频封面 */}
-        {showCover && (
-          <div className="video-cover">
-            <img src={data.content.cover} alt="视频封面" />
-          </div>
-        )}
-      </div>
+      {renderVideoContent()}
 
-      {/* 用户信息区域 */}
+      {/* 用户信息区域 - 始终渲染 */}
       <div className="user-info">
         <div className="user-avatar">
           <img src="https://picsum.photos/50/50" alt="用户头像" />
@@ -149,15 +194,16 @@ const VideoDetail: React.FC = () => {
         <button className="follow-button">关注</button>
       </div>
 
-      {/* 视频文案区域 */}
+      {/* 视频文案区域 - 始终渲染，使用兜底文字 */}
       <div className="video-text">
-        <div className="video-question">你的名字?</div>
-        {data.content.text}
+        <div className="video-question">{getDisplayTitle()}</div>
+        {getDisplayText()}
+        {error && <div className="error-message">{error}</div>}
       </div>
 
-      {/* 底部操作栏 */}
+      {/* 底部操作栏 - 始终渲染，stars可能为空 */}
       <VideoBottomBar 
-        stars={data.content.stars} 
+        stars={getDisplayStars()} 
         onNavClick={handleNavClick} 
       />
     </div>

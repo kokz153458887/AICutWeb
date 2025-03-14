@@ -18,7 +18,7 @@ const VideoBottomBar: React.FC<VideoBottomBarProps> = ({ stars, onNavClick }) =>
         <div className="like-icon-container">
           <HeartIcon />
         </div>
-        <span className="like-count">{stars}</span>
+        <span className="like-count">{stars || '加载中...'}</span>
       </div>
       <button className="make-same-button" onClick={onNavClick}>
         做同款

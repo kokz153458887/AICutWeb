@@ -9,9 +9,9 @@
         "styles": {}
       },
       "content": {
-        "videoUrl": "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+        "videoUrl": "/data/video_16_9.mp4",
         "text": "这是一段示例文案内容，展示在首页中间位置。这是一段示例文案内容，展示在首页中间位置。这是一段示例文案内容，展示在首页中间位置。",
-        "cover": "https://picsum.photos/800/450",
+        "cover": "/data/cover_16_9.jpg",
         "stars": "2178",
         "ratio": "16:9",
         "navUrl": "https://example.com"
@@ -28,9 +28,9 @@
         "styles": {}
       },
       "content": {
-        "videoUrl": "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
+        "videoUrl": "/data/video_4_3.mp4",
         "text": "这是一个4:3比例的视频示例，适合教学、演示等场景。这种比例的视频在平板电脑和传统电视上观看效果更好。",
-        "cover": "https://picsum.photos/800/600",
+        "cover": "/data/cover_4_3.jpg",
         "stars": "1456",
         "ratio": "4:3",
         "navUrl": "https://example.com/43video"
@@ -47,9 +47,9 @@
         "styles": {}
       },
       "content": {
-        "videoUrl": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        "videoUrl": "/data/video_1_1.mp4",
         "text": "这是一个1:1比例的视频示例，非常适合社交媒体平台如Instagram等。正方形视频在移动设备上浏览时占据更多屏幕空间。",
-        "cover": "https://picsum.photos/600/600",
+        "cover": "/data/cover_1_1.jpg",
         "stars": "3289",
         "ratio": "1:1",
         "navUrl": "https://example.com/11video"

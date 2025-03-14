@@ -44,10 +44,14 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
       )}
       
       {hasContent && (
-        <WaterfallList 
-          items={homeData!.content}
-          onItemClick={handleContentClick}
-        />
+        <>
+          <WaterfallList 
+            items={homeData!.content}
+            onItemClick={handleContentClick}
+          />
+          {/* 底部空白区域，避免内容被TabBar遮挡 */}
+          <div className="bottom-space"></div>
+        </>
       )}
       
       {!loading && !error && !hasContent && (

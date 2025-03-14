@@ -1,7 +1,7 @@
 /* 瀑布流容器 */
 .waterfall-container {
   width: 100%;
-  padding: 0 10px;
+  padding: 0 8px;
   box-sizing: border-box;
   min-height: 100%;
   position: relative;
@@ -41,7 +41,7 @@
 /* 适配移动端 */
 @media (max-width: 480px) {
   .waterfall-container {
-    padding: 0 6px;
+    padding: 0 4px;
   }
   
   .waterfall-columns {

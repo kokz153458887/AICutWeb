@@ -30,8 +30,8 @@ const WaterfallList: React.FC<WaterfallListProps> = ({ items, onItemClick }) => 
     const updateDimensions = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      const containerPadding = width <= 480 ? 8 : 12;
-      const columnGap = width <= 480 ? 6 : 8; // 减小列间距
+      const containerPadding = width <= 480 ? 6 : 10;
+      const columnGap = width <= 480 ? 4 : 6; // 进一步减小列间距
       const newColumnWidth = (width - containerPadding * 2 - columnGap) / 2;
       
       console.log(`[WaterfallList] 更新尺寸 - 窗口宽度: ${width}, 列宽: ${newColumnWidth}, 窗口高度: ${height}`);
@@ -79,7 +79,7 @@ const WaterfallList: React.FC<WaterfallListProps> = ({ items, onItemClick }) => 
       <Masonry
         items={items}
         columnCount={2}
-        columnGutter={8}
+        columnGutter={6}
         columnWidth={columnWidth}
         overscanBy={5} // 增加预加载行数
         height={containerHeight} // 设置容器高度

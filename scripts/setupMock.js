@@ -51,7 +51,7 @@ server.use((req, res, next) => {
 
 // 添加延迟模拟真实网络请求
 server.use((req, res, next) => {
-  setTimeout(next, 300);
+  setTimeout(next, 3000);
 });
 
 server.use(middlewares);

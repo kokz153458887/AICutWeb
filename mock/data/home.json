@@ -19,25 +19,274 @@
       ],
       "content": [
         {
-          "styleId": "91823114",
+          "styleId": "item1",
           "styleName": "横屏-漫剪-龙猫-治愈系",
           "text": "16:9比例视频 - 这是一段示例文案内容，展示在首页中间位置",
-          "cover": "https://picsum.photos/800/450",
-          "stars": "2178"
+          "cover": "https://picsum.photos/800/450?random=1",
+          "stars": "2178",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
         },
         {
-          "styleId": "43video",
+          "styleId": "item2",
           "styleName": "4:3比例-教学视频",
           "text": "4:3比例视频 - 这是一个4:3比例的视频示例，适合教学、演示等场景",
-          "cover": "https://picsum.photos/800/600",
-          "stars": "1456"
+          "cover": "https://picsum.photos/800/600?random=2",
+          "stars": "1456",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
         },
         {
-          "styleId": "11video",
+          "styleId": "item3",
           "styleName": "1:1比例-社交媒体",
           "text": "1:1比例视频 - 这是一个1:1比例的视频示例，非常适合社交媒体平台",
-          "cover": "https://picsum.photos/600/600",
-          "stars": "3289"
+          "cover": "https://picsum.photos/600/600?random=3",
+          "stars": "3289",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item4",
+          "styleName": "风景-自然-山水",
+          "text": "大自然的鬼斧神工，壮丽山河间的宁静时刻，让人心旷神怡",
+          "cover": "https://picsum.photos/800/450?random=4",
+          "stars": "1872",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item5",
+          "styleName": "美食-烹饪-甜点",
+          "text": "美食制作教程，简单几步做出令人垂涎的甜点，周末下午茶的绝佳选择",
+          "cover": "https://picsum.photos/800/600?random=5",
+          "stars": "2543",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item6",
+          "styleName": "宠物-萌宠-猫咪",
+          "text": "猫咪的日常生活，慵懒又可爱的瞬间，治愈你的每一天",
+          "cover": "https://picsum.photos/600/600?random=6",
+          "stars": "4521",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item7",
+          "styleName": "旅行-城市-建筑",
+          "text": "城市建筑之美，现代与古典的完美融合，探索城市的另一面",
+          "cover": "https://picsum.photos/800/450?random=7",
+          "stars": "1356",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item8",
+          "styleName": "运动-健身-瑜伽",
+          "text": "居家瑜伽教程，15分钟快速拉伸，缓解一天的疲劳",
+          "cover": "https://picsum.photos/800/600?random=8",
+          "stars": "2789",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item9",
+          "styleName": "手工-DIY-创意",
+          "text": "简单手工DIY教程，废物利用创造美，激发你的创造力",
+          "cover": "https://picsum.photos/600/600?random=9",
+          "stars": "1987",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item10",
+          "styleName": "科技-数码-评测",
+          "text": "最新科技产品评测，带你了解科技前沿，做明智的消费决策",
+          "cover": "https://picsum.photos/800/450?random=10",
+          "stars": "3245",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item11",
+          "styleName": "音乐-乐器-钢琴",
+          "text": "钢琴入门教程，从零基础开始，一周学会一首简单的曲子",
+          "cover": "https://picsum.photos/800/600?random=11",
+          "stars": "2134",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item12",
+          "styleName": "绘画-水彩-插画",
+          "text": "水彩画入门技巧，零基础也能画出美丽的插画，释放你的艺术天分",
+          "cover": "https://picsum.photos/600/600?random=12",
+          "stars": "1876",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item13",
+          "styleName": "摄影-技巧-构图",
+          "text": "手机摄影技巧分享，学会这些构图方法，让你的照片更专业",
+          "cover": "https://picsum.photos/800/450?random=13",
+          "stars": "2987",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item14",
+          "styleName": "园艺-植物-多肉",
+          "text": "多肉植物养护指南，新手也能养出肉肉的多肉，打造你的绿色角落",
+          "cover": "https://picsum.photos/800/600?random=14",
+          "stars": "1543",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item15",
+          "styleName": "时尚-穿搭-搭配",
+          "text": "春季穿搭指南，简单几件单品，搭配出时尚感，提升你的穿衣品味",
+          "cover": "https://picsum.photos/600/600?random=15",
+          "stars": "3654",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item16",
+          "styleName": "电影-影评-解析",
+          "text": "经典电影解析，带你看懂导演的用意，发现电影中的隐藏细节",
+          "cover": "https://picsum.photos/800/450?random=16",
+          "stars": "2345",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item17",
+          "styleName": "阅读-书评-推荐",
+          "text": "本月书籍推荐，这些好书不容错过，陪你度过充实的阅读时光",
+          "cover": "https://picsum.photos/800/600?random=17",
+          "stars": "1765",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item18",
+          "styleName": "心理-成长-思考",
+          "text": "如何培养积极思维，改变你的思考方式，让生活更加美好",
+          "cover": "https://picsum.photos/600/600?random=18",
+          "stars": "2876",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item19",
+          "styleName": "职场-技能-提升",
+          "text": "职场必备软技能，提升你的沟通能力，让工作更加顺利",
+          "cover": "https://picsum.photos/800/450?random=19",
+          "stars": "3124",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item20",
+          "styleName": "亲子-教育-游戏",
+          "text": "亲子互动游戏分享，增进亲子关系，促进孩子的全面发展",
+          "cover": "https://picsum.photos/800/600?random=20",
+          "stars": "2435",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item21",
+          "styleName": "动漫-二次元-角色",
+          "text": "经典动漫角色解析，了解角色背后的故事，感受动漫的魅力",
+          "cover": "https://picsum.photos/600/600?random=21",
+          "stars": "4321",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item22",
+          "styleName": "历史-文化-传统",
+          "text": "中国传统文化探索，了解传统节日的由来，传承中华文化",
+          "cover": "https://picsum.photos/800/450?random=22",
+          "stars": "1987",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item23",
+          "styleName": "科学-实验-探索",
+          "text": "有趣的科学实验，在家就能做，激发孩子对科学的兴趣",
+          "cover": "https://picsum.photos/800/600?random=23",
+          "stars": "2765",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item24",
+          "styleName": "游戏-攻略-技巧",
+          "text": "热门游戏攻略分享，掌握这些技巧，轻松提升游戏水平",
+          "cover": "https://picsum.photos/600/600?random=24",
+          "stars": "3567",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item25",
+          "styleName": "户外-探险-露营",
+          "text": "户外露营指南，从装备选择到搭建技巧，让你的露营之旅更加完美",
+          "cover": "https://picsum.photos/800/450?random=25",
+          "stars": "2134",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item26",
+          "styleName": "舞蹈-教学-街舞",
+          "text": "街舞基础教学，简单易学的舞步，让你在派对上脱颖而出",
+          "cover": "https://picsum.photos/800/600?random=26",
+          "stars": "2987",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item27",
+          "styleName": "宇宙-天文-星空",
+          "text": "探索宇宙的奥秘，了解星座背后的故事，感受浩瀚宇宙的魅力",
+          "cover": "https://picsum.photos/600/600?random=27",
+          "stars": "3456",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
+        },
+        {
+          "styleId": "item28",
+          "styleName": "语言-学习-英语",
+          "text": "英语学习技巧分享，高效记忆单词的方法，提升你的英语水平",
+          "cover": "https://picsum.photos/800/450?random=28",
+          "stars": "2345",
+          "ratio": "16:9",
+          "coverRatio": "16:9"
+        },
+        {
+          "styleId": "item29",
+          "styleName": "汽车-评测-驾驶",
+          "text": "新车评测，详细解析车辆性能，帮你选择适合自己的座驾",
+          "cover": "https://picsum.photos/800/600?random=29",
+          "stars": "1876",
+          "ratio": "4:3",
+          "coverRatio": "4:3"
+        },
+        {
+          "styleId": "item30",
+          "styleName": "创业-经验-分享",
+          "text": "创业者经验分享，从0到1的创业历程，避开创业路上的常见陷阱",
+          "cover": "https://picsum.photos/600/600?random=30",
+          "stars": "2987",
+          "ratio": "1:1",
+          "coverRatio": "1:1"
         }
       ]
     }

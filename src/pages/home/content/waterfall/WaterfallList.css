@@ -1,0 +1,35 @@
+/* 瀑布流容器 */
+.waterfall-container {
+  width: 100%;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+/* 瀑布流列容器 */
+.waterfall-columns {
+  display: flex;
+  margin: 0 -6px;
+  box-sizing: border-box;
+}
+
+/* 瀑布流列 */
+.waterfall-column {
+  flex: 0 0 50%;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+/* 适配移动端 */
+@media (max-width: 480px) {
+  .waterfall-container {
+    padding: 0 4px;
+  }
+  
+  .waterfall-columns {
+    margin: 0 -4px;
+  }
+  
+  .waterfall-column {
+    padding: 0 4px;
+  }
+} 

@@ -13,6 +13,7 @@
   "dependencies": {
     "@types/react-virtualized": "^9.22.2",
     "axios": "^1.6.2",
+    "masonic": "^4.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "^0.73.2",

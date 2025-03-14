@@ -110,7 +110,9 @@ class HomeContentClass extends React.Component<HomeContentProps, HomeContentStat
             style={{ 
               display: isActive ? 'block' : 'none',
               width: '100%',
-              height: '100%'
+              height: '100%',
+              flex: 1,
+              overflow: 'hidden'
             }}
           >
             {tabComponent}
@@ -120,7 +122,7 @@ class HomeContentClass extends React.Component<HomeContentProps, HomeContentStat
     });
     
     return (
-      <div className="home-content">
+      <div className="home-content" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 50px)' }}>
         {tabContents}
       </div>
     );

@@ -1,8 +1,27 @@
 /* 瀑布流容器 */
 .waterfall-container {
   width: 100%;
-  padding: 0 6px;
+  padding: 0 10px;
   box-sizing: border-box;
+  min-height: 100%;
+  position: relative;
+}
+
+/* masonic库生成的瀑布流网格 */
+.masonic {
+  width: 100%;
+  position: relative;
+  min-height: 100vh; /* 确保瀑布流至少有一个视口的高度 */
+}
+
+/* 瀑布流空状态 */
+.waterfall-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #999;
+  font-size: 14px;
 }
 
 /* 瀑布流列容器 */
@@ -22,7 +41,7 @@
 /* 适配移动端 */
 @media (max-width: 480px) {
   .waterfall-container {
-    padding: 0 4px;
+    padding: 0 6px;
   }
   
   .waterfall-columns {

@@ -5,6 +5,8 @@
   position: relative;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  height: calc(100vh - 50px); /* 设置高度为视口高度减去顶部导航栏高度 */
+  padding-bottom: 50px; /* 添加底部内边距，确保最后的内容可见 */
 }
 
 /* 空内容提示 */

@@ -6,27 +6,38 @@
       "topbar": [
         {
           "id": "recommend",
-          "text": "111推荐1"
+          "text": "推荐"
         },
         {
           "id": "useful",
-          "text": "222测试10"
+          "text": "热门"
+        },
+        {
+          "id": "video",
+          "text": "视频"
         }
       ],
       "content": [
         {
           "styleId": "91823114",
           "styleName": "横屏-漫剪-龙猫-治愈系",
-          "text": "222提升这是一段示例文案内容，展示在首页中间位置",
-          "cover": "http://example.com/image1.jpg",
+          "text": "16:9比例视频 - 这是一段示例文案内容，展示在首页中间位置",
+          "cover": "https://picsum.photos/800/450",
           "stars": "2178"
         },
         {
-          "styleId": "9182351",
-          "styleName": "竖屏-短视频-搞笑-活力",
-          "text": "11这是另一段示例文案内容，适合制作搞笑短视频",
-          "cover": "http://example.com/image2.jpg",
-          "stars": "1856"
+          "styleId": "43video",
+          "styleName": "4:3比例-教学视频",
+          "text": "4:3比例视频 - 这是一个4:3比例的视频示例，适合教学、演示等场景",
+          "cover": "https://picsum.photos/800/600",
+          "stars": "1456"
+        },
+        {
+          "styleId": "11video",
+          "styleName": "1:1比例-社交媒体",
+          "text": "1:1比例视频 - 这是一个1:1比例的视频示例，非常适合社交媒体平台",
+          "cover": "https://picsum.photos/600/600",
+          "stars": "3289"
         }
       ]
     }

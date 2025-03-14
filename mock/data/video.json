@@ -17,5 +17,43 @@
         "navUrl": "https://example.com"
       }
     }
+  },
+  "getVideoDetail43": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "template": {
+        "styleId": "43video",
+        "styleName": "4:3比例-教学视频",
+        "styles": {}
+      },
+      "content": {
+        "videoUrl": "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4",
+        "text": "这是一个4:3比例的视频示例，适合教学、演示等场景。这种比例的视频在平板电脑和传统电视上观看效果更好。",
+        "cover": "https://picsum.photos/800/600",
+        "stars": "1456",
+        "ratio": "4:3",
+        "navUrl": "https://example.com/43video"
+      }
+    }
+  },
+  "getVideoDetail11": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "template": {
+        "styleId": "11video",
+        "styleName": "1:1比例-社交媒体",
+        "styles": {}
+      },
+      "content": {
+        "videoUrl": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        "text": "这是一个1:1比例的视频示例，非常适合社交媒体平台如Instagram等。正方形视频在移动设备上浏览时占据更多屏幕空间。",
+        "cover": "https://picsum.photos/600/600",
+        "stars": "3289",
+        "ratio": "1:1",
+        "navUrl": "https://example.com/11video"
+      }
+    }
   }
 } 

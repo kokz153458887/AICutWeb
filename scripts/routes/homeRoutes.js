@@ -35,15 +35,28 @@ export class HomeRoutes {
 
   /**
    * 获取最新的视频详情数据
-   * 每次调用时都会重新读取文件
+   * 根据视频ID获取对应的视频数据
+   * @param {string} videoId - 视频ID
    * @returns {object} 最新的视频详情数据
    */
-  getLatestVideoData() {
+  getLatestVideoData(videoId) {
     try {
       // 从文件系统直接读取最新的video.json内容
       const data = JSON.parse(fs.readFileSync(this.videoDataPath, 'utf8'));
-      console.log('已重新读取video.json文件的最新内容');
-      return data.getVideoDetail;
+      console.log(`已重新读取video.json文件的最新内容，查找视频ID: ${videoId}`);
+      
+      // 根据视频ID返回不同的视频数据
+      if (videoId === '43video') {
+        console.log('返回4:3比例视频数据');
+        return data.getVideoDetail43;
+      } else if (videoId === '11video') {
+        console.log('返回1:1比例视频数据');
+        return data.getVideoDetail11;
+      } else {
+        // 默认返回16:9比例视频数据
+        console.log('返回默认16:9比例视频数据');
+        return data.getVideoDetail;
+      }
     } catch (error) {
       console.error('读取video.json文件失败:', error);
       // 如果读取失败，返回内存中的备份数据
@@ -93,12 +106,15 @@ export class HomeRoutes {
     console.log('请求参数:', req.query);
 
     try {
+      // 从请求参数中获取视频ID
+      const videoId = req.query.id || '';
+      console.log(`请求的视频ID: ${videoId}`);
+      
       // 获取最新数据而不是使用缓存
-      const latestVideoData = this.getLatestVideoData();
+      const latestVideoData = this.getLatestVideoData(videoId);
       
       if (latestVideoData) {
         console.log('找到视频详情数据');
-        // 这里可以根据req.query.id来过滤数据，但现在我们只有一个示例数据，所以直接返回
         res.jsonp(latestVideoData);
       } else {
         console.log('未找到视频详情数据');

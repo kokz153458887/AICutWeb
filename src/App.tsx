@@ -7,6 +7,7 @@ import Home from './pages/home/Home'
 import Mine from './pages/mine/Mine'
 import DebugConsole from './components/DebugConsole'
 import { VideoDetail } from './detail'
+import EditPage from './edit'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 
@@ -52,6 +53,8 @@ const AppContainer: React.FC = () => {
         </>} />
         {/* 视频播放页路由 */}
         <Route path="/video/:id" element={<VideoDetail />} />
+        {/* 视频编辑页路由 */}
+        <Route path="/edit" element={<EditPage />} />
         <Route path="*" element={<Navigate to="/?tab=home" replace />} />
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}

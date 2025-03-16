@@ -14,7 +14,7 @@
         "cover": "/data/cover_16_9.jpg",
         "stars": "2178",
         "ratio": "16:9",
-        "navUrl": "https://example.com"
+        "navUrl": "/edit?styleId=91823114"
       }
     }
   },
@@ -33,7 +33,7 @@
         "cover": "/data/cover_4_3.jpg",
         "stars": "1456",
         "ratio": "4:3",
-        "navUrl": "https://example.com/43video"
+        "navUrl": "/edit?styleId=43video"
       }
     }
   },
@@ -52,7 +52,7 @@
         "cover": "/data/cover_1_1.jpg",
         "stars": "3289",
         "ratio": "1:1",
-        "navUrl": "https://example.com/11video"
+        "navUrl": "/edit?styleId=11video"
       }
     }
   }

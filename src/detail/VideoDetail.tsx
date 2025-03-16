@@ -86,7 +86,15 @@ const VideoDetail: React.FC = () => {
   // 处理"做同款"按钮点击
   const handleNavClick = () => {
     if (data?.content.navUrl) {
-      window.location.href = data.content.navUrl;
+      // 使用navigate跳转替代直接修改location
+      if (data.content.navUrl.startsWith('/edit')) {
+        // 跳转到编辑页面，确保styleId被传递
+        const styleId = data.template.styleId;
+        navigate(`/edit?styleId=${styleId}`);
+      } else {
+        // 对于外部链接，继续使用原来的方式
+        window.location.href = data.content.navUrl;
+      }
     }
   };
 

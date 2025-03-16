@@ -6,6 +6,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../styles/TextInputSection.css';
 import { SpeakerIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
+import { volumeConfig } from '../config/volumeConfig';
 
 interface TextInputSectionProps {
   value: string;
@@ -24,7 +25,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   value,
   onChange,
   placeholder = '这一刻的想法...',
-  voiceVolume = 50,
+  voiceVolume = volumeConfig.defaultPercent / volumeConfig.displayFactor,
   onVoiceVolumeChange,
   speaker,
   onSpeakerClick
@@ -117,6 +118,13 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   };
 
   /**
+   * 获取显示用的音量值（百分比形式）
+   */
+  const getDisplayVolume = () => {
+    return Math.round(voiceVolume * volumeConfig.displayFactor);
+  };
+
+  /**
    * 处理音量滑动条变化
    */
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,9 +205,9 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
       <div className="input-controls">
         {/* 音量文字按钮 - 显示当前音量值 */}
         <div className="volume-text" onClick={handleVolumeTextClick}>
-          音量 <span className="volume-badge">{voiceVolume}</span>
+          音量 <span className="volume-badge">{getDisplayVolume()}%</span>
         </div>
-
+        
         {/* 说话人按钮 */}
         {speaker && (
           <div className="speaker-button" onClick={handleSpeakerButtonClick}>
@@ -218,14 +226,16 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
           <div className="volume-slider-container" ref={sliderRef}>
             <input
               type="range"
-              min="0"
-              max="100"
+              min={volumeConfig.minPercent / volumeConfig.displayFactor}
+              max={volumeConfig.maxPercent / volumeConfig.displayFactor}
               value={voiceVolume}
+              step={volumeConfig.sliderSteps / volumeConfig.displayFactor}
               onChange={handleVolumeChange}
               onMouseUp={handleVolumeMouseUp}
               onTouchEnd={handleVolumeMouseUp}
               className="volume-slider"
             />
+            <span className="volume-value">{getDisplayVolume()}%</span>
           </div>
         )}
       </div>

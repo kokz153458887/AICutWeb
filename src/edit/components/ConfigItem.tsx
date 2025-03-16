@@ -118,7 +118,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
         {hasVolumeControl && (
           <div className="config-volume-control">
             <div className="volume-text" onClick={handleVolumeTextClick}>
-              音量 <span className="volume-badge">{volume}</span>
+               <span className="volume-badge">{volume}</span>
             </div>
             
             {/* 音量滑动控制条 */}

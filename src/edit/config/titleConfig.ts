@@ -17,5 +17,14 @@ export const titleConfig = {
     '\n'
   ],
   // 文案输入框最大行数
-  textareaMaxRows: 12
+  textareaMaxRows: 8,
+  // 音量控制
+  volume: {
+    // 最大音量（相对于原音量的百分比）
+    maxPercent: 500,
+    // 默认音量（相对于原音量的百分比）
+    defaultPercent: 100,
+    // 最小音量
+    minPercent: 0
+  }
 }; 

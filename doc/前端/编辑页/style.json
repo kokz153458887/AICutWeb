@@ -62,6 +62,7 @@
     },
     "material": {
         "name": "龙猫",
-        "materialID": "longmao"
+        "materialID": "longmao",
+        "previewImage": "http://图片"
     }
 }

@@ -10,6 +10,13 @@ import TitleInputSection from './components/TitleInputSection';
 import ConfigItem from './components/ConfigItem';
 import SliderItem from './components/SliderItem';
 import { generateTitle } from './utils/titleGenerator';
+import { volumeConfig } from './config/volumeConfig';
+
+// 素材库预览图片示例URL
+const materialPreviewImage = 'http://gips0.baidu.com/it/u=3602773692,1512483864&fm=3028&app=3028&f=JPEG&fmt=auto?w=960&h=1280';
+
+// 视频风格预览视频示例URL
+const stylePreviewVideoUrl = 'https://media.w3.org/2010/05/sintel/trailer_hd.mp4';
 
 /**
  * 编辑页主组件
@@ -20,8 +27,8 @@ const EditPage: React.FC = () => {
   const [text, setText] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(50);
-  const [voiceVolume, setVoiceVolume] = useState<number>(50);
+  const [volume, setVolume] = useState<number>(volumeConfig.defaultPercent / volumeConfig.displayFactor);
+  const [voiceVolume, setVoiceVolume] = useState<number>(volumeConfig.defaultPercent / volumeConfig.displayFactor);
   const [backupCount, setBackupCount] = useState<number>(3);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
@@ -121,6 +128,29 @@ const EditPage: React.FC = () => {
     alert('待开发');
   };
 
+  /**
+   * 处理素材库预览点击事件
+   */
+  const handleMaterialPreviewClick = () => {
+    console.log('素材库预览被点击');
+  };
+
+  /**
+   * 处理音频试听事件
+   */
+  const handleMusicPlayback = () => {
+    console.log('开始试听背景音乐');
+    // 这里可以添加实际的音频播放逻辑
+    alert('音乐试听功能待接入');
+  };
+
+  /**
+   * 处理视频风格预览点击事件
+   */
+  const handleStyleVideoPreviewClick = () => {
+    console.log('视频风格预览被点击');
+  };
+
   return (
     <div className="edit-page">
       {/* 顶部导航栏 */}
@@ -150,21 +180,26 @@ const EditPage: React.FC = () => {
           placeholder="标题"
         />
 
-        {/* 视频风格选择 */}
+        {/* 视频风格选择 - 带视频预览 */}
         <ConfigItem
           title="视频风格"
           value="video_cut_style"
           onClick={() => handleConfigClick('style')}
+          hasVideoPreview={true}
+          previewVideoUrl={stylePreviewVideoUrl}
+          onVideoPreviewClick={handleStyleVideoPreviewClick}
         />
 
-        {/* 背景音乐选择 - 带音量控制 */}
+        {/* 背景音乐选择 - 带音量控制和试听功能 */}
         <ConfigItem
           title="背景音乐"
-          value="三生三世——高潮部分"
+          value="三生三世——高潮部分-测试长度测试长度测试长度测试长度测试长度测试长度"
           onClick={() => handleConfigClick('music')}
           hasVolumeControl={true}
           volume={volume}
           onVolumeChange={handleMusicVolumeChange}
+          hasAudioPlayback={true}
+          onPlayClick={handleMusicPlayback}
         />
 
         {/* 素材库选择 */}
@@ -172,6 +207,9 @@ const EditPage: React.FC = () => {
           title="素材库"
           value="pungge治愈系"
           onClick={() => handleConfigClick('material')}
+          hasPreview={true}
+          previewImage={materialPreviewImage}
+          onPreviewClick={handleMaterialPreviewClick}
         />
 
         {/* 备用视频数量 */}

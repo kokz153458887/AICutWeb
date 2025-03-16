@@ -165,9 +165,9 @@
 /* 音量滑动条容器 */
 .volume-slider-container {
   position: absolute;
-  right: 10px;
+  right: 40px;
   left: auto;
-  bottom: 52px; /* 调整位置，放在按钮容器上方 */
+  bottom: -35px; /* 调整位置，放在按钮容器上方 */
   background-color: rgba(20, 20, 20, 0.9);
   border-radius: 20px;
   padding: 6px 12px;
@@ -175,7 +175,8 @@
   align-items: center;
   gap: 10px;
   z-index: 10;
-  width: 220px;
+  width: 300px;
+  height: 30px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 

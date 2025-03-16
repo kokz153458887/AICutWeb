@@ -195,6 +195,11 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
       />
       
       <div className="input-controls">
+        {/* 音量文字按钮 - 显示当前音量值 */}
+        <div className="volume-text" onClick={handleVolumeTextClick}>
+          音量 <span className="volume-badge">{voiceVolume}</span>
+        </div>
+
         {/* 说话人按钮 */}
         {speaker && (
           <div className="speaker-button" onClick={handleSpeakerButtonClick}>
@@ -202,11 +207,6 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
             {speaker.tag && <span className="speaker-tag">{speaker.tag}</span>}
           </div>
         )}
-        
-        {/* 音量文字按钮 - 显示当前音量值 */}
-        <div className="volume-text" onClick={handleVolumeTextClick}>
-          音量 <span className="volume-badge">{voiceVolume}</span>
-        </div>
         
         {/* 喇叭图标 */}
         <div className="speaker-icon" onClick={handleSpeakerClick}>

@@ -52,6 +52,27 @@ const EditPage: React.FC = () => {
   };
 
   /**
+   * 处理语音音量变化
+   */
+  const handleVoiceVolumeChange = (newVolume: number) => {
+    setVoiceVolume(newVolume);
+  };
+
+  /**
+   * 处理背景音乐音量变化
+   */
+  const handleMusicVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+  };
+
+  /**
+   * 处理备用视频数量变化
+   */
+  const handleBackupCountChange = (newCount: number) => {
+    setBackupCount(newCount);
+  };
+
+  /**
    * 处理标题变化
    */
   const handleTitleChange = (newTitle: string) => {
@@ -107,6 +128,8 @@ const EditPage: React.FC = () => {
           value={text} 
           onChange={handleTextChange}
           placeholder="这一刻的想法..."
+          voiceVolume={voiceVolume}
+          onVoiceVolumeChange={handleVoiceVolumeChange}
         />
 
         {/* 标题输入区域 */}
@@ -114,16 +137,6 @@ const EditPage: React.FC = () => {
           value={title}
           onChange={handleTitleChange}
           placeholder="标题"
-        />
-
-        {/* 语音音量调节 */}
-        <SliderItem
-          title="语音音量"
-          min={1}
-          max={100}
-          value={voiceVolume}
-          onChange={setVoiceVolume}
-          showValue
         />
 
         {/* 视频风格选择 */}
@@ -142,21 +155,14 @@ const EditPage: React.FC = () => {
           onClick={() => handleConfigClick('speaker')}
         />
 
-        {/* 背景音乐选择 */}
+        {/* 背景音乐选择 - 带音量控制 */}
         <ConfigItem
           title="背景音乐"
           value="三生三世——高潮部分"
           onClick={() => handleConfigClick('music')}
-        />
-
-        {/* 音量调节 */}
-        <SliderItem
-          title="音量"
-          min={1}
-          max={100}
-          value={volume}
-          onChange={setVolume}
-          showValue
+          hasVolumeControl={true}
+          volume={volume}
+          onVolumeChange={handleMusicVolumeChange}
         />
 
         {/* 素材库选择 */}
@@ -173,8 +179,8 @@ const EditPage: React.FC = () => {
           min={1}
           max={5}
           value={backupCount}
-          onChange={setBackupCount}
-          showValue
+          onChange={handleBackupCountChange}
+          showValue={true}
           step={1}
         />
       </div>

@@ -23,11 +23,45 @@
   color: #888888;
 }
 
-/* 喇叭图标样式 */
-.speaker-icon {
+/* 控制按钮容器 */
+.input-controls {
   position: absolute;
   right: 15px;
   bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 音量文字按钮样式 */
+.volume-text {
+  font-size: 14px;
+  color: #888888;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 音量数字徽章 */
+.volume-badge {
+  font-size: 12px;
+  color: #00e676;
+  font-weight: 600;
+}
+
+.volume-text:hover {
+  color: #00e676;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* 喇叭图标样式 */
+.speaker-icon {
   width: 32px;
   height: 32px;
   display: flex;
@@ -38,9 +72,84 @@
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
+  z-index: 5;
 }
 
 .speaker-icon:hover {
   color: #00e676;
   background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* 音量图标样式 */
+.volume-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888888;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.volume-icon:hover {
+  color: #00e676;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* 音量滑动条容器 */
+.volume-slider-container {
+  position: absolute;
+  right: 40px;
+  left: auto;
+  bottom: -35px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  width: 300px;
+  height: 30px;
+}
+
+/* 音量滑动条 */
+.volume-slider {
+  -webkit-appearance: none;
+  flex: 1;
+  height: 4px;
+  background: #3a3a3a;
+  border-radius: 2px;
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00e676;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00e676;
+  cursor: pointer;
+  border: none;
+}
+
+/* 音量数值显示 */
+.volume-value {
+  font-size: 12px;
+  color: #ffffff;
+  min-width: 24px;
+  text-align: center;
 } 

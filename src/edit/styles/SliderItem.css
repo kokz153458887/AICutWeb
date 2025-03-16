@@ -10,7 +10,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
 
 .slider-title {
@@ -19,41 +18,102 @@
   font-weight: 500;
 }
 
-.slider-value {
-  font-size: 15px;
+/* 数值控制区域 */
+.slider-value-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 数值按钮样式 */
+.slider-value-button {
+  font-size: 14px;
+  color: #888888;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.slider-value-button:hover {
   color: #00e676;
-  font-weight: 500;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
-.slider-container {
-  width: 100%;
-  padding: 5px 0;
+/* 数值文本 */
+.slider-value-text {
+  font-size: 14px;
 }
 
-.slider-input {
+/* 数值徽章 */
+.slider-value-badge {
+  font-size: 12px;
+  color: #00e676;
+  font-weight: 600;
+}
+
+/* 滑动条浮层容器 */
+.slider-control-container {
+  position: absolute;
+  z-index: 100;
+  top: 2px;
+  right: 70px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 240px;
+  height: 30px;
+}
+
+/* 滑动条样式 */
+.slider-control-input {
   -webkit-appearance: none;
-  width: 100%;
+  flex: 1;
   height: 4px;
   background: #3a3a3a;
   border-radius: 2px;
   outline: none;
 }
 
-.slider-input::-webkit-slider-thumb {
+.slider-control-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #00e676;
   cursor: pointer;
 }
 
-.slider-input::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+.slider-control-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #00e676;
   cursor: pointer;
   border: none;
+}
+
+/* 滑块轨道的hover效果 */
+.slider-control-input:hover {
+  background: #444444;
+}
+
+/* 滑块拖动时的效果 */
+.slider-control-input:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.3);
+  transform: scale(1.1);
+}
+
+.slider-control-input:active::-moz-range-thumb {
+  box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.3);
+  transform: scale(1.1);
 } 

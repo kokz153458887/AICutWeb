@@ -7,6 +7,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 .config-title {
@@ -21,13 +22,13 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  gap: 10px;
 }
 
 .config-value-wrapper {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  margin-right: 10px;
 }
 
 .config-value-row {
@@ -59,4 +60,86 @@
 
 .config-arrow {
   color: #888888;
+  margin-left: 10px;
+}
+
+/* 音量控制相关样式 */
+.config-volume-control {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: 0px;
+  margin-right:0px;
+}
+
+/* 音量文字按钮样式 */
+.config-volume-control .volume-text {
+  font-size: 14px;
+  color: #888888;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 6px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 音量数字徽章 */
+.config-volume-control .volume-badge {
+  font-size: 12px;
+  color: #00e676;
+  font-weight: 600;
+}
+
+.config-volume-control .volume-text:hover {
+  color: #00e676;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* 音量滑动条容器 */
+.config-volume-control .volume-slider-container {
+  position: absolute;
+  z-index: 100;
+  top: 40px;
+  right: 0px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  width: 300px;
+}
+
+/* 音量滑动条 */
+.config-volume-control .volume-slider {
+  -webkit-appearance: none;
+  flex: 1;
+  height: 4px;
+  background: #3a3a3a;
+  border-radius: 2px;
+  outline: none;
+}
+
+.config-volume-control .volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00e676;
+  cursor: pointer;
+}
+
+.config-volume-control .volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00e676;
+  cursor: pointer;
+  border: none;
 } 

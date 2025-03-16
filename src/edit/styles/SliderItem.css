@@ -59,18 +59,17 @@
 
 /* 滑动条浮层容器 */
 .slider-control-container {
-  position: absolute;
-  z-index: 100;
-  top: 2px;
-  right: 70px;
-  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000; /* 提高z-index确保显示在最上层 */
+  background-color: rgba(20, 20, 20, 0.95);
   border-radius: 20px;
   padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 240px;
-  height: 30px;
+  height: 36px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  box-sizing: border-box;
+  touch-action: none; /* 防止触摸操作引起页面滚动 */
 }
 
 /* 滑动条样式 */
@@ -81,6 +80,9 @@
   background: #3a3a3a;
   border-radius: 2px;
   outline: none;
+  cursor: pointer;
+  width: 100%;
+  touch-action: none; /* 防止触摸操作引起页面滚动 */
 }
 
 .slider-control-input::-webkit-slider-thumb {

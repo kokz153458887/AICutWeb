@@ -35,6 +35,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   const sliderRef = useRef<HTMLDivElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [inputSectionPosition, setInputSectionPosition] = useState({ top: 0, left: 0, width: 0 });
   
   // 从配置文件获取最大行数
   const maxRows = titleConfig.textareaMaxRows || 12;
@@ -108,6 +109,17 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    */
   const handleVolumeTextClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 阻止事件冒泡
+    
+    // 获取输入区域元素的位置和宽度信息
+    if (inputSectionRef.current) {
+      const rect = inputSectionRef.current.getBoundingClientRect();
+      setInputSectionPosition({
+        top: rect.bottom + window.scrollY + 5, // 输入区域底部位置加5px间距
+        left: rect.left, // 与输入区域左侧对齐
+        width: rect.width // 使用输入区域的宽度
+      });
+    }
+    
     setShowVolumeSlider(prev => !prev);
     
     // 清除之前的定时器
@@ -198,6 +210,14 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
     e.stopPropagation(); // 阻止事件冒泡，避免触发整个输入区域的点击
   };
 
+  /**
+   * 处理滑块触摸移动事件，阻止页面滚动
+   */
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault(); // 阻止默认的触摸行为（页面滚动）
+    e.stopPropagation();
+  };
+
   return (
     <div className="text-input-section" ref={inputSectionRef}>
       <textarea
@@ -234,6 +254,13 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
             className="volume-slider-container" 
             ref={sliderRef}
             onClick={handleVolumeSliderClick}
+            onTouchMove={handleTouchMove}
+            style={{
+              top: `${inputSectionPosition.top}px`,
+              left: `${inputSectionPosition.left}px`,
+              position: 'fixed',
+              width: `${inputSectionPosition.width}px`
+            }}
           >
             <input
               type="range"
@@ -244,10 +271,11 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
               onChange={handleVolumeChange}
               onMouseUp={handleVolumeMouseUp}
               onTouchEnd={handleVolumeMouseUp}
+              onTouchMove={handleTouchMove}
               className="volume-slider"
               onClick={(e) => e.stopPropagation()}
+              style={{ flex: 1 }}
             />
-            <span className="volume-value">{getDisplayVolume()}%</span>
           </div>
         )}
       </div>

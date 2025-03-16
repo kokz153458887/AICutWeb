@@ -58,6 +58,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   const sliderRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const videoPreviewRef = useRef<HTMLDivElement>(null);
+  const [volumeBtnPosition, setVolumeBtnPosition] = useState({ top: 0, left: 0, width: 0 });
 
   /**
    * 获取显示用的音量值（百分比形式）
@@ -67,10 +68,24 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   };
 
   /**
-   * 处理音量文字点击事件
+   * 处理音量按钮点击事件，记录按钮位置
    */
-  const handleVolumeTextClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发整个配置项的点击
+  const handleVolumeClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
+    
+    // 获取按钮位置信息
+    if (e.currentTarget) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const configItem = (e.currentTarget as HTMLElement).closest('.config-item');
+      let sliderWidth = configItem ? configItem.getBoundingClientRect().width : 320;
+      
+      setVolumeBtnPosition({
+        top: rect.bottom + window.scrollY + 5, // 按钮底部位置加5px间距
+        left: configItem ? configItem.getBoundingClientRect().left : rect.left,
+        width: sliderWidth
+      });
+    }
+    
     setShowVolumeSlider(prev => !prev);
     
     // 清除之前的定时器
@@ -160,6 +175,14 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   };
 
   /**
+   * 处理滑块触摸移动事件，阻止页面滚动
+   */
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault(); // 阻止默认的触摸行为（页面滚动）
+    e.stopPropagation();
+  };
+
+  /**
    * 点击外部时隐藏控制项
    */
   useEffect(() => {    
@@ -205,7 +228,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   return (
     <div className="config-item" onClick={onClick}>
       <div className="config-title">{title}</div>
-      <div className="config-value-container">
+      <div className="config-value-container" style={{ position: 'relative' }}>
         <div className="config-value-wrapper">
           <div className="config-value-row">
             <div className="config-value" title={value}>{value}</div>
@@ -231,7 +254,10 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
         {/* 音量控制按钮 */}
         {hasVolumeControl && (
           <div className="config-volume-control">
-            <div className="volume-text" onClick={handleVolumeTextClick}>
+            <div
+              className="volume-text"
+              onClick={handleVolumeClick}
+            >
               <span className="volume-badge">{getDisplayVolume()}%</span>
             </div>
             
@@ -241,6 +267,13 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
                 className="volume-slider-container" 
                 ref={sliderRef}
                 onClick={handleVolumeSliderClick}
+                onTouchMove={handleTouchMove}
+                style={{
+                  top: `${volumeBtnPosition.top}px`,
+                  left: `${volumeBtnPosition.left}px`,
+                  position: 'fixed',
+                  width: `${volumeBtnPosition.width}px`
+                }}
               >
                 <input
                   type="range"
@@ -250,8 +283,10 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
                   onChange={handleVolumeChange}
                   onMouseUp={handleVolumeMouseUp}
                   onTouchEnd={handleVolumeMouseUp}
+                  onTouchMove={handleTouchMove}
                   className="volume-slider"
                   onClick={(e) => e.stopPropagation()}
+                  style={{ flex: 1 }}
                 />
               </div>
             )}

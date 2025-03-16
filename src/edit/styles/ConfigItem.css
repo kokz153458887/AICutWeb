@@ -5,50 +5,57 @@
   padding: 15px;
   margin: 10px 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .config-title {
   font-size: 16px;
   color: #ffffff;
   font-weight: 500;
-  min-width: 80px;
+  min-width: 70px;
+  margin-right: 10px; /* 确保与值区域保持间距 */
+  flex-shrink: 0; /* 防止标题被压缩 */
 }
 
 .config-value-container {
-  flex: 1;
+  flex: 1; /* 自动占据剩余空间 */
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .config-value-wrapper {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  max-width: 240px;
   overflow: hidden;
+  flex: 1; /* 使其自动占据value-container中的剩余空间 */
+  min-width: 0; /* 确保flex项可以缩小到比其内容更小 */
 }
 
 .config-value-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
+  justify-content: flex-end;
 }
 
 .config-value {
-  font-size: 15px;
-  color: #cccccc;
-  margin-bottom: 2px;
+  color: #ffffff;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  text-align: right;
+  min-width: 0; /* 确保flex项可以缩小到比其内容更小 */
+  flex: 1; /* 自动占据剩余空间 */
 }
 
 .config-sub-value {
@@ -61,19 +68,20 @@
 }
 
 .config-tag {
-  font-size: 11px;
+  font-size: 12px;
   color: #00e676;
+  font-weight: 500;
   background-color: rgba(0, 230, 118, 0.1);
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 10px;
-  margin-left: 8px;
+  margin-left: 3px;
   display: inline-block;
   flex-shrink: 0;
 }
 
 .config-arrow {
   color: #888888;
-  margin-left: 10px;
+  margin-left: 6px;
   flex-shrink: 0;
 }
 
@@ -102,7 +110,8 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  width: 55px;
+  min-width: 55px; /* 使用min-width而不是固定width */
+  max-width: 65px; /* 添加最大宽度限制 */
 }
 
 /* 音量数字徽章 */
@@ -110,7 +119,8 @@
   font-size: 12px;
   color: #00e676;
   font-weight: 600;
-  width: 30px;
+  width: auto; /* 使用自动宽度 */
+  min-width: 25px; /* 设置最小宽度 */
   text-align: center;
 }
 
@@ -121,20 +131,17 @@
 
 /* 音量滑动条容器 */
 .config-volume-control .volume-slider-container {
-  position: absolute;
-  z-index: 100;
-  top: 40px;
-  right: 0px;
+  z-index: 1000; /* 确保显示在最上层 */
   background-color: rgba(20, 20, 20, 0.95);
   border-radius: 20px;
   padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
   height: 36px;
-  width: 240px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(5px);
+  box-sizing: border-box;
+  touch-action: none; /* 防止触摸操作引起页面滚动 */
 }
 
 /* 音量滑动条 */
@@ -146,6 +153,8 @@
   border-radius: 2px;
   outline: none;
   cursor: pointer;
+  width: 100%;
+  touch-action: none; /* 防止触摸操作引起页面滚动 */
 }
 
 .config-volume-control .volume-slider::-webkit-slider-thumb {
@@ -169,15 +178,6 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
-/* 音量值显示 */
-.config-volume-control .volume-value {
-  font-size: 12px;
-  color: #ffffff;
-  font-weight: 500;
-  min-width: 40px;
-  text-align: right;
-}
-
 /* 预览图标按钮 */
 .preview-icon-button {
   width: 24px;
@@ -190,7 +190,7 @@
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-left: 6px;
+  margin-left: 4px;
   z-index: 5;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -264,7 +264,7 @@
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-left: 6px;
+  margin-left: 4px;
   z-index: 5;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -300,8 +300,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background-color: rgba(0, 230, 118, 0.1);
   color: #00e676;
@@ -318,4 +318,8 @@
 .play-icon-button:active {
   background-color: rgba(0, 230, 118, 0.3);
   transform: scale(0.95);
+}
+
+@media screen and (min-width: 768px) {
+  /* 删除特定屏幕宽度下的样式覆盖 */
 } 

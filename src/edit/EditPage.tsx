@@ -15,6 +15,9 @@ import { volumeConfig } from './config/volumeConfig';
 // 素材库预览图片示例URL
 const materialPreviewImage = 'http://gips0.baidu.com/it/u=3602773692,1512483864&fm=3028&app=3028&f=JPEG&fmt=auto?w=960&h=1280';
 
+// 背景图片预览示例URL
+const backgroundImagePreview = 'http://gips0.baidu.com/it/u=3602773692,1512483864&fm=3028&app=3028&f=JPEG&fmt=auto?w=960&h=1280';
+
 // 视频风格预览视频示例URL
 const stylePreviewVideoUrl = 'https://media.w3.org/2010/05/sintel/trailer_hd.mp4';
 
@@ -151,6 +154,13 @@ const EditPage: React.FC = () => {
     console.log('视频风格预览被点击');
   };
 
+  /**
+   * 处理背景图片预览点击事件
+   */
+  const handleBackgroundImagePreviewClick = () => {
+    console.log('背景图片预览被点击');
+  };
+
   return (
     <div className="edit-page">
       {/* 顶部导航栏 */}
@@ -200,6 +210,16 @@ const EditPage: React.FC = () => {
           onVolumeChange={handleMusicVolumeChange}
           hasAudioPlayback={true}
           onPlayClick={handleMusicPlayback}
+        />
+
+        {/* 背景图片选择 - 带预览功能 */}
+        <ConfigItem
+          title="背景图片"
+          value="白色-云"
+          onClick={() => handleConfigClick('background')}
+          hasPreview={true}
+          previewImage={backgroundImagePreview}
+          onPreviewClick={handleBackgroundImagePreviewClick}
         />
 
         {/* 素材库选择 */}

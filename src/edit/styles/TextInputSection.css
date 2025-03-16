@@ -164,21 +164,17 @@
 
 /* 音量滑动条容器 */
 .volume-slider-container {
-  position: absolute;
-  right: 40px;
-  left: auto;
-  bottom: -35px; /* 调整位置，放在按钮容器上方 */
+  z-index: 1000; /* 确保显示在最上层 */
   background-color: rgba(20, 20, 20, 0.95);
   border-radius: 20px;
   padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  z-index: 100;
-  width: 300px;
-  height: 30px;
+  height: 36px;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
+  box-sizing: border-box;
+  touch-action: none; /* 防止触摸操作引起页面滚动 */
 }
 
 /* 音量滑动条 */
@@ -189,6 +185,9 @@
   background: #3a3a3a;
   border-radius: 2px;
   outline: none;
+  cursor: pointer;
+  width: 100%;
+  touch-action: none; /* 防止触摸操作引起页面滚动 */
 }
 
 .volume-slider::-webkit-slider-thumb {
@@ -199,6 +198,7 @@
   border-radius: 50%;
   background: #00e676;
   cursor: pointer;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
 .volume-slider::-moz-range-thumb {
@@ -208,12 +208,5 @@
   background: #00e676;
   cursor: pointer;
   border: none;
-}
-
-/* 音量数值显示 */
-.volume-value {
-  font-size: 12px;
-  color: #ffffff;
-  min-width: 24px;
-  text-align: center;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 } 

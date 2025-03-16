@@ -6,8 +6,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './EditPage.css';
 import TextInputSection from './components/TextInputSection';
+import TitleInputSection from './components/TitleInputSection';
 import ConfigItem from './components/ConfigItem';
 import SliderItem from './components/SliderItem';
+import { generateTitle } from './utils/titleGenerator';
 
 /**
  * 编辑页主组件
@@ -16,10 +18,13 @@ const EditPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [text, setText] = useState<string>('');
+  const [title, setTitle] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(50);
+  const [voiceVolume, setVoiceVolume] = useState<number>(50);
   const [backupCount, setBackupCount] = useState<number>(3);
   const [styleId, setStyleId] = useState<string>('');
+  const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
   
   // 获取URL参数中的styleId
   useEffect(() => {
@@ -30,6 +35,32 @@ const EditPage: React.FC = () => {
       console.log('从URL获取到styleId:', urlStyleId);
     }
   }, [location.search]);
+
+  // 当文案变化时，自动生成标题
+  useEffect(() => {
+    if (autoGenerateTitle && text) {
+      const newTitle = generateTitle(text);
+      setTitle(newTitle);
+    }
+  }, [text, autoGenerateTitle]);
+
+  /**
+   * 处理文案变化
+   */
+  const handleTextChange = (newText: string) => {
+    setText(newText);
+  };
+
+  /**
+   * 处理标题变化
+   */
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    // 当用户手动修改标题时，禁用自动生成
+    if (newTitle !== generateTitle(text)) {
+      setAutoGenerateTitle(false);
+    }
+  };
 
   /**
    * 处理取消按钮点击事件
@@ -74,8 +105,25 @@ const EditPage: React.FC = () => {
         {/* 文案输入区域 */}
         <TextInputSection 
           value={text} 
-          onChange={setText}
+          onChange={handleTextChange}
           placeholder="这一刻的想法..."
+        />
+
+        {/* 标题输入区域 */}
+        <TitleInputSection
+          value={title}
+          onChange={handleTitleChange}
+          placeholder="标题"
+        />
+
+        {/* 语音音量调节 */}
+        <SliderItem
+          title="语音音量"
+          min={1}
+          max={100}
+          value={voiceVolume}
+          onChange={setVoiceVolume}
+          showValue
         />
 
         {/* 视频风格选择 */}

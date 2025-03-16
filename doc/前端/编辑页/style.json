@@ -1,0 +1,67 @@
+{
+    "title": "文案标题",
+    "content": {
+        "text": "文案内容",
+        "splitType": "normalize",
+        "volume": 2.2
+    },
+    "backgroundMusic": {
+        "name": "会开花的云-高潮-50秒",
+        "musicId": "music_1",
+        "url": "assets://music/王樾安-会开花的云.mp3",
+        "start_time": "00:02:39",
+        "end_time": "00:03:29",
+        "volume": 0.1,
+        "isloop": true
+    },
+    "backgroundImage": {
+        "url": "assets://background/bg_xiaoxin.jpg",
+        "backgroundId": "bg_xiaoxin",
+        "scaleType": "CENTER_CROP"
+    },
+    "style": {
+        "ratio": "9:16",
+        "resolution": "1080P",
+        "videoShowRatio": {
+            "ratio": "4:3",
+            "cut_style": "height"
+        },
+        "font": {
+            "voice_font_style": {
+                "font_size": 90,
+                "min_font_size": 60,
+                "max_line": 2,
+                "max_line_chars": 12,
+                "auto_scale": true,
+                "color": "white",
+                "stroke_color": "black",
+                "font_weight": "bold",
+                "stroke_width": 5.0,
+                "y_position": 1500,
+                "margin_left": 0,
+                "margin_right": 0,
+                "alignParent": "top"
+            },
+            "title_font_style": {
+                "font_size": 110,
+                "min_font_size": 70,
+                "max_line_chars": 10,
+                "max_line": 1,
+                "auto_scale": true,
+                "color": "black",
+                "font_weight": "bold",
+                "stroke_color": "white",
+                "stroke_width": 5.0,
+                "y_position": 330,
+                "margin_left": 0,
+                "margin_right": 0,
+                "alignParent": "top",
+                "overflow_char": ""
+            }
+        }
+    },
+    "material": {
+        "name": "龙猫",
+        "materialID": "longmao"
+    }
+}

@@ -1,0 +1,22 @@
+/* 标题输入区域样式 */
+.title-input-section {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin: 0 0 15px 0;
+}
+
+.title-input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  padding: 0;
+}
+
+.title-input::placeholder {
+  color: #888888;
+} 

@@ -21,11 +21,12 @@ const VideoDetail: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
-  // 从URL参数中获取标题、文案和视频比例
+  // 从URL参数中获取标题、文案、视频比例和封面图片
   const searchParams = new URLSearchParams(location.search);
   const urlTitle = searchParams.get('title') || '视频标题';
   const urlText = searchParams.get('text') || '视频文案加载中...';
   const urlRatio = searchParams.get('ratio') || '16:9'; // 默认16:9比例
+  const urlCover = searchParams.get('cover') || ''; // 从URL参数中获取封面图片
 
   // 获取视频数据
   useEffect(() => {
@@ -134,6 +135,12 @@ const VideoDetail: React.FC = () => {
     return data?.content.stars || '';
   };
 
+  // 获取要显示的封面图片
+  const getDisplayCover = () => {
+    // 优先使用URL参数中的封面，如果没有则使用API返回的封面
+    return urlCover || (data?.content.cover || '');
+  };
+
   // 渲染视频内容
   const renderVideoContent = () => {
     if (data) {
@@ -155,7 +162,7 @@ const VideoDetail: React.FC = () => {
           {/* 视频封面 */}
           {showCover && (
             <div className="video-cover">
-              <img src={data.content.cover} alt="视频封面" />
+              <img src={getDisplayCover()} alt="视频封面" />
             </div>
           )}
         </div>

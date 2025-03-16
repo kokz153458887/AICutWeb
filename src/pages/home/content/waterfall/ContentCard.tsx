@@ -3,6 +3,7 @@
  * 负责展示单个卡片，包括封面图、文案和星星数
  */
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HomeContentItem } from '../../../../types/home';
 import './ContentCard.css';
 
@@ -20,10 +21,17 @@ export interface ContentCardItem {
 
 interface ContentCardProps {
   item: HomeContentItem;
-  onClick: () => void;
+  onClick?: () => void; // 保留onClick作为可选属性，便于兼容现有代码
 }
 
+/**
+ * 内容卡片组件
+ * 负责展示单个内容卡片，并处理点击导航到详情页
+ */
 const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
+  // 获取导航函数
+  const navigate = useNavigate();
+  
   // 图片加载状态
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -50,8 +58,42 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
     setImageError(true);
   };
   
+  // 处理卡片点击
+  const handleCardClick = () => {
+    // 如果提供了外部onClick回调，则调用它
+    if (onClick) {
+      onClick();
+      return;
+    }
+    
+    // 构建URL参数
+    const params: Record<string, string> = {
+      title: item.styleName || item.text.split('.')[0] || '',
+      text: item.text || '',
+      ratio: item.ratio || item.coverRatio || '16:9',
+      cover: item.cover || ''
+    };
+    
+    // 优先使用navUrl，如果没有则使用styleId构建路径
+    let url = item.navUrl || `/video/${item.styleId}`;
+    
+    // 将参数添加到URL中
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) searchParams.append(key, value);
+    });
+    
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url = `${url}?${queryString}`;
+    }
+    
+    console.log(`[ContentCard] 点击卡片: ${item.styleId}, 跳转到: ${url}`);
+    navigate(url);
+  };
+  
   return (
-    <div className="content-card" onClick={onClick}>
+    <div className="content-card" onClick={handleCardClick}>
       <div className="image-container" style={{ paddingTop }}>
         {/* 图片加载前的占位图 */}
         {!imageLoaded && !imageError && (

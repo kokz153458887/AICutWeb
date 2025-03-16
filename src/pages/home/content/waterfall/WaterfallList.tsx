@@ -2,14 +2,14 @@
  * 瀑布流列表组件
  * 使用纯CSS实现瀑布流布局，简化实现，避免虚拟滚动带来的复杂性
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import ContentCard from './ContentCard';
 import './WaterfallList.css';
 import { HomeContentItem } from '../../../../types/home';
 
 interface WaterfallListProps {
   items: HomeContentItem[];
-  onItemClick: (itemId: string) => void;
+  onItemClick?: (itemId: string, params?: Record<string, string>) => void; // 保留为可选属性，便于兼容现有代码
   onRetry?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
@@ -76,14 +76,6 @@ const WaterfallList: React.FC<WaterfallListProps> = ({
   // 容器引用
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // 处理卡片点击
-  const handleCardClick = useCallback((item: HomeContentItem) => {
-    // 优先使用navUrl，如果没有则使用styleId构建路径
-    const url = item.navUrl || `/video/${item.styleId}`;
-    console.log(`[WaterfallList] 点击卡片: ${item.styleId}, 跳转到: ${url}`);
-    onItemClick(item.styleId);
-  }, [onItemClick]);
-  
   // 处理加载更多点击
   const handleLoadMoreClick = useCallback(() => {
     if (onLoadMore && !isLoadingMore) {
@@ -135,7 +127,6 @@ const WaterfallList: React.FC<WaterfallListProps> = ({
           <div className="masonry-item" key={`${item.styleId}-${index}`}>
             <ContentCard 
               item={item} 
-              onClick={() => handleCardClick(item)}
             />
           </div>
         ))}

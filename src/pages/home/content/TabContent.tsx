@@ -56,18 +56,6 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
     
     return items;
   }, [homeData?.content, id]);
-
-  // 处理内容项点击，跳转到视频播放页
-  const handleContentClick = useCallback((itemId: string) => {
-    // 查找对应的内容项
-    const item = contentItemsRef.current.find(item => item.styleId === itemId);
-    if (!item) return;
-    
-    // 优先使用navUrl，如果没有则使用styleId构建路径
-    const url = item.navUrl || `/video/${itemId}`;
-    console.log(`[TabContent] 点击内容项，跳转到: ${url}`);
-    navigate(url);
-  }, [navigate]);
   
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
@@ -90,7 +78,6 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
         <>
           <WaterfallList 
             items={contentItems}
-            onItemClick={handleContentClick}
             onRetry={handleRetry}
             hasMore={hasMore}
             isLoadingMore={isLoadingMore}

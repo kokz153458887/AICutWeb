@@ -19,41 +19,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 模拟数据
-const generateMockData = () => {
-  const topbarItems = [
-    { id: 'recommend', text: '推荐' },
-    { id: 'hot', text: '热门' },
-    { id: 'video', text: '视频' }
-  ];
-  
-  // 生成模拟内容项
-  const generateContentItems = (count, startIndex = 1) => {
-    return Array.from({ length: count }, (_, i) => {
-      const index = startIndex + i;
-      return {
-        styleId: `item${index}`,
-        styleName: `内容项 ${index}`,
-        text: `这是第 ${index} 个内容项的描述文本，可能会很长很长很长很长很长很长很长很长很长很长`,
-        cover: `https://picsum.photos/300/400?random=${index}`,
-        stars: Math.floor(Math.random() * 50000),
-        ratio: Math.random() * 0.5 + 1.2, // 1.2 - 1.7的随机比例
-      };
-    });
-  };
-  
-  return {
-    topbarItems,
-    contentMap: {
-      recommend: generateContentItems(100),
-      hot: generateContentItems(100),
-      video: generateContentItems(100)
-    }
-  };
-};
-
-const mockData = generateMockData();
-
 // 模拟API延迟
 const simulateDelay = (req, res, next) => {
   const delay = Math.random() * 500 + 200; // 200-700ms的随机延迟
@@ -65,34 +30,47 @@ app.use(simulateDelay);
 
 // 获取首页数据的API
 app.get('/api/home', (req, res) => {
-  const { tab = 'recommend', pageNum = 1, pageSize = 8 } = req.query;
-  
-  // 获取指定标签的内容
-  const allContent = mockData.contentMap[tab] || [];
-  
-  // 分页处理
-  const start = (pageNum - 1) * pageSize;
-  const end = start + parseInt(pageSize);
-  const content = allContent.slice(start, end);
-  
-  // 构建响应数据
-  const response = {
-    code: 0,
-    message: 'success',
-    data: {
-      topbarItems: mockData.topbarItems,
-      content,
-      pages: {
-        total: allContent.length,
-        pageNum: parseInt(pageNum),
-        pageSize: parseInt(pageSize),
-        hasMore: end < allContent.length
+  try {
+    const { tab = 'recommend', pageNum = 1, pageSize = 8 } = req.query;
+    
+    // 读取home.json文件中的模拟数据
+    const homeData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/home.json'), 'utf8'));
+    
+    // 从home.json中提取数据
+    const topbarItems = homeData.getHomeData.data.topbar;
+    const allContent = homeData.getHomeData.data.content;
+    
+    // 分页处理
+    const start = (pageNum - 1) * pageSize;
+    const end = start + parseInt(pageSize);
+    const content = allContent.slice(start, end);
+    
+    // 构建响应数据
+    const response = {
+      code: 0,
+      message: 'success',
+      data: {
+        topbarItems: topbarItems,
+        content,
+        pages: {
+          total: allContent.length,
+          pageNum: parseInt(pageNum),
+          pageSize: parseInt(pageSize),
+          hasMore: end < allContent.length
+        }
       }
-    }
-  };
-  
-  // 返回响应
-  res.json(response);
+    };
+    
+    // 返回响应
+    res.json(response);
+  } catch (error) {
+    console.error('[Mock Server] 获取首页数据失败:', error);
+    res.status(500).json({
+      code: -1,
+      message: '服务器内部错误',
+      data: null
+    });
+  }
 });
 
 // 兼容旧版API路径

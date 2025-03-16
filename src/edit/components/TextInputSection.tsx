@@ -191,6 +191,13 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
     };
   }, []);
 
+  /**
+   * 处理音量滑动条点击事件，防止事件穿透
+   */
+  const handleVolumeSliderClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发整个输入区域的点击
+  };
+
   return (
     <div className="text-input-section" ref={inputSectionRef}>
       <textarea
@@ -223,7 +230,11 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         
         {/* 音量滑动控制条 */}
         {showVolumeSlider && (
-          <div className="volume-slider-container" ref={sliderRef}>
+          <div 
+            className="volume-slider-container" 
+            ref={sliderRef}
+            onClick={handleVolumeSliderClick}
+          >
             <input
               type="range"
               min={volumeConfig.minPercent / volumeConfig.displayFactor}
@@ -234,6 +245,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
               onMouseUp={handleVolumeMouseUp}
               onTouchEnd={handleVolumeMouseUp}
               className="volume-slider"
+              onClick={(e) => e.stopPropagation()}
             />
             <span className="volume-value">{getDisplayVolume()}%</span>
           </div>

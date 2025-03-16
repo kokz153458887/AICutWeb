@@ -29,24 +29,35 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  width: 350px;
+  max-width: 240px;
+  overflow: hidden;
 }
 
 .config-value-row {
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
 .config-value {
   font-size: 15px;
   color: #cccccc;
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .config-sub-value {
   font-size: 12px;
   color: #888888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .config-tag {
@@ -57,11 +68,13 @@
   border-radius: 10px;
   margin-left: 8px;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .config-arrow {
   color: #888888;
   margin-left: 10px;
+  flex-shrink: 0;
 }
 
 /* 音量控制相关样式 */
@@ -69,8 +82,10 @@
   display: flex;
   align-items: center;
   position: relative;
-  margin-left: 0px;
-  margin-right:0px;
+  margin-left: 0;
+  margin-right: 0;
+  flex-shrink: 0;
+  z-index: 20;
 }
 
 /* 音量文字按钮样式 */
@@ -78,14 +93,16 @@
   font-size: 14px;
   color: #888888;
   background-color: rgba(0, 0, 0, 0.2);
-  padding: 6px 10px;
+  padding: 6px 6px;
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 5;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  width: 55px;
 }
 
 /* 音量数字徽章 */
@@ -94,6 +111,7 @@
   color: #00e676;
   font-weight: 600;
   width: 30px;
+  text-align: center;
 }
 
 .config-volume-control .volume-text:hover {
@@ -107,14 +125,16 @@
   z-index: 100;
   top: 40px;
   right: 0px;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(20, 20, 20, 0.95);
   border-radius: 20px;
   padding: 6px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 30px;
-  width: 300px;
+  height: 36px;
+  width: 240px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
 }
 
 /* 音量滑动条 */
@@ -125,6 +145,7 @@
   background: #3a3a3a;
   border-radius: 2px;
   outline: none;
+  cursor: pointer;
 }
 
 .config-volume-control .volume-slider::-webkit-slider-thumb {
@@ -135,6 +156,7 @@
   border-radius: 50%;
   background: #00e676;
   cursor: pointer;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
 .config-volume-control .volume-slider::-moz-range-thumb {
@@ -144,4 +166,156 @@
   background: #00e676;
   cursor: pointer;
   border: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 音量值显示 */
+.config-volume-control .volume-value {
+  font-size: 12px;
+  color: #ffffff;
+  font-weight: 500;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 预览图标按钮 */
+.preview-icon-button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0a0a0;
+  background-color: rgba(20, 20, 20, 0.85);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 6px;
+  z-index: 5;
+  backdrop-filter: blur(3px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.preview-icon-button:hover {
+  color: #00e676;
+  background-color: rgba(20, 20, 20, 0.95);
+}
+
+/* 预览浮层 */
+.preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.preview-container {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.preview-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 30px;
+  height: 30px;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1010;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+/* 视频预览图标按钮 */
+.video-preview-icon-button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a0a0a0;
+  background-color: rgba(20, 20, 20, 0.85);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 6px;
+  z-index: 5;
+  backdrop-filter: blur(3px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.video-preview-icon-button:hover {
+  color: #00e676;
+  background-color: rgba(20, 20, 20, 0.95);
+}
+
+/* 视频预览容器 */
+.video-preview-container {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 预览视频样式 */
+.preview-video {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 4px;
+  display: block;
+}
+
+/* 试听按钮样式 */
+.play-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(0, 230, 118, 0.1);
+  color: #00e676;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.play-icon-button:hover {
+  background-color: rgba(0, 230, 118, 0.2);
+  transform: scale(1.05);
+}
+
+.play-icon-button:active {
+  background-color: rgba(0, 230, 118, 0.3);
+  transform: scale(0.95);
 } 

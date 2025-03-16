@@ -1,8 +1,9 @@
 /**
  * 内容卡片组件
- * 负责展示单个内容项的卡片，包括封面图、文案和星星数
+ * 负责展示单个卡片，包括封面图、文案和星星数
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { HomeContentItem } from '../../../../types/home';
 import './ContentCard.css';
 
 // 定义卡片数据接口
@@ -18,63 +19,72 @@ export interface ContentCardItem {
 }
 
 interface ContentCardProps {
-  item: ContentCardItem;
+  item: HomeContentItem;
   onClick: () => void;
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
+  // 图片加载状态
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  // 计算图片比例
-  const imgRatio = item.coverRatio || item.ratio || '1:1';
-  const [width, height] = imgRatio.split(':').map(Number);
-  const aspectRatio = height / width;
+  // 固定使用3:4比例
+  const ratio = useMemo(() => {
+    return { width: 3, height: 4 }; // 固定3:4比例
+  }, []);
+  
+  // 计算图片容器的padding-top，用于保持比例
+  const paddingTop = useMemo(() => {
+    return `${(ratio.height / ratio.width) * 100}%`;
+  }, [ratio]);
   
   // 处理图片加载完成
   const handleImageLoad = () => {
+    console.log(`[ContentCard] 图片加载完成: ${item.styleId}`);
     setImageLoaded(true);
   };
   
   // 处理图片加载失败
   const handleImageError = () => {
+    console.log(`[ContentCard] 图片加载失败: ${item.styleId}`);
     setImageError(true);
   };
   
   return (
     <div className="content-card" onClick={onClick}>
-      <div 
-        className="card-image-container" 
-        style={{ paddingBottom: `${aspectRatio * 100}%` }}
-      >
-        {/* 占位图 */}
-        <div className={`card-image-placeholder ${imageLoaded ? 'hidden' : ''}`} />
+      <div className="image-container" style={{ paddingTop }}>
+        {/* 图片加载前的占位图 */}
+        {!imageLoaded && !imageError && (
+          <div className="image-placeholder"></div>
+        )}
         
-        {/* 实际图片 */}
-        {!imageError ? (
-          <img 
-            src={item.cover} 
-            alt={item.text}
+        {/* 图片加载失败显示错误图 */}
+        {imageError ? (
+          <div className="image-error">
+            <span className="error-icon">!</span>
+            <span className="error-text">加载失败</span>
+          </div>
+        ) : (
+          /* 图片 */
+          <img
+            src={item.cover}
+            alt={item.styleName}
             className={`card-image ${imageLoaded ? 'loaded' : ''}`}
             onLoad={handleImageLoad}
             onError={handleImageError}
           />
-        ) : (
-          <div className="card-image-error">
-            <span>图片加载失败</span>
-          </div>
         )}
       </div>
       
+      {/* 卡片内容区 */}
       <div className="card-content">
-        <p className="card-text">{item.text}</p>
-        <div className="card-footer">
-          <div className="card-stars">
-            <svg className="star-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z" fill="#FF4757"/>
-            </svg>
-            <span>{item.stars}</span>
-          </div>
+        {/* 文案，最多2行 */}
+        <p className="content-text">{item.text}</p>
+        
+        {/* 星星数 */}
+        <div className="stars-container">
+          <span className="stars-icon">★</span>
+          <span className="stars-count">{item.stars}</span>
         </div>
       </div>
     </div>

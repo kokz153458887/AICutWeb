@@ -29,190 +29,210 @@ export class HomeDataManager {
   private setLoading: (loading: boolean) => void;
   private setError: (error: string | null) => void;
   
-  // 当前搜索参数
-  private searchParams: URLSearchParams;
+  // 分页相关状态更新函数
+  private setHasMore: (hasMore: boolean) => void;
+  private setIsLoadingMore: (isLoadingMore: boolean) => void;
+  private setLoadMoreError: (loadMoreError: boolean) => void;
   
   /**
    * 构造函数
    * @param setters 状态更新函数集合
    * @param refs 引用集合
-   * @param searchParams URL搜索参数
    */
   constructor(
     setters: {
       setHomeData: (data: HomeData | null) => void;
       setLoading: (loading: boolean) => void;
       setError: (error: string | null) => void;
+      setHasMore: (hasMore: boolean) => void;
+      setIsLoadingMore: (isLoadingMore: boolean) => void;
+      setLoadMoreError: (loadMoreError: boolean) => void;
     },
     refs: {
       isMountedRef: React.MutableRefObject<boolean>;
       currentTabIdRef: React.MutableRefObject<string | null>;
       requestIdRef: React.MutableRefObject<number>;
     },
-    searchParams: URLSearchParams
   ) {
     this.setHomeData = setters.setHomeData;
     this.setLoading = setters.setLoading;
     this.setError = setters.setError;
+    this.setHasMore = setters.setHasMore;
+    this.setIsLoadingMore = setters.setIsLoadingMore;
+    this.setLoadMoreError = setters.setLoadMoreError;
     
     this.isMountedRef = refs.isMountedRef;
     this.currentTabIdRef = refs.currentTabIdRef;
     this.requestIdRef = refs.requestIdRef;
-    
-    this.searchParams = searchParams;
-  }
-  
-  /**
-   * 创建缓存键
-   * @param topbar 标签ID
-   * @returns 唯一的缓存键
-   */
-  private createCacheKey(topbar: string): string {
-    return `home_data_${topbar}`;
-  }
-  
-  /**
-   * 安全设置组件状态
-   * 确保只在组件挂载时更新状态
-   */
-  private safeSetState(
-    data: HomeData | null = null, 
-    isLoading: boolean = false, 
-    errorMsg: string | null = null
-  ): void {
-    if (!this.isMountedRef.current) return;
-    
-    if (data !== null) this.setHomeData(data);
-    this.setLoading(isLoading);
-    this.setError(errorMsg);
-  }
-  
-  /**
-   * 尝试复用正在进行的请求
-   * @param cacheKey 缓存键
-   * @param topbar 标签ID
-   * @param requestId 请求ID
-   * @returns 如果成功复用请求则返回true，否则返回false
-   */
-  private async tryReuseExistingRequest(cacheKey: string, topbar: string, requestId: number): Promise<boolean> {
-    const existingRequest = HomeDataManager.pendingRequests.get(cacheKey);
-    if (!existingRequest) return false;
-
-    console.log(`[HomeDataManager] 复用正在进行的请求: ${topbar}`);
-    try {
-      // 标记正在加载
-      this.safeSetState(null, true, null);
-      
-      const response = await existingRequest;
-      
-      // 检查请求ID是否仍然是当前请求
-      if (requestId !== this.requestIdRef.current) {
-        console.log(`[HomeDataManager] 丢弃过时的请求结果: ${requestId} vs ${this.requestIdRef.current}`);
-        return true;
-      }
-      
-      // 检查响应有效性
-      if (response && response.data) {
-        this.safeSetState(response.data, false, null);
-      }
-    } catch (err) {
-      console.warn(`[HomeDataManager] 复用请求出错:`, err);
-      // 请求失败但仍算作已处理
-    } finally {
-      this.safeSetState(null, false, null);
-    }
-    return true;
-  }
-  
-  /**
-   * 发送新的数据请求
-   * @param cacheKey 缓存键
-   * @param topbar 标签ID
-   * @param requestId 请求ID
-   */
-  private async sendNewRequest(cacheKey: string, topbar: string, requestId: number): Promise<void> {
-    // 增加全局请求计数
-    HomeDataManager.globalRequestCount++;
-    console.log(`[HomeDataManager] 开始加载新数据: ${topbar}, 全局请求计数: ${HomeDataManager.globalRequestCount}`);
-    
-    // 标记正在加载
-    this.safeSetState(null, true, null);
-    
-    // 创建请求并存储到pendingRequests
-    const request = HomeApiService.getHomeData({ topbar });
-    HomeDataManager.pendingRequests.set(cacheKey, request);
-    
-    try {
-      const response = await request;
-      
-      // 请求完成后从pendingRequests中删除
-      HomeDataManager.pendingRequests.delete(cacheKey);
-      
-      // 检查请求ID是否仍然是当前请求
-      if (requestId !== this.requestIdRef.current) {
-        console.log(`[HomeDataManager] 丢弃过时的请求结果 (ID不匹配): ${requestId} vs ${this.requestIdRef.current}`);
-        return;
-      }
-      
-      // 确保回调时仍然是当前tab ID，避免竞态条件
-      if (this.currentTabIdRef.current !== topbar) {
-        console.log(`[HomeDataManager] 丢弃过期数据 (Tab变化): ${topbar}, 当前ID: ${this.currentTabIdRef.current}`);
-        return;
-      }
-      
-      if (response && response.data) {
-        // 更新缓存
-        HomeDataManager.dataCache.set(cacheKey, response.data);
-        this.safeSetState(response.data, false, null);
-      } else {
-        throw new Error('返回数据格式不正确');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '获取首页数据失败';
-      this.safeSetState(null, false, errorMessage);
-      console.error('[HomeDataManager] 获取首页数据失败:', err);
-      
-      // 出错时也要从pendingRequests中删除
-      HomeDataManager.pendingRequests.delete(cacheKey);
-    }
   }
   
   /**
    * 获取首页数据
-   * @param id 可选的标签ID，如果不提供则使用URL中的参数
+   * @param tabId 标签ID
+   * @param isLoadMore 是否加载更多
+   * @param pageNum 页码
    */
-  public async fetchHomeData(id?: string): Promise<void> {
+  public async fetchHomeData(tabId: string, isLoadMore: boolean = false, pageNum: number = 1): Promise<void> {
     try {
-      // 递增请求ID，用于防止竞态条件
-      this.requestIdRef.current = (this.requestIdRef.current || 0) + 1;
+      // 增加本地请求ID，用于防止竞态条件
+      this.requestIdRef.current++;
       const currentRequestId = this.requestIdRef.current;
       
-      // 使用传入的id作为topbar参数
-      const topbar = id || this.searchParams.get('homebar') || 'recommend';
-      
-      // 更新当前加载的tab ID
-      this.currentTabIdRef.current = topbar;
+      // 如果不是加载更多，则设置加载状态
+      if (!isLoadMore) {
+        this.setLoading(true);
+        this.setError(null);
+      } else {
+        this.setIsLoadingMore(true);
+        this.setLoadMoreError(false);
+      }
       
       // 创建缓存键
-      const cacheKey = this.createCacheKey(topbar);
+      const cacheKey = this.createCacheKey(tabId, pageNum);
       
-      // 检查缓存
-      const cachedData = HomeDataManager.dataCache.get(cacheKey);
-      if (cachedData) {
-        console.log(`[HomeDataManager] 使用缓存数据: ${topbar}`);
-        this.safeSetState(cachedData, false, null);
+      console.log(`[HomeDataManager] 开始请求数据: ${tabId}, 页码: ${pageNum}, 是否加载更多: ${isLoadMore}, 请求ID: ${currentRequestId}`);
+      
+      // 发送请求并获取数据
+      const { data } = await this.sendRequest(tabId, isLoadMore, pageNum);
+      
+      // 检查组件是否已卸载或请求是否已过期
+      if (!this.isMountedRef.current || this.requestIdRef.current !== currentRequestId) {
+        console.log(`[HomeDataManager] 请求已过期或组件已卸载: ${tabId}, 请求ID: ${currentRequestId}, 当前ID: ${this.requestIdRef.current}`);
         return;
       }
       
-      // 尝试复用正在进行的请求
-      const hasReusedRequest = await this.tryReuseExistingRequest(cacheKey, topbar, currentRequestId);
-      if (hasReusedRequest) return;
+      // 更新hasMore状态
+      const hasMore = data.pages?.hasMore || false;
+      console.log(`[HomeDataManager] 更新hasMore状态: ${hasMore}, 当前页码: ${pageNum}, 总数据: ${data.pages?.total || 0}`);
+      this.setHasMore(hasMore);
       
-      // 发送新请求
-      await this.sendNewRequest(cacheKey, topbar, currentRequestId);
-    } catch (err) {
-      console.error('[HomeDataManager] fetchHomeData出错:', err);
-      this.safeSetState(null, false, '获取数据失败');
+      // 更新状态
+      if (isLoadMore) {
+        // 合并数据
+        const existingData = HomeDataManager.dataCache.get(this.createCacheKey(tabId, pageNum - 1));
+        if (existingData) {
+          // 合并内容
+          const mergedContent = [...existingData.content, ...data.content];
+          const mergedData = {
+            ...data,
+            content: mergedContent,
+            pages: data.pages ? {
+              ...data.pages,
+              pageNum: pageNum
+            } : undefined
+          };
+          
+          // 更新缓存
+          HomeDataManager.dataCache.set(cacheKey, mergedData);
+          
+          // 更新状态
+          this.setHomeData(mergedData);
+          
+          console.log(`[HomeDataManager] 合并数据 - 缓存数据: ${existingData.content.length}项, 新数据: ${data.content.length}项, hasMore: ${hasMore}`);
+          console.log(`[HomeDataManager] 缓存数据第一项ID: ${existingData.content[0]?.styleId || 'N/A'}, 最后一项ID: ${existingData.content[existingData.content.length - 1]?.styleId || 'N/A'}`);
+          console.log(`[HomeDataManager] 新数据第一项ID: ${data.content[0]?.styleId || 'N/A'}, 最后一项ID: ${data.content[data.content.length - 1]?.styleId || 'N/A'}`);
+          console.log(`[HomeDataManager] 合并后数据总量: ${mergedContent.length}项`);
+          console.log(`[HomeDataManager] 合并后第一项ID: ${mergedContent[0]?.styleId || 'N/A'}, 最后一项ID: ${mergedContent[mergedContent.length - 1]?.styleId || 'N/A'}`);
+        } else {
+          // 没有找到上一页数据，直接使用新数据
+          HomeDataManager.dataCache.set(cacheKey, data);
+          this.setHomeData(data);
+          console.log(`[HomeDataManager] 未找到上一页缓存数据，直接使用新数据: ${data.content.length}项, hasMore: ${hasMore}`);
+        }
+      } else {
+        // 直接使用新数据
+        HomeDataManager.dataCache.set(cacheKey, data);
+        this.setHomeData(data);
+        console.log(`[HomeDataManager] 使用新数据: ${data.content.length}项, hasMore: ${hasMore}`);
+      }
+    } catch (error) {
+      // 检查组件是否已卸载
+      if (!this.isMountedRef.current) return;
+      
+      console.error(`[HomeDataManager] 获取数据失败: ${tabId}`, error);
+      
+      if (isLoadMore) {
+        this.setLoadMoreError(true);
+      } else {
+        this.setError(error instanceof Error ? error.message : '获取数据失败');
+      }
+    } finally {
+      // 检查组件是否已卸载
+      if (!this.isMountedRef.current) return;
+      
+      // 如果不是加载更多，则设置加载状态为false
+      if (!isLoadMore) {
+        this.setLoading(false);
+      } else {
+        this.setIsLoadingMore(false);
+      }
+    }
+  }
+  
+  /**
+   * 创建缓存键
+   * @param tabId 标签ID
+   * @param pageNum 页码
+   * @returns 缓存键
+   */
+  private createCacheKey(tabId: string, pageNum: number = 1): string {
+    return `${tabId}_page${pageNum}`;
+  }
+  
+  /**
+   * 发送请求
+   * @param tabId 标签ID
+   * @param isLoadMore 是否加载更多
+   * @param pageNum 页码
+   * @returns 请求结果
+   */
+  private async sendRequest(tabId: string, isLoadMore: boolean = false, pageNum: number = 1): Promise<{data: HomeData}> {
+    // 创建缓存键
+    const cacheKey = this.createCacheKey(tabId, pageNum);
+    
+    // 检查缓存
+    const cachedData = HomeDataManager.dataCache.get(cacheKey);
+    if (cachedData && !isLoadMore) {
+      console.log(`[HomeDataManager] 使用缓存数据: ${cacheKey}, 数据项数量: ${cachedData.content.length}, hasMore: ${cachedData.pages?.hasMore || false}`);
+      return { data: cachedData };
+    }
+    
+    // 检查是否有进行中的请求
+    const pendingRequest = HomeDataManager.pendingRequests.get(cacheKey);
+    if (pendingRequest) {
+      console.log(`[HomeDataManager] 复用进行中的请求: ${cacheKey}`);
+      return pendingRequest;
+    }
+    
+    // 发送新请求
+    console.log(`[HomeDataManager] 开始加载新数据: ${tabId}, 页码: ${pageNum}, 全局请求计数: ${++HomeDataManager.globalRequestCount}`);
+    
+    // 创建新请求
+    const newRequest = HomeApiService.getHomeData(tabId, { pageNum, pageSize: 10 })
+      .then(result => {
+        console.log(`[HomeDataManager] 请求成功: ${tabId}, 页码: ${pageNum}, 数据项数量: ${result.data.content.length}, hasMore: ${result.data.pages?.hasMore || false}`);
+        return result;
+      });
+    
+    // 记录进行中的请求
+    HomeDataManager.pendingRequests.set(cacheKey, newRequest);
+    
+    try {
+      // 等待请求完成
+      const result = await newRequest;
+      
+      // 移除进行中的请求记录
+      HomeDataManager.pendingRequests.delete(cacheKey);
+      
+      return result;
+    } catch (error) {
+      // 移除进行中的请求记录
+      HomeDataManager.pendingRequests.delete(cacheKey);
+      
+      console.error(`[HomeDataManager] 请求失败: ${tabId}, 页码: ${pageNum}`, error);
+      
+      // 抛出错误
+      throw error;
     }
   }
 
@@ -220,16 +240,7 @@ export class HomeDataManager {
    * 清理资源
    */
   public cleanup(): void {
-    this.isMountedRef.current = false;
-  }
-  
-  /**
-   * 重置缓存
-   * 用于测试或强制刷新时
-   */
-  public static resetCache(): void {
-    HomeDataManager.dataCache.clear();
-    HomeDataManager.pendingRequests.clear();
-    console.log('[HomeDataManager] 已重置缓存');
+    // 清理资源
+    this.currentTabIdRef.current = null;
   }
 }

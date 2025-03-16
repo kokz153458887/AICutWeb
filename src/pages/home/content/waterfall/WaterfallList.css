@@ -1,20 +1,25 @@
 /* 瀑布流容器 */
 .waterfall-container {
+  padding: 6px;
   width: 100%;
-  padding: 0 8px;
   box-sizing: border-box;
-  min-height: 100%;
-  position: relative;
 }
 
-/* masonic库生成的瀑布流网格 */
-.masonic {
-  width: 100%;
-  position: relative;
-  min-height: 100vh; /* 确保瀑布流至少有一个视口的高度 */
+/* Masonry网格布局 - 双列瀑布流 */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 双列布局 */
+  grid-gap: 6px; /* 间距 */
+  grid-auto-rows: min-content; /* 根据内容自适应高度 */
 }
 
-/* 瀑布流空状态 */
+/* Masonry网格项 */
+.masonry-item {
+  break-inside: avoid; /* 避免内容被分割 */
+  margin-bottom: 6px;
+}
+
+/* 空状态 */
 .waterfall-empty {
   display: flex;
   justify-content: center;
@@ -24,31 +29,101 @@
   font-size: 14px;
 }
 
-/* 瀑布流列容器 */
-.waterfall-columns {
+/* 加载状态容器 - 单列横向铺满 */
+.loading-more,
+.load-more-error,
+.no-more-data,
+.load-more-button {
+  grid-column: 1 / -1; /* 横跨所有列 */
+  background-color: #fff;
+  border-radius: 8px;
+  margin: 10px 0;
+  padding: 15px;
   display: flex;
-  margin: 0 -6px;
-  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* 瀑布流列 */
-.waterfall-column {
-  flex: 0 0 50%;
-  padding: 0 6px;
-  box-sizing: border-box;
+/* 加载更多状态 */
+.loading-more {
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 适配移动端 */
-@media (max-width: 480px) {
+/* 加载中的转圈动画 */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3498db;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 加载错误状态 */
+.load-more-error {
+  color: #f56c6c;
+  font-size: 14px;
+  flex-direction: column;
+}
+
+.load-more-error button {
+  margin-top: 8px;
+  padding: 5px 15px;
+  background-color: #f56c6c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 没有更多数据状态 */
+.no-more-data {
+  color: #999;
+  font-size: 14px;
+}
+
+/* 加载更多按钮 */
+.load-more-button button {
+  padding: 8px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.load-more-button button:hover {
+  background-color: #2980b9;
+}
+
+.load-more-button button:active {
+  background-color: #1f6aa5;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 480px) {
   .waterfall-container {
-    padding: 0 4px;
+    padding: 4px;
   }
   
-  .waterfall-columns {
-    margin: 0 -4px;
+  .masonry-grid {
+    grid-gap: 4px;
   }
   
-  .waterfall-column {
-    padding: 0 4px;
+  .masonry-item {
+    margin-bottom: 4px;
   }
 } 

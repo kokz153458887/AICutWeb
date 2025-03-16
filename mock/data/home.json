@@ -21,7 +21,7 @@
         {
           "styleId": "item1",
           "styleName": "横屏-漫剪-龙猫-治愈系",
-          "text": "16:9比例视频 - 这是一段示例文案内容，展示在首页中间位置",
+          "text": "测试第一条，16:9比例视频 - 这是一段示例文案内容，展示在首页中间位置",
           "cover": "https://picsum.photos/800/450?random=1",
           "stars": "2178",
           "ratio": "16:9",
@@ -288,7 +288,13 @@
           "ratio": "1:1",
           "coverRatio": "1:1"
         }
-      ]
+      ],
+      "pages": {
+        "pageNum": 1,
+        "pageSize": 30,
+        "total": 100,
+        "hasMore": true
+      }
     }
   }
 } 

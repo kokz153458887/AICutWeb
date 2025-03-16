@@ -8,13 +8,25 @@ import { HomeApiResponse, HomeApiParams } from './homeApiModel';
 export class HomeApiService {
   /**
    * 获取首页数据
+   * @param tabId 标签ID
    * @param params 请求参数
    * @returns Promise<HomeApiResponse>
    */
-  static async getHomeData(params: HomeApiParams): Promise<HomeApiResponse> {
+  static async getHomeData(tabId: string, params?: Partial<HomeApiParams>): Promise<HomeApiResponse> {
     try {
+      // 合并默认参数和传入的参数
+      const mergedParams: HomeApiParams = {
+        tab: tabId,
+        pageNum: params?.pageNum || 1,
+        pageSize: params?.pageSize || 10,
+        ...params
+      };
+      
+      console.log(`[HomeApi] 发起请求: tab=${mergedParams.tab}, pageNum=${mergedParams.pageNum}, pageSize=${mergedParams.pageSize}`);
+      
+      // 发起真实的API请求
       const response = await axios.get<HomeApiResponse>('/api/home/getHomeData', {
-        params,
+        params: mergedParams,
         timeout: 10000, // 10秒超时
         headers: {
           'Content-Type': 'application/json'
@@ -30,6 +42,8 @@ export class HomeApiService {
       if (!response.data || response.data.status !== 'success') {
         throw new Error(response.data?.msg || '获取数据失败');
       }
+      
+      console.log(`[HomeApi] 请求成功: 获取到${response.data.data.content.length}条数据, 第一条ID: ${response.data.data.content[0]?.styleId || 'N/A'}, 最后一条ID: ${response.data.data.content[response.data.data.content.length - 1]?.styleId || 'N/A'}`);
       
       return response.data;
     } catch (error) {

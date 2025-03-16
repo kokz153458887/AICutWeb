@@ -8,7 +8,11 @@ export interface HomeDataContextType {
   homeData: HomeData | null;
   loading: boolean;
   error: string | null;
-  refetch: (id?: string) => Promise<void>;
+  refetch: (id?: string, isLoadMore?: boolean) => Promise<void>;
+  // 分页相关属性
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  loadMoreError: boolean;
 }
 
 /**
@@ -18,7 +22,11 @@ export const HomeDataContext = React.createContext<HomeDataContextType>({
   homeData: null,
   loading: false,
   error: null,
-  refetch: async () => {}
+  refetch: async () => {},
+  // 分页相关属性默认值
+  hasMore: false,
+  isLoadingMore: false,
+  loadMoreError: false
 });
 
 /**

@@ -25,6 +25,7 @@ const EditPage: React.FC = () => {
   const [backupCount, setBackupCount] = useState<number>(3);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
+  const [speaker, setSpeaker] = useState({ name: '龙小明', tag: '温柔' });
   
   // 获取URL参数中的styleId
   useEffect(() => {
@@ -84,6 +85,14 @@ const EditPage: React.FC = () => {
   };
 
   /**
+   * 处理说话人点击事件
+   */
+  const handleSpeakerClick = () => {
+    // 弹出toast提示
+    alert('说话人选择功能待开发');
+  };
+
+  /**
    * 处理取消按钮点击事件
    */
   const handleCancel = () => {
@@ -130,6 +139,8 @@ const EditPage: React.FC = () => {
           placeholder="这一刻的想法..."
           voiceVolume={voiceVolume}
           onVoiceVolumeChange={handleVoiceVolumeChange}
+          speaker={speaker}
+          onSpeakerClick={handleSpeakerClick}
         />
 
         {/* 标题输入区域 */}
@@ -143,16 +154,7 @@ const EditPage: React.FC = () => {
         <ConfigItem
           title="视频风格"
           value="video_cut_style"
-          subValue="ID: 1234"
           onClick={() => handleConfigClick('style')}
-        />
-
-        {/* 说话人选择 */}
-        <ConfigItem
-          title="说话人"
-          value="龙小明"
-          tag="温柔"
-          onClick={() => handleConfigClick('speaker')}
         />
 
         {/* 背景音乐选择 - 带音量控制 */}
@@ -169,7 +171,6 @@ const EditPage: React.FC = () => {
         <ConfigItem
           title="素材库"
           value="pungge治愈系"
-          subValue="ID: 1244"
           onClick={() => handleConfigClick('material')}
         />
 

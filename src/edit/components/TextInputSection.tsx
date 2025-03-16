@@ -4,6 +4,8 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/TextInputSection.css';
+import { SpeakerIcon } from './icons/SvgIcons';
+import { titleConfig } from '../config/titleConfig';
 
 interface TextInputSectionProps {
   value: string;
@@ -11,6 +13,8 @@ interface TextInputSectionProps {
   placeholder?: string;
   voiceVolume?: number;
   onVoiceVolumeChange?: (volume: number) => void;
+  speaker?: { name: string; tag: string };
+  onSpeakerClick?: () => void;
 }
 
 /**
@@ -21,12 +25,18 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   onChange,
   placeholder = '这一刻的想法...',
   voiceVolume = 50,
-  onVoiceVolumeChange
+  onVoiceVolumeChange,
+  speaker,
+  onSpeakerClick
 }) => {
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
   const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // 从配置文件获取最大行数
+  const maxRows = titleConfig.textareaMaxRows || 12;
 
   /**
    * 处理文本变化事件
@@ -36,6 +46,43 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   };
 
   /**
+   * 自动调整文本区域高度
+   */
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    // 重置高度以获取正确的scrollHeight
+    textarea.style.height = 'auto';
+    
+    // 计算内容的实际高度
+    const scrollHeight = textarea.scrollHeight;
+    
+    // 计算单行高度（以像素为单位）
+    const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 20;
+    
+    // 计算最大高度（以像素为单位）
+    const maxHeight = lineHeight * maxRows;
+    
+    // 如果内容高度超过最大高度，则使用最大高度并允许滚动
+    if (scrollHeight > maxHeight) {
+      textarea.style.height = `${maxHeight}px`;
+      textarea.style.overflowY = 'auto';
+    } else {
+      // 否则，使用实际内容高度并禁用滚动
+      textarea.style.height = `${scrollHeight}px`;
+      textarea.style.overflowY = 'hidden';
+    }
+  };
+
+  /**
+   * 当文本内容变化时，调整文本区域高度
+   */
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [value, maxRows]);
+
+  /**
    * 处理喇叭点击事件
    */
   const handleSpeakerClick = (e: React.MouseEvent) => {
@@ -43,6 +90,16 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
     console.log('喇叭被点击');
     // 这里可以添加语音输入或文本朗读等功能
     alert('语音功能待实现');
+  };
+
+  /**
+   * 处理说话人按钮点击事件
+   */
+  const handleSpeakerButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
+    if (onSpeakerClick) {
+      onSpeakerClick();
+    }
   };
 
   /**
@@ -100,6 +157,22 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   }, []);
 
   /**
+   * 组件初始化时，调整文本区域高度
+   */
+  useEffect(() => {
+    // 初始化时调整高度
+    adjustTextareaHeight();
+    
+    // 添加窗口调整大小事件监听器，调整高度
+    window.addEventListener('resize', adjustTextareaHeight);
+    
+    // 清理事件监听器
+    return () => {
+      window.removeEventListener('resize', adjustTextareaHeight);
+    };
+  }, []);
+
+  /**
    * 组件卸载时清除定时器
    */
   useEffect(() => {
@@ -113,14 +186,23 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   return (
     <div className="text-input-section" ref={inputSectionRef}>
       <textarea
+        ref={textareaRef}
         className="text-input"
         value={value}
         onChange={handleChange}
         placeholder={placeholder}
-        rows={4}
+        style={{ resize: 'none' }}
       />
       
       <div className="input-controls">
+        {/* 说话人按钮 */}
+        {speaker && (
+          <div className="speaker-button" onClick={handleSpeakerButtonClick}>
+            <span className="speaker-name">{speaker.name}</span>
+            {speaker.tag && <span className="speaker-tag">{speaker.tag}</span>}
+          </div>
+        )}
+        
         {/* 音量文字按钮 - 显示当前音量值 */}
         <div className="volume-text" onClick={handleVolumeTextClick}>
           音量 <span className="volume-badge">{voiceVolume}</span>
@@ -128,11 +210,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         
         {/* 喇叭图标 */}
         <div className="speaker-icon" onClick={handleSpeakerClick}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M19.07 4.93C20.9447 6.80528 21.9979 9.34836 21.9979 12C21.9979 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <SpeakerIcon />
         </div>
         
         {/* 音量滑动控制条 */}

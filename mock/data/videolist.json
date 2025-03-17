@@ -1,0 +1,102 @@
+{
+  "getVideoList": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "videolist": [
+        {
+          "generateId": "video_001",
+          "title": "卡通漫画风格萌娃",
+          "text": "卡通漫画风格萌娃，黑色头发梳成发髻插着藕粉色花朵，佩戴绿色圆形耳环，身穿带有藕粉绿色精美图案轻薄的汉服饰，领口有黑白色花纹装饰，俏皮可爱，灵动微闭一眼，淘气讨人喜欢，背景为简洁模糊光影。",
+          "createTime": "2024/03/17 17:23:55.13",
+          "status": "done",
+          "ratio": "3:4",
+          "materialName": "可爱动漫",
+          "videolist": [
+            {
+              "coverImg": "/data/测试标题_1.jpg",
+              "videoUrl": "/data/测试标题_1.mp4"
+            },
+            {
+              "coverImg": "/data/测试标题.jpg",
+              "videoUrl": "/data/测试标题.mp4"
+            },
+            {
+              "coverImg": "/data/从今以后_1.jpg",
+              "videoUrl": "/data/从今以后_1.mp4"
+            },
+            {
+              "coverImg": "/data/20250317174458.jpg",
+              "videoUrl": "/data/龙猫_2224-2232.mp4"
+            },
+            {
+              "coverImg": "/data/20250317174522.jpg",
+              "videoUrl": "/data/测试标题.mp4"
+            }
+          ]
+        },
+        {
+          "generateId": "video_002",
+          "title": "山水画风格自然风光",
+          "text": "中国传统山水画风格，远山青黛，近水清澈，松树挺拔，云雾缭绕，给人一种宁静致远之感。画面构图饱满，层次分明，意境深远。",
+          "createTime": "2024/03/17 15:42:18.22",
+          "status": "done",
+          "ratio": "16:9",
+          "materialName": "中国风",
+          "videolist": [
+            {
+              "coverImg": "/data/测试标题_1.jpg",
+              "videoUrl": "/data/测试标题_1.mp4"
+            },
+            {
+              "coverImg": "/data/测试标题.jpg",
+              "videoUrl": "/data/测试标题.mp4"
+            },
+            {
+              "coverImg": "/data/从今以后_1.jpg",
+              "videoUrl": "/data/从今以后_1.mp4"
+            }
+          ]
+        },
+        {
+          "generateId": "video_003",
+          "title": "现代城市夜景",
+          "text": "城市夜景灯火璀璨，高楼大厦霓虹闪烁，车水马龙中透露着现代都市的繁华与活力。远处天际线与近景城市建筑形成鲜明对比，给人一种科技感与未来感。",
+          "createTime": "2024/03/17 09:15:32.45",
+          "status": "generating",
+          "ratio": "9:16",
+          "materialName": "城市风光",
+          "videolist": [
+            {
+              "coverImg": "/data/测试标题_1.jpg",
+              "videoUrl": "/data/测试标题_1.mp4"
+            }
+          ]
+        },
+        {
+          "generateId": "video_004",
+          "title": "海洋生物科普",
+          "text": "深海鱼类种类繁多，色彩斑斓，形态各异。它们适应了不同深度的海洋环境，有些能在极端压力下生存，有些能发出生物荧光。这段视频展示了几种罕见深海鱼类的生活习性和独特适应性。",
+          "createTime": "2024/03/16 20:37:41.19",
+          "status": "done",
+          "ratio": "1:1",
+          "materialName": "海洋世界",
+         "videolist": [
+            {
+              "coverImg": "/data/测试标题_1.jpg",
+              "videoUrl": "/data/测试标题_1.mp4"
+            },
+            {
+              "coverImg": "/data/测试标题.jpg",
+              "videoUrl": "/data/测试标题.mp4"
+            },
+            {
+              "coverImg": "/data/从今以后_1.jpg",
+              "videoUrl": "/data/从今以后_1.mp4"
+            }
+          ]
+        }
+      ]
+    }
+  }
+} 

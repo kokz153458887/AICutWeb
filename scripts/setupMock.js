@@ -5,6 +5,7 @@ import { dirname, join } from 'path';
 import fs from 'fs';
 import { HomeRoutes } from './routes/homeRoutes.js';
 import { EditRoutes } from './routes/editRoutes.js';
+import { VideoListRoutes } from './routes/videolistRoutes.js';
 import { MOCK_SERVER } from './config.js';
 import express from 'express';
 
@@ -74,6 +75,10 @@ homeRoutes.registerRoutes(server);
 // 使用 EditRoutes 类处理编辑页路由
 const editRoutes = new EditRoutes(db);
 editRoutes.registerRoutes(server);
+
+// 使用 VideoListRoutes 类处理视频列表路由
+const videoListRoutes = new VideoListRoutes(db);
+videoListRoutes.registerRoutes(server);
 
 server.use(jsonServer.rewriter(routes));
 server.use(router);

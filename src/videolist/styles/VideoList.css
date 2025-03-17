@@ -1,0 +1,213 @@
+/* 视频列表页样式 */
+.video-list-page {
+  padding: 0;
+  background-color: #121214;
+  min-height: 100vh;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* 顶部栏样式 */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #18181b;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  height: 44px;
+}
+
+.top-bar-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.filter-button {
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  padding: 5px 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.filter-button svg {
+  margin-right: 4px;
+  width: 18px;
+  height: 18px;
+}
+
+.filter-button:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Toast提示样式 */
+.toast-message {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeInOut 2s ease;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, 20px); }
+  15% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
+/* 内容容器 */
+.video-content {
+  padding: 16px 12px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 生成中图标旋转动画 */
+.generating-icon-spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 视频列表页空状态 */
+.video-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #a0a0a0;
+  text-align: center;
+  padding: 40px 20px;
+  margin: 30px auto 0;
+  background-color: #18181b;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  width: 85%;
+}
+
+.video-list-empty p {
+  font-size: 15px;
+  margin-bottom: 0;
+  letter-spacing: 0.3px;
+  opacity: 0.8;
+}
+
+.video-list-empty::before {
+  content: "📹";
+  font-size: 40px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* 错误状态样式 */
+.video-list-error {
+  color: #ff5252;
+  text-align: center;
+  padding: 24px 20px;
+  margin: 24px auto 0;
+  background-color: rgba(255, 82, 82, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 82, 82, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 85%;
+}
+
+.video-list-error p {
+  margin-bottom: 16px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.video-list-error button {
+  background: linear-gradient(45deg, #383867, #44447a);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.3px;
+}
+
+.video-list-error button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.video-list-error button:active {
+  transform: scale(0.97);
+}
+
+/* 加载中状态样式 */
+.video-list-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+  color: #ffffff;
+  margin: 20px auto;
+  width: 85%;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid #04e762;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+.video-list-loading p {
+  font-size: 15px;
+  margin-top: 8px;
+  color: #e0e0e0;
+  letter-spacing: 0.3px;
+  font-weight: 400;
+}
+
+/* 视频列表容器 */
+.video-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+  width: 100%;
+} 

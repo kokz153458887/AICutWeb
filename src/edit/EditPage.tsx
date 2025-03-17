@@ -14,7 +14,7 @@ import MaterialSection from './components/MaterialSection';
 import BackupVideoSection from './components/BackupVideoSection';
 import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
-import { EditService, EditConfigResponse, VideoEditConfig } from './api';
+import { EditService, VideoEditConfig } from './api';
 
 /**
  * 编辑页主组件
@@ -35,6 +35,7 @@ const EditPage: React.FC = () => {
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
   const [speaker, setSpeaker] = useState({ name: '龙小明', tag: '温柔' });
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // 防止重复提交
   
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
@@ -161,9 +162,15 @@ const EditPage: React.FC = () => {
   };
 
   /**
-   * 处理发表按钮点击事件
+   * 处理视频生成按钮点击事件
    */
-  const handleSubmit = async () => {
+  const handleGenerate = async () => {
+    // 防止重复提交
+    if (isSubmitting) {
+      console.log('已有请求正在进行中，忽略本次点击');
+      return;
+    }
+    
     if (!text.trim()) {
       alert('请输入文案内容');
       return;
@@ -176,9 +183,10 @@ const EditPage: React.FC = () => {
     
     try {
       setLoading(true);
+      setIsSubmitting(true); // 标记正在提交
       
       // 准备提交数据
-      const submitData = {
+      const submitData: VideoEditConfig = {
         ...configData,
         title: title,
         content: {
@@ -197,21 +205,28 @@ const EditPage: React.FC = () => {
       console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
       
       // 发起提交请求
-      const response = await EditService.submitEditConfig(submitData);
+      const response = await EditService.generateVideo(submitData);
       
       if (response.code === 0 && response.data) {
-        console.log('提交成功，视频ID:', response.data.videoId);
-        // 跳转到结果页面或首页
-        alert('视频生成请求已提交，视频ID: ' + response.data.videoId);
-        navigate('/'); // 使用React Router导航
+        console.log('提交成功，生成任务ID:', response.data.generateId);
+        
+        // 如果有成功跳转URL，则跳转到该URL
+        if (response.data.successUrl) {
+          window.location.href = response.data.successUrl; // 使用原生跳转以便完全关闭当前页面
+        } else {
+          alert('视频生成请求已提交，视频生成ID: ' + response.data.generateId);
+          navigate('/'); // 如果没有跳转URL，则回到首页
+        }
       } else {
         throw new Error(response.message || '提交失败');
       }
     } catch (err) {
       console.error('提交配置失败:', err);
-      alert('提交失败，请重试');
+      alert('视频生成失败，请重试');
+      setIsSubmitting(false); // 重置提交状态，允许用户再次尝试
     } finally {
       setLoading(false);
+      setIsSubmitting(false); // 确保无论成功还是失败都重置提交状态
     }
   };
 
@@ -258,7 +273,7 @@ const EditPage: React.FC = () => {
       <div className="edit-header">
         <div className="cancel-button" onClick={handleCancel}>取消</div>
         <div className="page-title">创建视频</div>
-        <div className="submit-button" onClick={handleSubmit}>发表</div>
+        <div className="submit-button" onClick={handleGenerate}>生成</div>
       </div>
 
       {/* 主要内容区域 */}

@@ -3,7 +3,7 @@
  * 负责处理视频编辑页面的API请求
  */
 import axios from 'axios';
-import { ApiResponse, EditConfigResponse } from './types';
+import { ApiResponse, EditConfigResponse, VideoEditConfig, VideoGenerateResponse } from './types';
 
 // API基础URL
 const BASE_URL = '/api';
@@ -61,10 +61,16 @@ export class EditService {
   }
 
   /**
-   * 提交视频编辑配置
+   * 提交视频编辑配置，生成视频
    * @param config 编辑配置
+   * @returns 包含生成ID和成功跳转URL的响应
    */
-  static async submitEditConfig(config: any): Promise<ApiResponse<{ videoId: string }>> {
-    return apiClient.post('/edit/submit', config);
+  static async generateVideo(config: VideoEditConfig): Promise<ApiResponse<VideoGenerateResponse>> {
+    // 只提交config数据，不需要包装code和message
+    const formattedData = {
+      config: config
+    };
+    
+    return apiClient.post('/edit/submit', formattedData);
   }
 } 

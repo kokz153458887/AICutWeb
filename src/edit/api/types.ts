@@ -95,6 +95,12 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+// 视频生成提交响应模型
+export interface VideoGenerateResponse {
+  generateId: string;  // 视频生成任务ID
+  successUrl: string;  // 成功跳转链接
+}
+
 // 编辑页配置响应模型
 export interface EditConfigResponse {
   config: VideoEditConfig;

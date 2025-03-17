@@ -95,26 +95,46 @@ export class EditRoutes {
 
     // 提交视频编辑配置
     server.post('/api/edit/submit', (req, res) => {
-      console.log('提交视频编辑配置请求:', JSON.stringify(req.body).substring(0, 200) + '...');
+      console.log('提交视频编辑配置请求开始处理');
       
       try {
+        // 检查请求体是否存在并记录
+        if (req.body) {
+          console.log('提交视频编辑配置请求格式:', Object.keys(req.body));
+          
+          // 检查数据格式并记录关键信息
+          if (req.body.config) {
+            console.log('检测到简化格式的提交数据 (仅config)');
+            console.log('提交的视频标题:', req.body.config.title);
+            console.log('提交的文案内容:', req.body.config.content?.text?.substring(0, 30) + '...');
+          } else if (req.body.data && req.body.data.config) {
+            console.log('检测到旧的封装格式的提交数据 (有code/message/data)');
+            console.log('提交的视频标题:', req.body.data.config.title);
+            console.log('提交的文案内容:', req.body.data.config.content?.text?.substring(0, 30) + '...');
+          } else {
+            console.log('提交的是普通格式数据');
+            console.log('提交的视频标题:', req.body.title);
+            console.log('提交的文案内容:', req.body.content?.text?.substring(0, 30) + '...');
+          }
+          
+          // 输出完整数据的一部分用于调试
+          console.log('提交数据摘要:', JSON.stringify(req.body).substring(0, 300) + '...');
+        } else {
+          console.log('提交视频编辑配置请求: 请求体为空');
+        }
+        
         // 从文件系统获取最新的提交配置响应数据
         const submitData = this.getLatestSubmitData();
         
         if (submitData) {
-          console.log('找到提交配置响应数据');
+          console.log('找到提交配置响应数据, generateId:', submitData.data.generateId);
           res.jsonp(submitData);
         } else {
-          console.log('未找到提交配置响应数据，返回默认响应');
-          // 返回默认生成的视频ID
-          const videoId = 'video_' + Date.now().toString();
-          console.log(`生成的视频ID: ${videoId}`);
-          res.jsonp({
-            code: 0,
-            message: 'success',
-            data: {
-              videoId: videoId
-            }
+          console.log('未找到提交配置响应数据，返回错误响应');
+          res.status(500).jsonp({
+            code: 500,
+            message: '未找到提交配置响应数据',
+            data: null
           });
         }
       } catch (error) {

@@ -83,8 +83,8 @@
     "code": 0,
     "message": "success",
     "data": {
-      "generateId": "video_001",
-      "successUrl": "https://www.baidu.com"
+      "generateId": "video_gen_001",
+      "successUrl": ""
     }
   }
 } 

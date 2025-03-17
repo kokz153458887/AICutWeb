@@ -26,7 +26,7 @@ export interface BackgroundImageModel {
   url: string;
   backgroundId: string;
   scaleType: string;
-  backgroundImageName?: string; // 背景图片名称
+  name?: string; // 背景图片名称
 }
 
 // 视频比例模型
@@ -64,6 +64,7 @@ export interface StyleModel {
   ratio: string;
   resolution: string;
   styleName?: string; // 风格名称
+  stylePreviewUrl?: string; // 风格预览视频URL
   videoShowRatio: VideoRatioModel;
   font: FontModel;
 }
@@ -72,7 +73,8 @@ export interface StyleModel {
 export interface MaterialModel {
   name: string;
   materialID: string;
-  previewImage: string;
+  previewUrl: string; // 视频预览URL
+  previewImage?: string; // 保留旧属性以保持兼容性
 }
 
 // 视频编辑配置模型

@@ -1,3 +1,22 @@
+/* 禁用长按文本选择功能，解决移动端长按弹出复制框问题 */
+body, div, span, p, h1, h2, h3, h4, h5, h6, 
+button, a, li, ul, ol, img, svg, 
+.config-item, .config-title, .config-value, .config-value-container, 
+.volume-text, .volume-badge, .speaker-button, .preview-icon-button,
+.video-preview-icon-button, .play-icon-button, .speaker-icon {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 仅允许输入框和文本域可以长按选择文本 */
+input, textarea, [contenteditable="true"] {
+  -webkit-touch-callout: text;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

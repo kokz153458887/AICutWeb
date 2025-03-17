@@ -5,7 +5,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/ConfigItem.css';
 import { ArrowIcon, PreviewIcon, PlayIcon, VideoPreviewIcon } from './icons/SvgIcons';
-import { volumeConfig } from '../config/volumeConfig';
 
 interface ConfigItemProps {
   title: string;
@@ -13,10 +12,14 @@ interface ConfigItemProps {
   subValue?: string;
   tag?: string;
   onClick: () => void;
+  // 自定义渲染函数
+  renderCustomValue?: () => React.ReactNode;
   // 音量控制相关属性
   hasVolumeControl?: boolean;
   volume?: number;
   onVolumeChange?: (volume: number) => void;
+  maxVolume?: number; // 最大音量值
+  volumeStep?: number; // 音量调节步长
   // 预览相关属性
   hasPreview?: boolean;
   previewImage?: string;
@@ -24,6 +27,7 @@ interface ConfigItemProps {
   // 试听相关属性
   hasAudioPlayback?: boolean;
   onPlayClick?: () => void;
+  isPlaying?: boolean;
   // 视频预览相关属性
   hasVideoPreview?: boolean;
   previewVideoUrl?: string;
@@ -40,16 +44,20 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   tag,
   onClick,
   hasVolumeControl = false,
-  volume = volumeConfig.defaultPercent / volumeConfig.displayFactor,
+  volume = 1, // 默认为1 (100%)
   onVolumeChange,
+  maxVolume = 5, // 默认最大值为5 (500%)
+  volumeStep = 0.1, // 默认调节步长为0.1 (10%)
   hasPreview = false,
   previewImage = '',
   onPreviewClick,
   hasAudioPlayback = false,
   onPlayClick,
+  isPlaying = false,
   hasVideoPreview = false,
   previewVideoUrl = '',
-  onVideoPreviewClick
+  onVideoPreviewClick,
+  renderCustomValue
 }) => {
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
@@ -64,7 +72,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
    * 获取显示用的音量值（百分比形式）
    */
   const getDisplayVolume = () => {
-    return Math.round(volume * volumeConfig.displayFactor);
+    return Math.round(volume * 100);
   };
 
   /**
@@ -227,12 +235,14 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
 
   return (
     <div className="config-item" onClick={onClick}>
-      <div className="config-title">{title}</div>
+      <div className="config-title" style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>{title}</div>
       <div className="config-value-container" style={{ position: 'relative' }}>
         <div className="config-value-wrapper">
           <div className="config-value-row">
-            <div className="config-value" title={value}>{value}</div>
-            {tag && <div className="config-tag">{tag}</div>}
+            <div className="config-value" title={value} style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>
+              {renderCustomValue ? renderCustomValue() : value}
+              {tag && <span className="config-tag" style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>{tag}</span>}
+            </div>
             
             {/* 添加预览按钮 */}
             {hasPreview && (
@@ -248,7 +258,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
               </div>
             )}
           </div>
-          {subValue && <div className="config-sub-value" title={subValue}>{subValue}</div>}
+          {subValue && <div className="config-sub-value" title={subValue} style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>{subValue}</div>}
         </div>
         
         {/* 音量控制按钮 */}
@@ -277,10 +287,10 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
               >
                 <input
                   type="range"
-                  min={volumeConfig.minPercent / volumeConfig.displayFactor}
-                  max={volumeConfig.maxPercent / volumeConfig.displayFactor}
+                  min={0}
+                  max={maxVolume}
                   value={volume}
-                  step={volumeConfig.sliderSteps / volumeConfig.displayFactor}
+                  step={volumeStep}
                   onChange={handleVolumeChange}
                   onMouseUp={handleVolumeMouseUp}
                   onTouchEnd={handleVolumeMouseUp}
@@ -297,7 +307,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
         {/* 试听按钮 */}
         {hasAudioPlayback && (
           <div className="play-icon-button" onClick={handlePlayClick}>
-            <PlayIcon />
+            <PlayIcon isPlaying={isPlaying} />
           </div>
         )}
         

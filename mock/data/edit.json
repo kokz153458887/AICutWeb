@@ -4,23 +4,24 @@
     "message": "success",
     "data": {
       "config": {
-        "title": "我的视频",
+        "title": "",
         "content": {
-          "text": "11你好，这是一段示例文本，用于生成视频。你可以修改这段文字，定制你自己的视频内容。",
+          "text": "",
           "splitType": "auto",
-          "volume": 20
+          "volume": 2
         },
         "backgroundMusic": {
-          "name": "轻松欢快",
-          "musicId": "music_001",
-          "url": "/data/music/happy.mp3",
+          "name": "会开花的云-高潮-1分21秒",
+          "url": "/data/会开花的云(Live)-弦子&姚晓棠.mp3",
           "start_time": "00:02:29",
           "end_time": "00:03:50",
+          "discription": "叫轻视我的人一一晓得，相信我 懂得我 你说 穿越人间风雨 终将邂逅那晴空梦是会开花的执着每当阳光 洒满检徽 镌刻你的 巾帼魂在法治的 最深处 暖暖照着我你说 翻阅那些寂寞 就会看到那花朵守护正义 不负韶华幸好跟你走过 走到了 这不同的时空未来落在了眼中 我抬起了头幸好 坚守 这正义长河去见更好 的我",
+          "musicId": "music_001",
           "volume": 0.5,
           "isloop": true
         },
         "backgroundImage": {
-          "url": "/data/images/background.jpg",
+          "url": "/data/bg_green.jpg",
           "backgroundId": "bg_001",
           "scaleType": "填充",
           "name": "乡间小路-白"
@@ -29,7 +30,7 @@
           "ratio": "9:16",
           "resolution": "720p",
           "styleName": "横屏治愈系漫剪",
-          "stylePreviewUrl": "/data/images/style_preview.mp4",
+          "stylePreviewUrl": "/data/床上_视频电话_亲吻.mp4",
           "videoShowRatio": {
             "ratio": "9:16",
             "cut_style": "center"
@@ -72,17 +73,18 @@
         "material": {
           "name": "可爱动漫",
           "materialID": "material_001",
-          "previewImage": "/data/images/material_preview.jpg"
-        }
+          "previewUrl": "/data/龙猫_2224-2232.mp4"
+        },
+        "backupVideoNum": 1
       }
-      
     }
   },
   "submitConfig": {
     "code": 0,
     "message": "success",
     "data": {
-      "videoId": "video_001"
+      "generateId": "video_001",
+      "successUrl": "https://www.baidu.com"
     }
   }
 } 

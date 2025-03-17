@@ -7,21 +7,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './EditPage.css';
 import TextInputSection from './components/TextInputSection';
 import TitleInputSection from './components/TitleInputSection';
-import ConfigItem from './components/ConfigItem';
-import SliderItem from './components/SliderItem';
+import VideoStyleSection from './components/VideoStyleSection';
+import BackgroundMusicSection from './components/BackgroundMusicSection';
+import BackgroundImageSection from './components/BackgroundImageSection';
+import MaterialSection from './components/MaterialSection';
+import BackupVideoSection from './components/BackupVideoSection';
 import { generateTitle } from './utils/titleGenerator';
-import { volumeConfig } from './config/volumeConfig';
 import LoadingView from '../components/LoadingView';
 import { EditService, EditConfigResponse, VideoEditConfig } from './api';
-
-// 素材库预览图片示例URL
-const materialPreviewImage = 'http://gips0.baidu.com/it/u=3602773692,1512483864&fm=3028&app=3028&f=JPEG&fmt=auto?w=960&h=1280';
-
-// 背景图片预览示例URL
-const backgroundImagePreview = 'http://gips0.baidu.com/it/u=3602773692,1512483864&fm=3028&app=3028&f=JPEG&fmt=auto?w=960&h=1280';
-
-// 视频风格预览视频示例URL
-const stylePreviewVideoUrl = 'https://media.w3.org/2010/05/sintel/trailer_hd.mp4';
 
 /**
  * 编辑页主组件
@@ -36,19 +29,15 @@ const EditPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingData, setLoadingData] = useState<boolean>(true); // 数据加载状态
   const [error, setError] = useState<string>(''); // 错误信息
-  const [volume, setVolume] = useState<number>(volumeConfig.defaultPercent / volumeConfig.displayFactor);
-  const [voiceVolume, setVoiceVolume] = useState<number>(volumeConfig.defaultPercent / volumeConfig.displayFactor);
-  const [backupCount, setBackupCount] = useState<number>(3);
+  const [volume, setVolume] = useState<number>(1); // 默认音量为1 (100%)
+  const [voiceVolume, setVoiceVolume] = useState<number>(1); // 默认音量为1 (100%)
+  const [backupCount, setBackupCount] = useState<number>(1);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
   const [speaker, setSpeaker] = useState({ name: '龙小明', tag: '温柔' });
   
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
-  const [styleList, setStyleList] = useState<Array<{ id: string; name: string; previewUrl: string }>>([]);
-  const [musicList, setMusicList] = useState<Array<{ id: string; name: string; url: string; duration: string }>>([]);
-  const [backgroundList, setBackgroundList] = useState<Array<{ id: string; name: string; url: string }>>([]);
-  const [materialList, setMaterialList] = useState<Array<{ id: string; name: string; previewUrl: string }>>([]);
   
   // 获取URL参数中的styleId
   useEffect(() => {
@@ -73,32 +62,31 @@ const EditPage: React.FC = () => {
         const response = await EditService.getEditConfig(styleId);
         
         if (response.code === 0 && response.data) {
-          const { config, styleList, musicList, backgroundList, materialList } = response.data;
+          const { config } = response.data;
           
           console.log('API请求成功，更新状态数据');
           
           // 更新状态
           setConfigData(config);
-          setStyleList(styleList || []);
-          setMusicList(musicList || []);
-          setBackgroundList(backgroundList || []);
-          setMaterialList(materialList || []);
           
-          // 更新UI状态 - 统一处理音量为内部表示(0-100)
+          // 更新UI状态
           setText(config.content.text || '');
           setTitle(config.title || '');
           
-          // 语音音量处理
-          // API中语音音量已经是0-100范围，直接使用
-          const voiceVol = config.content.volume || volumeConfig.defaultPercent / volumeConfig.displayFactor;
-          console.log('设置语音音量:', voiceVol, '(0-100范围)');
+          // 语音音量处理 - API 字段为 0-5 范围
+          const voiceVol = config.content.volume !== undefined ? config.content.volume : 1;
+          console.log('设置语音音量:', voiceVol, '(0-5范围)');
           setVoiceVolume(voiceVol);
           
-          // 背景音乐音量处理
-          // API中背景音乐音量是0-1范围，转换为内部0-100范围
-          const musicVol = (config.backgroundMusic.volume * 100) || volumeConfig.defaultPercent / volumeConfig.displayFactor;
-          console.log('设置背景音乐音量:', config.backgroundMusic.volume, '(0-1范围) =>', musicVol, '(0-100范围)');
+          // 背景音乐音量处理 - API 字段为 0-5 范围
+          const musicVol = config.backgroundMusic.volume !== undefined ? config.backgroundMusic.volume : 1;
+          console.log('设置背景音乐音量:', musicVol, '(0-5范围)');
           setVolume(musicVol);
+          
+          // 设置备用视频数量
+          if (config.backupVideoNum !== undefined) {
+            setBackupCount(config.backupVideoNum);
+          }
           
           console.log('配置数据加载成功', config);
         } else {
@@ -147,13 +135,6 @@ const EditPage: React.FC = () => {
   };
 
   /**
-   * 处理备用视频数量变化
-   */
-  const handleBackupCountChange = (newCount: number) => {
-    setBackupCount(newCount);
-  };
-
-  /**
    * 处理标题变化
    */
   const handleTitleChange = (newTitle: string) => {
@@ -197,22 +178,22 @@ const EditPage: React.FC = () => {
       setLoading(true);
       
       // 准备提交数据
-      // 注意：提交时需要将内部音量值(0-100)转换回API音量值(0-1)
       const submitData = {
         ...configData,
         title: title,
         content: {
           ...configData.content,
           text: text,
-          volume: voiceVolume // 语音音量(内部已是0-100范围)
+          volume: voiceVolume // 语音音量(0-5范围)
         },
         backgroundMusic: {
           ...configData.backgroundMusic,
-          volume: volume / 100 // 背景音乐音量转换为API表示(0-1范围)
-        }
+          volume: volume // 背景音乐音量(0-5范围)
+        },
+        backupVideoNum: backupCount // 添加备用视频数量
       };
       
-      console.log('准备提交数据，背景音乐音量:', volume, '(0-100范围) =>', volume / 100, '(0-1范围)');
+      console.log('准备提交数据，音量值:', voiceVolume, volume, '(0-5范围)');
       console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
       
       // 发起提交请求
@@ -251,12 +232,10 @@ const EditPage: React.FC = () => {
   };
 
   /**
-   * 处理音频试听事件
+   * 处理背景图片预览点击事件
    */
-  const handleMusicPlayback = () => {
-    console.log('开始试听背景音乐');
-    // 这里可以添加实际的音频播放逻辑
-    alert('音乐试听功能待接入');
+  const handleBackgroundImagePreviewClick = () => {
+    console.log('背景图片预览被点击');
   };
 
   /**
@@ -267,35 +246,10 @@ const EditPage: React.FC = () => {
   };
 
   /**
-   * 处理背景图片预览点击事件
+   * 处理备用视频数量变化
    */
-  const handleBackgroundImagePreviewClick = () => {
-    console.log('背景图片预览被点击');
-  };
-
-  // 获取当前选中的风格预览URL
-  const getStylePreviewUrl = () => {
-    if (styleId && styleList.length > 0) {
-      const style = styleList.find(s => s.id === styleId);
-      return style ? style.previewUrl : styleList[0].previewUrl;
-    }
-    return configData?.style ? "https://media.w3.org/2010/05/sintel/trailer_hd.mp4" : "";
-  };
-
-  // 获取当前背景图片URL
-  const getBackgroundImageUrl = () => {
-    if (configData?.backgroundImage) {
-      return configData.backgroundImage.url;
-    }
-    return backgroundList.length > 0 ? backgroundList[0].url : "";
-  };
-
-  // 获取当前素材库预览图片
-  const getMaterialPreviewUrl = () => {
-    if (configData?.material) {
-      return configData.material.previewImage;
-    }
-    return materialList.length > 0 ? materialList[0].previewUrl : "";
+  const handleBackupCountChange = (newCount: number) => {
+    setBackupCount(newCount);
   };
 
   return (
@@ -327,57 +281,46 @@ const EditPage: React.FC = () => {
           placeholder="标题"
         />
 
-        {/* 视频风格选择 - 带视频预览 */}
-        <ConfigItem
-          title="视频风格"
-          value={configData?.style?.styleName || ""}
-          onClick={() => handleConfigClick('style')}
-          hasVideoPreview={true}
-          previewVideoUrl={getStylePreviewUrl()}
+        {/* 视频风格选择 */}
+        <VideoStyleSection
+          styleName={configData?.style?.styleName || ""}
+          stylePreviewUrl={configData?.style?.stylePreviewUrl || ""}
+          onStyleClick={() => handleConfigClick('style')}
           onVideoPreviewClick={handleStyleVideoPreviewClick}
         />
 
-        {/* 背景音乐选择 - 带音量控制和试听功能 */}
-        <ConfigItem
-          title="背景音乐"
-          value={configData?.backgroundMusic.name || ""}
-          onClick={() => handleConfigClick('music')}
-          hasVolumeControl={true}
+        {/* 背景音乐选择 */}
+        <BackgroundMusicSection
+          musicName={configData?.backgroundMusic?.name || ""}
+          musicUrl={configData?.backgroundMusic?.url || ""}
+          startTime={configData?.backgroundMusic?.start_time || ""}
+          endTime={configData?.backgroundMusic?.end_time || ""}
           volume={volume}
+          onMusicClick={() => handleConfigClick('music')}
           onVolumeChange={handleMusicVolumeChange}
-          hasAudioPlayback={true}
-          onPlayClick={handleMusicPlayback}
         />
 
-        {/* 背景图片选择 - 带预览功能 */}
-        <ConfigItem
-          title="背景图片"
-          value={configData?.backgroundImage?.backgroundImageName || ""}
-          onClick={() => handleConfigClick('background')}
-          hasPreview={true}
-          previewImage={getBackgroundImageUrl()}
+        {/* 背景图片选择 */}
+        <BackgroundImageSection
+          imageName={configData?.backgroundImage?.name || ""}
+          imageUrl={configData?.backgroundImage?.url || ""}
+          onImageClick={() => handleConfigClick('background')}
           onPreviewClick={handleBackgroundImagePreviewClick}
         />
 
         {/* 素材库选择 */}
-        <ConfigItem
-          title="素材库"
-          value={configData?.material.name || ""}
-          onClick={() => handleConfigClick('material')}
-          hasPreview={true}
-          previewImage={getMaterialPreviewUrl()}
+        <MaterialSection
+          materialName={configData?.material?.name || ""}
+          previewUrl={configData?.material?.previewUrl || ""}
+          onMaterialClick={() => handleConfigClick('material')}
           onPreviewClick={handleMaterialPreviewClick}
         />
 
         {/* 备用视频数量 */}
-        <SliderItem
-          title="备用视频数量"
-          min={1}
-          max={5}
-          value={backupCount}
-          onChange={handleBackupCountChange}
-          showValue={true}
-          step={1}
+        <BackupVideoSection
+          backupCount={backupCount}
+          onConfigClick={() => handleConfigClick('backup')}
+          onBackupCountChange={handleBackupCountChange}
         />
       </div>
 

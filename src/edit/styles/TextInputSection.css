@@ -2,8 +2,8 @@
 .text-input-section {
   background-color: #1e1e1e;
   border-radius: 8px;
-  padding: 15px;
-  margin: 15px 0;
+  padding: 10px 15px;
+  margin: 8px 0;
   position: relative;
 }
 
@@ -17,9 +17,12 @@
   resize: none;
   outline: none;
   padding: 0;
-  min-height: 100px; /* 至少显示4行（约）的高度 */
-  overflow-y: auto !important; /* 超出最大高度时显示滚动条，使用!important确保不被覆盖 */
-  transition: height 0.2s ease; /* 平滑过渡高度变化 */
+  min-height: 80px;
+  overflow-y: auto !important;
+  transition: height 0.2s ease;
+  -webkit-touch-callout: text !important; /* 强制允许选择文本 */
+  -webkit-user-select: text !important;   /* 强制允许选择文本 */
+  user-select: text !important;           /* 强制允许选择文本 */
 }
 
 /* 自定义滚动条样式 */
@@ -49,11 +52,23 @@
 .input-controls {
   position: absolute;
   right: 15px;
-  bottom: 15px;
+  bottom: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
   /* 移除统一背景和装饰性样式 */
+}
+
+/* 禁用所有可点击元素的默认触摸高亮效果 */
+.speaker-button,
+.volume-text,
+.volume-badge,
+.speaker-icon,
+.speaker-tag,
+.volume-icon,
+.volume-slider {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 /* 说话人按钮样式 */
@@ -73,8 +88,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.speaker-button:hover {
-  color: #00e676;
+/* 说话人按钮按下效果 */
+.speaker-button:active {
+  transform: scale(0.95);
   background-color: rgba(20, 20, 20, 0.95);
 }
 
@@ -96,7 +112,7 @@
   font-size: 14px;
   color: #a0a0a0;
   background-color: rgba(20, 20, 20, 0.85);
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -106,10 +122,12 @@
   gap: 5px;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  min-height: 26px;
 }
 
-.volume-text:hover {
-  color: #00e676;
+/* 音量文字按钮按下效果 */
+.volume-text:active {
+  transform: scale(0.95);
   background-color: rgba(20, 20, 20, 0.95);
 }
 
@@ -137,8 +155,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.speaker-icon:hover {
-  color: #00e676;
+/* 喇叭图标按下效果 */
+.speaker-icon:active {
+  transform: scale(0.9);
   background-color: rgba(20, 20, 20, 0.95);
 }
 

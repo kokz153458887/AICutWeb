@@ -6,7 +6,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../styles/TextInputSection.css';
 import { SpeakerIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
-import { volumeConfig } from '../config/volumeConfig';
 
 interface TextInputSectionProps {
   value: string;
@@ -25,7 +24,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   value,
   onChange,
   placeholder = '这一刻的想法...',
-  voiceVolume = volumeConfig.defaultPercent / volumeConfig.displayFactor,
+  voiceVolume = 1, // 默认为1 (100%)
   onVoiceVolumeChange,
   speaker,
   onSpeakerClick
@@ -133,7 +132,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    * 获取显示用的音量值（百分比形式）
    */
   const getDisplayVolume = () => {
-    return Math.round(voiceVolume * volumeConfig.displayFactor);
+    return Math.round(voiceVolume * 100);
   };
 
   /**
@@ -264,10 +263,10 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
           >
             <input
               type="range"
-              min={volumeConfig.minPercent / volumeConfig.displayFactor}
-              max={volumeConfig.maxPercent / volumeConfig.displayFactor}
+              min={0}
+              max={5}
               value={voiceVolume}
-              step={volumeConfig.sliderSteps / volumeConfig.displayFactor}
+              step={0.1}
               onChange={handleVolumeChange}
               onMouseUp={handleVolumeMouseUp}
               onTouchEnd={handleVolumeMouseUp}

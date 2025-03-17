@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <title>AICut</title>
+    <style>
+      /* 禁用长按文本选择和高亮 */
+      * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      /* 允许输入框和文本域可选择 */
+      input, textarea, [contenteditable="true"] {
+        -webkit-touch-callout: text;
+        -webkit-user-select: text;
+        user-select: text;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -101,6 +101,61 @@ app.get('/api/video/getVideoDetail', (req, res) => {
   }
 });
 
+// 获取编辑页配置
+app.get('/api/edit/config', (req, res) => {
+  try {
+    const styleId = req.query.styleId;
+    console.log(`[Mock Server] 获取编辑页配置: styleId=${styleId}`);
+    
+    // 读取编辑页配置数据
+    const editConfig = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/edit.json'), 'utf8'));
+    
+    // 如果指定了styleId，可以根据styleId调整返回数据
+    if (styleId) {
+      // 从styleList中查找匹配的风格
+      const selectedStyle = editConfig.data.styleList.find(style => style.id === styleId);
+      if (selectedStyle) {
+        // 将选中的风格ID赋值给当前配置
+        editConfig.data.config.style.videoShowRatio.cut_style = selectedStyle.name;
+      }
+    }
+    
+    // 返回数据
+    res.json(editConfig);
+  } catch (error) {
+    console.error('[Mock Server] 获取编辑页配置失败:', error);
+    res.status(500).json({
+      code: -1,
+      message: '服务器内部错误',
+      data: null
+    });
+  }
+});
+
+// 提交编辑配置
+app.post('/api/edit/submit', (req, res) => {
+  try {
+    const config = req.body;
+    console.log('[Mock Server] 提交编辑配置:', JSON.stringify(config).substring(0, 100) + '...');
+    
+    // 模拟提交成功
+    res.json({
+      code: 0,
+      message: 'success',
+      data: {
+        videoId: 'video_' + Date.now()  // 生成一个随机视频ID
+      }
+    });
+  } catch (error) {
+    console.error('[Mock Server] 提交编辑配置失败:', error);
+    res.status(500).json({
+      code: -1,
+      message: '服务器内部错误',
+      data: null
+    });
+  }
+});
+
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`Mock服务器运行在 http://localhost:${PORT}`);

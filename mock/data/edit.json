@@ -1,0 +1,88 @@
+{
+  "getEditConfig": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "config": {
+        "title": "我的视频",
+        "content": {
+          "text": "11你好，这是一段示例文本，用于生成视频。你可以修改这段文字，定制你自己的视频内容。",
+          "splitType": "auto",
+          "volume": 20
+        },
+        "backgroundMusic": {
+          "name": "轻松欢快",
+          "musicId": "music_001",
+          "url": "/data/music/happy.mp3",
+          "start_time": "00:02:29",
+          "end_time": "00:03:50",
+          "volume": 0.5,
+          "isloop": true
+        },
+        "backgroundImage": {
+          "url": "/data/images/background.jpg",
+          "backgroundId": "bg_001",
+          "scaleType": "填充",
+          "name": "乡间小路-白"
+        },
+        "style": {
+          "ratio": "9:16",
+          "resolution": "720p",
+          "styleName": "横屏治愈系漫剪",
+          "stylePreviewUrl": "/data/images/style_preview.mp4",
+          "videoShowRatio": {
+            "ratio": "9:16",
+            "cut_style": "center"
+          },
+          "font": {
+            "voice_font_style": {
+              "font_size": 24,
+              "min_font_size": 18,
+              "max_line": 3,
+              "max_line_chars": 20,
+              "auto_scale": true,
+              "color": "#FFFFFF",
+              "stroke_color": "#000000",
+              "font_weight": "normal",
+              "stroke_width": 1,
+              "y_position": 50,
+              "margin_left": 10,
+              "margin_right": 10,
+              "alignParent": "bottom",
+              "overflow_char": "..."
+            },
+            "title_font_style": {
+              "font_size": 28,
+              "min_font_size": 20,
+              "max_line": 2,
+              "max_line_chars": 15,
+              "auto_scale": true,
+              "color": "#FFFFFF",
+              "stroke_color": "#000000",
+              "font_weight": "bold",
+              "stroke_width": 1,
+              "y_position": 20,
+              "margin_left": 10,
+              "margin_right": 10,
+              "alignParent": "top",
+              "overflow_char": "..."
+            }
+          }
+        },
+        "material": {
+          "name": "可爱动漫",
+          "materialID": "material_001",
+          "previewImage": "/data/images/material_preview.jpg"
+        }
+      }
+      
+    }
+  },
+  "submitConfig": {
+    "code": 0,
+    "message": "success",
+    "data": {
+      "videoId": "video_001"
+    }
+  }
+} 

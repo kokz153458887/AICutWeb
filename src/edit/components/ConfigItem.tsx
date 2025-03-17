@@ -277,9 +277,10 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
               >
                 <input
                   type="range"
-                  min={0}
-                  max={100}
+                  min={volumeConfig.minPercent / volumeConfig.displayFactor}
+                  max={volumeConfig.maxPercent / volumeConfig.displayFactor}
                   value={volume}
+                  step={volumeConfig.sliderSteps / volumeConfig.displayFactor}
                   onChange={handleVolumeChange}
                   onMouseUp={handleVolumeMouseUp}
                   onTouchEnd={handleVolumeMouseUp}

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
 import { HomeRoutes } from './routes/homeRoutes.js';
+import { EditRoutes } from './routes/editRoutes.js';
 import { MOCK_SERVER } from './config.js';
 import express from 'express';
 
@@ -69,6 +70,10 @@ const routes = JSON.parse(fs.readFileSync(routesPath, 'utf-8'));
 // 使用 HomeRoutes 类处理路由
 const homeRoutes = new HomeRoutes(db);
 homeRoutes.registerRoutes(server);
+
+// 使用 EditRoutes 类处理编辑页路由
+const editRoutes = new EditRoutes(db);
+editRoutes.registerRoutes(server);
 
 server.use(jsonServer.rewriter(routes));
 server.use(router);

@@ -92,7 +92,8 @@
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
-  min-height: 55px;
+  height: 63px;
+  min-height: unset;
   letter-spacing: 0.2px;
 }
 

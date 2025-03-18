@@ -20,12 +20,14 @@ const FilterIcon: React.FC = () => (
 
 // 默认分页大小
 const DEFAULT_PAGE_SIZE = 10;
+// 初始数据长度，用于预填充数组
+const INITIAL_DATA_LENGTH = 10;
 
 /**
  * 视频列表页组件
  */
 const VideoListPage: React.FC = () => {
-  const [videos, setVideos] = useState<VideoCardData[]>([]);
+  const [videos, setVideos] = useState<(VideoCardData | null)[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,21 +58,47 @@ const VideoListPage: React.FC = () => {
         setHasMore(true);
       }
 
+      const currentPageNum = reset ? 1 : pageNum;
+      
       const params: PaginationParams = {
-        pageNum: reset ? 1 : pageNum,
+        pageNum: currentPageNum,
         pageSize: DEFAULT_PAGE_SIZE,
       };
       
+      console.log("loadVideoList params:" ,params)
+
       const { videoList, hasMore: moreData } = await getVideoList(params);
       
       if (reset) {
-        setVideos(videoList);
+        // 初始化一个数组，长度基于初始数据长度
+        const initialVideos = Array(INITIAL_DATA_LENGTH).fill(null);
+        // 填充获取到的数据
+        videoList.forEach((video, index) => {
+          initialVideos[index] = video;
+        });
+        setVideos(initialVideos);
       } else {
-        setVideos(prevVideos => [...prevVideos, ...videoList]);
+        setVideos(prevVideos => {
+          const newVideos = [...prevVideos];
+          // 计算起始索引
+          const startIndex = (currentPageNum - 1) * DEFAULT_PAGE_SIZE;
+          
+          // 填充新获取的数据
+          videoList.forEach((video, index) => {
+            const realIndex = startIndex + index;
+            if (realIndex < newVideos.length) {
+              newVideos[realIndex] = video;
+            } else {
+              newVideos.push(video);
+            }
+          });
+          
+          return newVideos;
+        });
       }
       
       setHasMore(moreData);
-      setPageNum(prev => (reset ? 2 : prev + 1));
+      setPageNum(currentPageNum + 1); // 使用计算得到的页码值，而不是硬编码
     } catch (error) {
       console.error('Failed to load video list:', error);
       if (reset) {
@@ -92,19 +120,19 @@ const VideoListPage: React.FC = () => {
   /**
    * 处理编辑视频
    */
-  const handleEdit = (videoId: string) => {
+  const handleEdit = useCallback((videoId: string) => {
     console.log('Edit video:', videoId);
     // 跳转到编辑页面
     alert(`编辑视频: ${videoId}`);
-  };
+  }, []);
 
   /**
    * 处理重新生成视频
    */
-  const handleRegenerate = async (videoId: string) => {
+  const handleRegenerate = useCallback(async (videoId: string) => {
     try {
       // 查找对应的VideoCardData
-      const videoCard = videos.find(v => v.generateId === videoId);
+      const videoCard = videos.find(v => v && v.generateId === videoId);
       if (!videoCard) {
         console.error('无法找到ID为', videoId, '的视频');
         return Promise.reject('视频未找到');
@@ -112,7 +140,7 @@ const VideoListPage: React.FC = () => {
       
       // 更新本地状态为生成中
       const updatedVideos = videos.map(video => {
-        if (video.generateId === videoId) {
+        if (video && video.generateId === videoId) {
           return { ...video, status: 'generating' as const };
         }
         return video;
@@ -133,7 +161,7 @@ const VideoListPage: React.FC = () => {
       setTimeout(() => {
         setVideos(prevVideos => 
           prevVideos.map(video => {
-            if (video.generateId === videoId) {
+            if (video && video.generateId === videoId) {
               return { ...video, status: 'done' as const };
             }
             return video;
@@ -146,74 +174,71 @@ const VideoListPage: React.FC = () => {
       console.error('Failed to regenerate video:', error);
       return Promise.reject(error);
     }
-  };
-
-  /**
-   * 转换VideoCardData为Video类型
-   */
-  const convertToVideo = (videoCard: VideoCardData): Video => {
-    return {
-      id: videoCard.generateId,
-      title: videoCard.title,
-      content: videoCard.text,
-      createTime: new Date(videoCard.createTime).getTime(),
-      status: videoCard.status === 'done' ? 'generated' : videoCard.status,
-      tags: [videoCard.ratio, videoCard.materialName].filter(Boolean),
-      videos: videoCard.videolist
-    };
-  };
+  }, [videos]);
 
   /**
    * 检查项目是否已加载
    */
-  const isItemLoaded = (index: number) => {
-    return !hasMore || index < videos.length;
-  };
+  const isItemLoaded = useCallback((index: number) => {
+    return index < videos.length && videos[index] !== null;
+  }, [videos]);
 
   /**
    * 加载更多项目
    */
-  const loadMoreItems = async (startIndex: number, stopIndex: number) => {
+  const loadMoreItems = useCallback(async (startIndex: number, stopIndex: number) => {
+    console.log('loadMoreItems startIndex:', startIndex, ' stopIndex:', stopIndex, " loadingMore:", loadingMore, " hasMore:", hasMore);
     if (loadingMore || !hasMore) return Promise.resolve();
     
     setLoadingMore(true);
     setLoadMoreError(false);
     
+    // 计算应该加载的页码
+    const targetPageNum = Math.floor(startIndex / DEFAULT_PAGE_SIZE) + 1;
+    if (targetPageNum !== pageNum) {
+      setPageNum(targetPageNum);
+    }
+    
     try {
-      await loadVideoList();
+      const params: PaginationParams = {
+        pageNum: targetPageNum,
+        pageSize: DEFAULT_PAGE_SIZE
+      };
+      
+      console.log("请求参数:", params);
+      const { videoList, hasMore: moreData } = await getVideoList(params);
+      
+      console.log("loadMoreItems videoList: ", videoList.length, " hasMore: ", hasMore )
+      setVideos(prevVideos => {
+        const newVideos = [...prevVideos];
+        // 填充新获取的数据
+        videoList.forEach((video, idx) => {
+          const realIndex = startIndex + idx;
+          if (realIndex < newVideos.length) {
+            newVideos[realIndex] = video;
+          } else {
+            newVideos.push(video);
+          }
+        });
+        return newVideos;
+      });
+      
+      setHasMore(moreData);
+      setPageNum(targetPageNum + 1);
+      setLoadingMore(false);
+      
       return Promise.resolve();
     } catch (error) {
       setLoadMoreError(true);
+      setLoadingMore(false);
       return Promise.reject(error);
     }
-  };
+  }, [hasMore, loadingMore, pageNum]);
 
-  /**
-   * 渲染列表项
-   */
-  const renderItem = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    // 如果是最后一项且有更多数据，显示加载更多
-    if (index === videos.length) {
-      return (
-          <LoadingFooter 
-            isLoading={loadingMore} 
-            error={loadMoreError} 
-            onRetry={() => loadMoreItems(index, index + DEFAULT_PAGE_SIZE)}
-          />
-      );
-    }
-
-    // 渲染视频卡片
-    const videoCard = videos[index];
-    return (
-        <VideoCard
-          key={videoCard.generateId}
-          video={convertToVideo(videoCard)}
-          onEdit={handleEdit}
-          onRegenerate={handleRegenerate}
-        />
-    );
-  };
+  // 处理重试加载
+  const handleRetry = useCallback((index: number) => {
+    return loadMoreItems(index, index + DEFAULT_PAGE_SIZE);
+  }, [loadMoreItems]);
 
   return (
     <div className="video-list-page">
@@ -255,7 +280,11 @@ const VideoListPage: React.FC = () => {
             hasMore={hasMore}
             isItemLoaded={isItemLoaded}
             loadMoreItems={loadMoreItems}
-            renderItem={renderItem}
+            onEdit={handleEdit}
+            onRegenerate={handleRegenerate}
+            onRetry={handleRetry}
+            loadingMore={loadingMore}
+            loadMoreError={loadMoreError}
           />
         )}
       </div>

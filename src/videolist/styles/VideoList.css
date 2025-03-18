@@ -208,7 +208,6 @@
 .video-list-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   margin-top: 8px;
   width: 100%;
 }
@@ -267,4 +266,33 @@
 
 .list-error-footer:active {
   transform: scale(0.98);
+}
+
+/* 列表项加载状态 */
+.list-loading-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  height: 300px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.list-loading-item .loading-spinner-small {
+  margin-bottom: 12px;
+}
+
+.list-loading-item span {
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+/* 视频卡片包装器样式 */
+.video-card-wrapper {
+  box-sizing: border-box;
+  padding: 8px 0;
+  overflow: visible;
 } 

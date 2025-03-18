@@ -2,9 +2,11 @@
  * 视频列表页组件
  * 负责显示所有生成的视频卡片
  */
-import React, { useEffect, useState } from 'react';
-import { VideoCardData, Video, getVideoList, regenerateVideo } from '../api/videoListApi';
+import React, { useEffect, useState, useCallback } from 'react';
+import { VideoCardData, Video, getVideoList, regenerateVideo, PaginationParams } from '../api/videoListApi';
 import VideoCard from './VideoCard';
+import VirtualizedVideoList from './VirtualizedVideoList';
+import LoadingFooter from './LoadingFooter';
 import '../styles/VideoList.css';
 
 /**
@@ -16,13 +18,20 @@ const FilterIcon: React.FC = () => (
   </svg>
 );
 
+// 默认分页大小
+const DEFAULT_PAGE_SIZE = 10;
+
 /**
  * 视频列表页组件
  */
 const VideoListPage: React.FC = () => {
   const [videos, setVideos] = useState<VideoCardData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [pageNum, setPageNum] = useState<number>(1);
   const [showToast, setShowToast] = useState<boolean>(false);
 
   /**
@@ -38,24 +47,46 @@ const VideoListPage: React.FC = () => {
   /**
    * 加载视频列表数据
    */
-  const loadVideoList = async () => {
+  const loadVideoList = async (reset: boolean = false) => {
     try {
-      setLoading(true);
-      setError(null);
+      if (reset) {
+        setLoading(true);
+        setError(null);
+        setPageNum(1);
+        setHasMore(true);
+      }
+
+      const params: PaginationParams = {
+        pageNum: reset ? 1 : pageNum,
+        pageSize: DEFAULT_PAGE_SIZE,
+      };
       
-      const data = await getVideoList();
-      setVideos(data);
+      const { videoList, hasMore: moreData } = await getVideoList(params);
+      
+      if (reset) {
+        setVideos(videoList);
+      } else {
+        setVideos(prevVideos => [...prevVideos, ...videoList]);
+      }
+      
+      setHasMore(moreData);
+      setPageNum(prev => (reset ? 2 : prev + 1));
     } catch (error) {
       console.error('Failed to load video list:', error);
-      setError('加载视频列表失败，请稍后重试');
+      if (reset) {
+        setError('加载视频列表失败，请稍后重试');
+      } else {
+        setLoadMoreError(true);
+      }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
   // 首次加载时获取视频列表
   useEffect(() => {
-    loadVideoList();
+    loadVideoList(true);
   }, []);
 
   /**
@@ -100,14 +131,14 @@ const VideoListPage: React.FC = () => {
       
       // 模拟API调用延迟，显示生成完成状态
       setTimeout(() => {
-        const finalVideos = videos.map(video => {
-          if (video.generateId === videoId) {
-            return { ...video, status: 'done' as const };
-          }
-          return video;
-        });
-        
-        setVideos(finalVideos);
+        setVideos(prevVideos => 
+          prevVideos.map(video => {
+            if (video.generateId === videoId) {
+              return { ...video, status: 'done' as const };
+            }
+            return video;
+          })
+        );
       }, 3000);
       
       return Promise.resolve();
@@ -130,6 +161,58 @@ const VideoListPage: React.FC = () => {
       tags: [videoCard.ratio, videoCard.materialName].filter(Boolean),
       videos: videoCard.videolist
     };
+  };
+
+  /**
+   * 检查项目是否已加载
+   */
+  const isItemLoaded = (index: number) => {
+    return !hasMore || index < videos.length;
+  };
+
+  /**
+   * 加载更多项目
+   */
+  const loadMoreItems = async (startIndex: number, stopIndex: number) => {
+    if (loadingMore || !hasMore) return Promise.resolve();
+    
+    setLoadingMore(true);
+    setLoadMoreError(false);
+    
+    try {
+      await loadVideoList();
+      return Promise.resolve();
+    } catch (error) {
+      setLoadMoreError(true);
+      return Promise.reject(error);
+    }
+  };
+
+  /**
+   * 渲染列表项
+   */
+  const renderItem = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    // 如果是最后一项且有更多数据，显示加载更多
+    if (index === videos.length) {
+      return (
+          <LoadingFooter 
+            isLoading={loadingMore} 
+            error={loadMoreError} 
+            onRetry={() => loadMoreItems(index, index + DEFAULT_PAGE_SIZE)}
+          />
+      );
+    }
+
+    // 渲染视频卡片
+    const videoCard = videos[index];
+    return (
+        <VideoCard
+          key={videoCard.generateId}
+          video={convertToVideo(videoCard)}
+          onEdit={handleEdit}
+          onRegenerate={handleRegenerate}
+        />
+    );
   };
 
   return (
@@ -160,23 +243,20 @@ const VideoListPage: React.FC = () => {
         ) : error ? (
           <div className="video-list-error">
             <p>{error}</p>
-            <button onClick={loadVideoList}>重试</button>
+            <button onClick={() => loadVideoList(true)}>重试</button>
           </div>
         ) : videos.length === 0 ? (
           <div className="video-list-empty">
             <p>暂无视频，请先创建新视频</p>
           </div>
         ) : (
-          <div className="video-list-container">
-            {videos.map(videoCard => (
-              <VideoCard
-                key={videoCard.generateId}
-                video={convertToVideo(videoCard)}
-                onEdit={handleEdit}
-                onRegenerate={handleRegenerate}
-              />
-            ))}
-          </div>
+          <VirtualizedVideoList
+            videos={videos}
+            hasMore={hasMore}
+            isItemLoaded={isItemLoaded}
+            loadMoreItems={loadMoreItems}
+            renderItem={renderItem}
+          />
         )}
       </div>
     </div>

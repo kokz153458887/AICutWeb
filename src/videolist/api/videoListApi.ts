@@ -32,12 +32,23 @@ export interface Video {
   videos: VideoItem[];
 }
 
+/**
+ * 分页参数接口
+ */
+export interface PaginationParams {
+  pageNum: number;
+  pageSize: number;
+  filterCreateTime?: number; // 可选的时间过滤参数
+}
+
 // 视频列表响应接口
 export interface VideoListResponse {
   code: number;
   message: string;
   data: {
     videolist: VideoCardData[];
+    total?: number;
+    hasMore?: boolean;
   };
 }
 
@@ -53,21 +64,40 @@ export interface RegenerateResponse {
 
 /**
  * 获取视频列表数据
+ * @param params 分页参数
  */
-export const getVideoList = async (): Promise<VideoCardData[]> => {
+export const getVideoList = async (params?: PaginationParams): Promise<{
+  videoList: VideoCardData[];
+  hasMore: boolean;
+}> => {
   try {
-    const response = await fetch('/api/videolist');
+    // 构建URL和查询参数
+    const url = new URL('/api/videolist', window.location.origin);
+    
+    if (params) {
+      url.searchParams.append('pageNum', params.pageNum.toString());
+      url.searchParams.append('pageSize', params.pageSize.toString());
+      
+      if (params.filterCreateTime) {
+        url.searchParams.append('filterCreateTime', params.filterCreateTime.toString());
+      }
+    }
+    
+    const response = await fetch(url.toString());
     const data: VideoListResponse = await response.json();
     
     if (data.code === 200 && data.data && data.data.videolist) {
-      return data.data.videolist;
+      return {
+        videoList: data.data.videolist,
+        hasMore: data.data.hasMore ?? false
+      };
     }
     
     console.error('获取视频列表失败:', data.message);
-    return [];
+    return { videoList: [], hasMore: false };
   } catch (error) {
     console.error('获取视频列表出错:', error);
-    return [];
+    return { videoList: [], hasMore: false };
   }
 };
 

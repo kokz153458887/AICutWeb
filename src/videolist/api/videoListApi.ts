@@ -83,8 +83,42 @@ export const getVideoList = async (params?: PaginationParams): Promise<{
       }
     }
     
-    const response = await fetch(url.toString());
-    const data: VideoListResponse = await response.json();
+    // 增加超时处理
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+    
+    const response = await fetch(url.toString(), {
+      signal: controller.signal
+    });
+    
+    // 清除超时计时器
+    clearTimeout(timeoutId);
+    
+    // 检查响应状态
+    if (!response.ok) {
+      console.error(`获取视频列表失败 - HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`服务器错误: ${response.status}`);
+    }
+    
+    // 检查响应内容类型
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('获取视频列表失败 - 响应不是JSON格式');
+      throw new Error('响应格式错误');
+    }
+    
+    // 安全地解析JSON
+    let data: VideoListResponse;
+    try {
+      const text = await response.text();
+      if (!text || text.trim() === '') {
+        throw new Error('空响应');
+      }
+      data = JSON.parse(text);
+    } catch (jsonError) {
+      console.error('解析JSON失败:', jsonError);
+      throw new Error('数据解析错误');
+    }
     
     if (data.code === 200 && data.data && data.data.videolist) {
       return {
@@ -94,10 +128,23 @@ export const getVideoList = async (params?: PaginationParams): Promise<{
     }
     
     console.error('获取视频列表失败:', data.message);
-    return { videoList: [], hasMore: false };
-  } catch (error) {
+    throw new Error(`API错误: ${data.message || '未知错误'}`);
+  } catch (error: any) {
     console.error('获取视频列表出错:', error);
-    return { videoList: [], hasMore: false };
+    // 根据错误类型给出更具体的错误信息
+    let errorMessage = '网络请求失败';
+    if (error instanceof SyntaxError) {
+      errorMessage = 'JSON解析失败，可能是服务器返回了无效数据';
+    } else if (error.name === 'AbortError') {
+      errorMessage = '请求超时';
+    } else if (error instanceof TypeError && error.message.includes('NetworkError')) {
+      errorMessage = '网络连接问题';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // 重要：抛出错误而不是返回空结果
+    throw new Error(errorMessage);
   }
 };
 
@@ -126,26 +173,71 @@ export const getVideoDetail = async (id: string): Promise<VideoCardData | null> 
  * 重新生成视频
  * @param generateId 视频生成ID
  */
-export const regenerateVideo = async (generateId: string): Promise<RegenerateResponse | null> => {
+export const regenerateVideo = async (generateId: string): Promise<RegenerateResponse> => {
   try {
+    // 增加超时处理
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+    
     const response = await fetch('/api/videolist/regenerate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ generateId })
+      body: JSON.stringify({ generateId }),
+      signal: controller.signal
     });
     
-    const data = await response.json();
+    // 清除超时计时器
+    clearTimeout(timeoutId);
+    
+    // 检查响应状态
+    if (!response.ok) {
+      console.error(`重新生成视频失败 - HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`服务器错误: ${response.status}`);
+    }
+    
+    // 检查响应内容类型
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('重新生成视频失败 - 响应不是JSON格式');
+      throw new Error('响应格式错误');
+    }
+    
+    // 安全地解析JSON
+    let data: RegenerateResponse;
+    try {
+      const text = await response.text();
+      if (!text || text.trim() === '') {
+        throw new Error('空响应');
+      }
+      data = JSON.parse(text);
+    } catch (jsonError) {
+      console.error('解析JSON失败:', jsonError);
+      throw new Error('数据解析错误');
+    }
     
     if (data.code === 200) {
       return data;
     }
     
     console.error('重新生成视频失败:', data.message);
-    return null;
-  } catch (error) {
+    throw new Error(`API错误: ${data.message || '未知错误'}`);
+  } catch (error: any) {
     console.error('重新生成视频出错:', error);
-    return null;
+    // 根据错误类型给出更具体的错误信息
+    let errorMessage = '网络请求失败';
+    if (error instanceof SyntaxError) {
+      errorMessage = 'JSON解析失败，可能是服务器返回了无效数据';
+    } else if (error.name === 'AbortError') {
+      errorMessage = '请求超时';
+    } else if (error instanceof TypeError && error.message.includes('NetworkError')) {
+      errorMessage = '网络连接问题';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // 重要：抛出错误而不是返回null
+    throw new Error(errorMessage);
   }
 }; 

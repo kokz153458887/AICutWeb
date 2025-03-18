@@ -7,9 +7,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.04);
-  width: 92%;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  margin-top: 10px;
 }
 
 .video-card:active {
@@ -450,4 +451,11 @@
   max-height: 90vh;
   display: block;
   border-radius: 10px;
+}
+
+/* 卡片包装器固定宽度 */
+.video-card-wrapper {
+  width: 100% !important;
+  box-sizing: border-box;
+  padding: 0 16px;
 } 

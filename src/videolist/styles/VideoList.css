@@ -243,29 +243,48 @@
   animation: spin 1s linear infinite;
 }
 
-/* 底部错误状态 */
+/* 列表加载错误页脚样式 */
 .list-error-footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 0;
+  padding: 16px;
   color: #ff5252;
-  background-color: rgba(255, 82, 82, 0.08);
+  background-color: rgba(255, 82, 82, 0.1);
+  border-radius: 8px;
   margin: 10px auto;
-  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  height: 60px;
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  transition: all 0.2s ease;
   width: 92%;
-  border: 1px solid rgba(255, 82, 82, 0.2);
+  font-weight: 500;
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(255, 82, 82, 0.2);
+  height: 60px;
 }
 
 .list-error-footer:hover {
-  background-color: rgba(255, 82, 82, 0.12);
+  background-color: rgba(255, 82, 82, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(255, 82, 82, 0.3);
 }
 
 .list-error-footer:active {
-  transform: scale(0.98);
+  transform: translateY(0);
+  background-color: rgba(255, 82, 82, 0.2);
+}
+
+.retry-icon {
+  font-size: 18px;
+  display: inline-block;
+  margin-right: 4px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 /* 列表项加载状态 */
@@ -295,4 +314,15 @@
   box-sizing: border-box;
   padding: 8px 0;
   overflow: visible;
+}
+
+/* 添加旋转动画 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.list-error-footer:hover .retry-icon {
+  display: inline-block;
+  animation: spin 1s ease infinite;
 } 

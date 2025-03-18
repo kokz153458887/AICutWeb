@@ -20,6 +20,7 @@ interface VideoCardProps {
     onEdit: (videoId: string) => void;
     onRegenerate: (videoId: string) => Promise<void>;
     onRetry: (index: number) => void;
+    lastAttemptedRange: {start: number, end: number} | null;
   };
 }
 
@@ -42,26 +43,45 @@ const convertToVideo = (videoCard: VideoCardData): Video => {
  * 视频卡片组件 - 使用react-window标准格式
  */
 const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
-  const { videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry } = data;
+  const { videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry, lastAttemptedRange } = data;
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
-  console.log("VideoCard index:", index); // 用于调试
+  console.log(`VideoCard渲染: index=${index}, hasMore=${hasMore}, loadMoreError=${loadMoreError}, videos.length=${videos.length}`);
   
-  // 如果是最后一项且有更多数据，显示加载更多
-  if (index === videos.length && hasMore) {
+  // 是否为加载更多的底部项
+  const isLoadMoreItem = index === videos.length && hasMore;
+  
+  // 如果是底部加载项，显示加载更多或错误状态
+  if (isLoadMoreItem) {
+    console.log(`VideoCard render footer: loadingMore=${loadingMore}, loadMoreError=${loadMoreError}`);
+    
     return (
       <div style={style} className="footer-container">
         <LoadingFooter 
-          isLoading={loadingMore} 
-          error={loadMoreError} 
-          onRetry={() => onRetry(index)}
+          isLoading={loadingMore && !loadMoreError} // 确保当有错误时，不显示加载中状态
+          error={loadMoreError}
+          onRetry={() => {
+            console.log('触发重试事件: index =', index);
+            onRetry(index);
+          }}
         />
       </div>
     );
   }
-
-  // 如果数据还未加载，显示加载中的状态
+  
+  // 当发生加载错误时，不显示未加载项的加载中状态
+  // 这样用户只会看到底部的错误提示，而不会看到多个加载中的卡片
   if (!videos[index]) {
+    // 如果发生加载错误，且当前索引在上次尝试加载的范围内，不显示加载中状态
+    if (loadMoreError && lastAttemptedRange) {
+      // 只有当前索引在上次尝试加载的范围内，才隐藏加载状态
+      if (index >= lastAttemptedRange.start && index <= lastAttemptedRange.end) {
+        console.log(`因加载错误不显示loading: index=${index}, lastAttemptedRange=${JSON.stringify(lastAttemptedRange)}`);
+        return <div style={style}></div>; // 返回空白div，不显示加载中状态
+      }
+    }
+    
+    console.log(`VideoCard render list-loading: index=${index}`);
     return (
       <div style={style} className="list-loading-item">
         <div className="loading-spinner-small"></div>

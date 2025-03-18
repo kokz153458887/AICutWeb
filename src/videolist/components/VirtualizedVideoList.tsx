@@ -19,6 +19,7 @@ interface VirtualizedVideoListProps {
   onRetry: (index: number) => void;
   loadingMore: boolean;
   loadMoreError: boolean;
+  lastAttemptedRange: {start: number, end: number} | null;
 }
 
 /**
@@ -33,7 +34,8 @@ const VirtualizedVideoList: React.FC<VirtualizedVideoListProps> = ({
   onRegenerate,
   onRetry,
   loadingMore,
-  loadMoreError
+  loadMoreError,
+  lastAttemptedRange
 }) => {
   // 引用列表实例
   const listRef = useRef<any>(null);
@@ -60,8 +62,9 @@ const VirtualizedVideoList: React.FC<VirtualizedVideoListProps> = ({
     loadMoreError,
     onEdit,
     onRegenerate,
-    onRetry
-  }), [videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry]);
+    onRetry,
+    lastAttemptedRange
+  }), [videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry, lastAttemptedRange]);
 
   return (
     <div className="virtualized-list-wrapper" style={{ height: 'calc(100vh - 44px)', width: '100%' }}>

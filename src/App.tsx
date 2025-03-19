@@ -11,6 +11,7 @@ import EditPage from './edit'
 import VideoListPage from './videolist'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
+import Toast from './components/Toast'
 
 // 内容容器组件，根据URL参数显示不同页面
 const ContentContainer: React.FC = () => {
@@ -27,12 +28,10 @@ const ContentContainer: React.FC = () => {
         <Mine />
       </div>
       <div style={{ 
-        display: currentTab === 'add' ? 'flex' : 'none', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+        display: currentTab === 'videolist' ? 'block' : 'none', 
         height: '100%'
       }}>
-        添加新内容
+        <VideoListPage />
       </div>
     </div>
   );
@@ -61,6 +60,7 @@ const AppContainer: React.FC = () => {
         <Route path="*" element={<Navigate to="/?tab=home" replace />} />
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}
+      <Toast />
     </div>
   );
 };

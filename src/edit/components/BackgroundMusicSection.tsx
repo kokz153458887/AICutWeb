@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ConfigItem from './ConfigItem';
+import { toast } from '../../components/Toast';
 
 interface BackgroundMusicSectionProps {
   musicName: string;
@@ -37,7 +38,7 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
     // 更新音频源和音量
     if (audioRef.current) {
       audioRef.current.src = musicUrl;
-      audioRef.current.volume = Math.min(volume, 1); // Web Audio API 的音量范围是 0-1，超过1的部分要通过其他方式处理
+      audioRef.current.volume = Math.min(volume, 1);
     }
     
     // 清理函数
@@ -52,7 +53,7 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
   // 监听音量变化
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = Math.min(volume, 1); // Web Audio API 的音量范围是 0-1，超过1的部分要通过其他方式处理
+      audioRef.current.volume = Math.min(volume, 1);
     }
   }, [volume]);
 
@@ -65,7 +66,13 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
+      toast.info('停止播放');
     } else {
+      if (!musicUrl) {
+        toast.error('暂无音乐可播放');
+        return;
+      }
+
       // 解析开始时间
       if (startTime) {
         try {
@@ -73,7 +80,6 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
           let totalSeconds = 0;
           
           if (timeParts.length === 3) {
-            // 处理小时:分钟:秒格式
             const [hours, minutes, secondsWithMs] = timeParts;
             const [seconds, ms] = secondsWithMs.split('.').map(Number);
             
@@ -87,13 +93,17 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
           audioRef.current.currentTime = totalSeconds;
         } catch (error) {
           console.error('解析开始时间失败:', error);
-          // 默认从开始播放
           audioRef.current.currentTime = 0;
         }
       }
 
-      audioRef.current.play();
+      audioRef.current.play().catch(error => {
+        console.error('播放失败:', error);
+        toast.error('播放失败，请重试');
+        setIsPlaying(false);
+      });
       setIsPlaying(true);
+      toast.info('开始播放');
 
       // 如果有设置结束时间，则在适当的时间停止播放
       if (endTime && startTime) {
@@ -132,9 +142,9 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
               // 设置定时器在到达结束时间时停止
               setTimeout(() => {
                 if (audioRef.current && isPlaying) {
-                  // 如果还在播放且是同一个实例，则暂停
                   audioRef.current.pause();
                   setIsPlaying(false);
+                  toast.info('播放结束');
                 }
               }, duration * 1000);
             }

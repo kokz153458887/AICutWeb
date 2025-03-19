@@ -10,26 +10,36 @@ export class VideoListRoutes {
 
   // 读取最新的视频列表数据
   readLatestVideoListData() {
-    try {
-      if (fs.existsSync(this.dataPath)) {
-        const data = fs.readFileSync(this.dataPath, 'utf8');
-        const jsonData = JSON.parse(data);
-        
-        // 检查JSON结构，确保返回正确格式
-        if (jsonData && jsonData.getVideoList) {
-          return jsonData.getVideoList;
+    return new Promise((resolve) => {
+      try {
+        if (fs.existsSync(this.dataPath)) {
+          const data = fs.readFileSync(this.dataPath, 'utf8');
+          const jsonData = JSON.parse(data);
+          
+          // 延迟一秒再返回
+          setTimeout(() => {
+            // 检查JSON结构，确保返回正确格式
+            if (jsonData && jsonData.getVideoList) {
+              resolve(jsonData.getVideoList);
+            } else {
+              console.warn('视频列表JSON文件格式不正确');
+              resolve({ code: 200, message: 'success', data: { videolist: [] } });
+            }
+          }, 1000);
+          
         } else {
-          console.warn('视频列表JSON文件格式不正确');
-          return { code: 200, message: 'success', data: { videolist: [] } };
+          console.warn('视频列表JSON文件不存在:', this.dataPath);
+          setTimeout(() => {
+            resolve({ code: 200, message: 'success', data: { videolist: [] } });
+          }, 1000);
         }
+      } catch (error) {
+        console.error('读取视频列表数据失败:', error);
+        setTimeout(() => {
+          resolve({ code: 200, message: 'success', data: { videolist: [] } });
+        }, 1000);
       }
-      
-      console.warn('视频列表JSON文件不存在:', this.dataPath);
-      return { code: 200, message: 'success', data: { videolist: [] } };
-    } catch (error) {
-      console.error('读取视频列表数据失败:', error);
-      return { code: 200, message: 'success', data: { videolist: [] } };
-    }
+    });
   }
 
   // 注册所有路由处理函数
@@ -51,12 +61,12 @@ export class VideoListRoutes {
   }
 
   // 获取视频列表
-  getVideoList(req, res) {
+  async getVideoList(req, res) {
     try {
       console.log('获取视频列表');
       
       // 从JSON文件中读取最新数据
-      const response = this.readLatestVideoListData();
+      const response = await this.readLatestVideoListData();
       const allVideos = response.data.videolist || [];
       
       // 构建响应 - 直接返回所有数据
@@ -82,13 +92,13 @@ export class VideoListRoutes {
   }
 
   // 获取单个视频详情
-  getVideoDetail(req, res) {
+  async getVideoDetail(req, res) {
     try {
       const { id } = req.params;
       console.log(`获取视频详情: ${id}`);
       
       // 从JSON文件中读取最新数据
-      const videoListData = this.readLatestVideoListData();
+      const videoListData = await this.readLatestVideoListData();
       const allVideos = videoListData.data.videolist;
       const video = allVideos.find(item => item.generateId === id);
       

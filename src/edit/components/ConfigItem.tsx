@@ -5,6 +5,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/ConfigItem.css';
 import { ArrowIcon, PreviewIcon, PlayIcon, VideoPreviewIcon } from './icons/SvgIcons';
+import { toast } from '../../components/Toast';
 
 interface ConfigItemProps {
   title: string;
@@ -107,7 +108,11 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
    * 处理预览图标点击事件
    */
   const handlePreviewClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发整个配置项的点击
+    e.stopPropagation();
+    if (!previewImage) {
+      toast.info('暂无预览图片');
+      return;
+    }
     setShowPreview(true);
     if (onPreviewClick) {
       onPreviewClick();
@@ -126,7 +131,11 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
    * 处理视频预览图标点击事件
    */
   const handleVideoPreviewClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发整个配置项的点击
+    e.stopPropagation();
+    if (!previewVideoUrl) {
+      toast.info('暂无预览视频');
+      return;
+    }
     setShowVideoPreview(true);
     if (onVideoPreviewClick) {
       onVideoPreviewClick();
@@ -145,9 +154,11 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
    * 处理试听按钮点击事件
    */
   const handlePlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发整个配置项的点击
+    e.stopPropagation();
     if (onPlayClick) {
       onPlayClick();
+    } else {
+      toast.info('试听功能待实现');
     }
   };
 

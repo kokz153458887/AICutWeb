@@ -6,6 +6,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../styles/TextInputSection.css';
 import { SpeakerIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
+import { toast } from '../../components/Toast';
 
 interface TextInputSectionProps {
   value: string;
@@ -87,19 +88,20 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    * 处理喇叭点击事件
    */
   const handleSpeakerClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡
+    e.stopPropagation();
     console.log('喇叭被点击');
-    // 这里可以添加语音输入或文本朗读等功能
-    alert('语音功能待实现');
+    toast.info('语音功能待实现');
   };
 
   /**
    * 处理说话人按钮点击事件
    */
   const handleSpeakerButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡
+    e.stopPropagation();
     if (onSpeakerClick) {
       onSpeakerClick();
+    } else {
+      toast.info('说话人选择功能待实现');
     }
   };
 

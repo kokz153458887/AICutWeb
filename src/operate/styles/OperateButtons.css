@@ -1,0 +1,62 @@
+/* 底部操作按钮容器 */
+.operate-buttons {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 12px 15px;
+  background-color: transparent;
+  z-index: 11;
+}
+
+/* 操作按钮基础样式 */
+.operate-button {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 按钮点击效果 */
+.operate-button:active {
+  transform: scale(0.95);
+}
+
+/* 发布按钮样式 */
+.publish-button {
+  background-color: #00e676;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(0, 230, 118, 0.3);
+}
+
+.publish-button:active {
+  background-color: #00c853;
+  box-shadow: 0 2px 8px rgba(0, 230, 118, 0.2);
+}
+
+/* 下载按钮样式 */
+.download-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.download-button:active {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 适配iPhone底部安全区域 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .operate-buttons {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+} 

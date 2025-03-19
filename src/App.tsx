@@ -9,6 +9,7 @@ import DebugConsole from './components/DebugConsole'
 import { VideoDetail } from './detail'
 import EditPage from './edit'
 import VideoListPage from './videolist'
+import VideoOperatePage from './operate/components/VideoOperatePage'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 import Toast from './components/Toast'
@@ -57,6 +58,8 @@ const AppContainer: React.FC = () => {
         <Route path="/edit" element={<EditPage />} />
         {/* 视频列表页路由 */}
         <Route path="/videolist" element={<VideoListPage />} />
+        {/* 视频操作页路由 */}
+        <Route path="/operate/:id" element={<VideoOperatePage />} />
         <Route path="*" element={<Navigate to="/?tab=home" replace />} />
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}

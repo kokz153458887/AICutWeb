@@ -1,0 +1,90 @@
+/* 视频预览列表包装器 */
+.video-gallery-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 12px 0;
+  background-color: transparent;
+  z-index: 11;
+}
+
+/* 视频预览列表 */
+.video-gallery {
+  display: flex;
+  gap: 8px;
+  padding: 0 15px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* 隐藏滚动条 */
+.video-gallery::-webkit-scrollbar {
+  display: none;
+}
+
+/* 预览项 */
+.gallery-item {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transform: scale(0.9);
+  transition: transform 0.2s ease;
+  border: 2px solid transparent;
+}
+
+/* 预览项点击效果 */
+.gallery-item:active {
+  transform: scale(0.85);
+}
+
+/* 当前选中项 */
+.gallery-item.active {
+  transform: scale(1);
+  border: 2px solid #00e676;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+/* 预览缩略图 */
+.gallery-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 渐变遮罩 */
+.gallery-gradient {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 左侧渐变 */
+.gallery-gradient.left {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.8), transparent);
+}
+
+/* 右侧渐变 */
+.gallery-gradient.right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
+}
+
+/* 适配iPhone底部安全区域 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .video-gallery-wrapper {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+} 

@@ -55,43 +55,22 @@ export class VideoListRoutes {
     try {
       console.log('获取视频列表');
       
-      // 获取请求中的分页参数
-      const pageNum = parseInt(req.query.pageNum) || 1;
-      const pageSize = parseInt(req.query.pageSize) || 10;
-      const filterCreateTime = req.query.filterCreateTime ? parseInt(req.query.filterCreateTime) : null;
-      
-      console.log(`分页参数: pageNum=${pageNum}, pageSize=${pageSize}, filterCreateTime=${filterCreateTime}`);
-      
       // 从JSON文件中读取最新数据
       const response = this.readLatestVideoListData();
-      let allVideos = response.data.videolist || [];
+      const allVideos = response.data.videolist || [];
       
-      // 应用时间过滤（如果有）
-      if (filterCreateTime) {
-        allVideos = allVideos.filter(video => {
-          const videoCreateTime = new Date(video.createTime).getTime();
-          return videoCreateTime >= filterCreateTime;
-        });
-      }
-      
-      // 计算分页数据
-      const startIndex = (pageNum - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedVideos = allVideos.slice(startIndex, endIndex);
-      const hasMore = endIndex < allVideos.length;
-      
-      // 构建响应
-      const paginatedResponse = {
+      // 构建响应 - 直接返回所有数据
+      const responseData = {
         ...response,
         data: {
-          videolist: paginatedVideos,
+          videolist: allVideos,
           total: allVideos.length,
-          hasMore: hasMore
+          hasMore: true
         }
       };
       
-      console.log(`返回分页数据: ${paginatedVideos.length} 条, 总共: ${allVideos.length} 条, 是否有更多: ${hasMore}`);
-      return res.status(200).json(paginatedResponse);
+      console.log(`返回数据: 总共 ${allVideos.length} 条`);
+      return res.status(200).json(responseData);
     } catch (error) {
       console.error('获取视频列表失败:', error);
       return res.status(500).json({

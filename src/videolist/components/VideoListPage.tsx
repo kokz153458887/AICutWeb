@@ -73,13 +73,9 @@ const VideoListPage: React.FC = () => {
       console.log(`获取数据成功: 数据长度=${videoList.length}, 还有更多=${moreData}`);
       
       if (reset) {
-        // 初始化一个数组，长度基于初始数据长度
-        const initialVideos = Array(INITIAL_DATA_LENGTH).fill(null);
-        // 填充获取到的数据
-        videoList.forEach((video, index) => {
-          initialVideos[index] = video;
-        });
-        setVideos(initialVideos);
+        // 直接使用获取到的数据，不再使用固定长度的INITIAL_DATA_LENGTH
+        // 这样避免了数组中出现多余的null值，从而导致底部出现空白的加载项
+        setVideos([...videoList]);
         
         // 强制设置hasMore为true，即使API返回false
         // 这样可以确保在初始加载后，用户滚动到底部时可以触发加载更多，并允许显示错误状态
@@ -246,6 +242,14 @@ const VideoListPage: React.FC = () => {
       
       const { videoList, hasMore: moreData } = await getVideoList(params);
       
+      // 如果返回的数据为空，说明没有更多数据了
+      if (!videoList || videoList.length === 0) {
+        console.log('返回数据为空，设置hasMore=false');
+        setHasMore(false);
+        setLoadingMore(false);
+        return Promise.resolve();
+      }
+      
       setVideos(prevVideos => {
         const newVideos = [...prevVideos];
         // 填充新获取的数据
@@ -260,8 +264,8 @@ const VideoListPage: React.FC = () => {
         return newVideos;
       });
       
-      // 更新hasMore状态
-      setHasMore(moreData || videoList.length >= DEFAULT_PAGE_SIZE); // 如果获取了整页数据，可能还有更多
+      // 更新hasMore状态 - 只有当返回数据不为空且API指示还有更多数据时才设置为true
+      setHasMore(moreData && videoList.length > 0);
       setPageNum(targetPageNum + 1);
       
       console.log(`数据加载成功，新数据长度: ${videoList.length}，还有更多: ${moreData}`);

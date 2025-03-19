@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: #FFFFFF;
+  background-color: #141414;
   overflow: hidden;
 }
 
@@ -20,7 +20,7 @@
 
 /* 加载状态文本 */
 .loading-text {
-  color: #AAAAAA;
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
   margin-top: 20px;
 }
@@ -34,7 +34,7 @@
 
 /* 空内容提示 */
 .empty-text {
-  color: #AAAAAA;
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
   margin-top: 20px;
 }

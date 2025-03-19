@@ -14,6 +14,7 @@ import MaterialSection from './components/MaterialSection';
 import BackupVideoSection from './components/BackupVideoSection';
 import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
+import Toast, { toast } from '../components/Toast';
 import { EditService, VideoEditConfig } from './api';
 
 /**
@@ -150,8 +151,7 @@ const EditPage: React.FC = () => {
    * 处理说话人点击事件
    */
   const handleSpeakerClick = () => {
-    // 弹出toast提示
-    alert('说话人选择功能待开发');
+    toast.info('说话人选择功能待开发');
   };
 
   /**
@@ -172,18 +172,18 @@ const EditPage: React.FC = () => {
     }
     
     if (!text.trim()) {
-      alert('请输入文案内容');
+      toast.error('请输入文案内容');
       return;
     }
     
     if (!configData) {
-      alert('配置数据不完整，请重试');
+      toast.error('配置数据不完整，请重试');
       return;
     }
     
     try {
       setLoading(true);
-      setIsSubmitting(true); // 标记正在提交
+      setIsSubmitting(true);
       
       // 准备提交数据
       const submitData: VideoEditConfig = {
@@ -192,13 +192,13 @@ const EditPage: React.FC = () => {
         content: {
           ...configData.content,
           text: text,
-          volume: voiceVolume // 语音音量(0-5范围)
+          volume: voiceVolume
         },
         backgroundMusic: {
           ...configData.backgroundMusic,
-          volume: volume // 背景音乐音量(0-5范围)
+          volume: volume
         },
-        backupVideoNum: backupCount // 添加备用视频数量
+        backupVideoNum: backupCount
       };
       
       console.log('准备提交数据，音量值:', voiceVolume, volume, '(0-5范围)');
@@ -212,21 +212,22 @@ const EditPage: React.FC = () => {
         
         // 如果有成功跳转URL，则跳转到该URL
         if (response.data.successUrl) {
-          window.location.href = response.data.successUrl; // 使用原生跳转以便完全关闭当前页面
+          window.location.href = response.data.successUrl;
         } else {
-          alert('视频生成请求已提交，视频生成ID: ' + response.data.generateId);
-          navigate('/'); // 如果没有跳转URL，则回到首页
+          toast.success(`视频生成请求已提交，视频生成ID: ${response.data.generateId}`);
+          // 跳转到主页的视频列表tab
+          navigate('/?tab=videolist');
         }
       } else {
         throw new Error(response.message || '提交失败');
       }
     } catch (err) {
       console.error('提交配置失败:', err);
-      alert('视频生成失败，请重试');
-      setIsSubmitting(false); // 重置提交状态，允许用户再次尝试
+      toast.error('视频生成失败，请重试');
+      setIsSubmitting(false);
     } finally {
       setLoading(false);
-      setIsSubmitting(false); // 确保无论成功还是失败都重置提交状态
+      setIsSubmitting(false);
     }
   };
 
@@ -235,8 +236,7 @@ const EditPage: React.FC = () => {
    * @param type 配置项类型
    */
   const handleConfigClick = (type: string) => {
-    // 根据类型打开对应选择器
-    alert(`${type}选择器待开发`);
+    toast.info(`${type}选择器待开发`);
   };
 
   /**
@@ -355,6 +355,9 @@ const EditPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Toast组件 */}
+      <Toast />
     </div>
   );
 };

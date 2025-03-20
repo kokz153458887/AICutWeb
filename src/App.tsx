@@ -13,6 +13,7 @@ import VideoOperatePage from './operate/components/VideoOperatePage'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 import Toast from './components/Toast'
+import { VideoOperateData } from './operate/api/types'
 
 // 内容容器组件，根据URL参数显示不同页面
 const ContentContainer: React.FC = () => {
@@ -38,19 +39,27 @@ const ContentContainer: React.FC = () => {
   );
 };
 
-// 主应用容器组件
+/**
+ * 应用程序主容器组件
+ * 负责管理整体布局结构和路由配置
+ */
 const AppContainer: React.FC = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const isVideoOperateVisible = Boolean(searchParams.get('videoId'));
+  const state = location.state as { videoData?: VideoOperateData };
+
   useEffect(() => {
     // 初始化设备信息收集
     initDeviceInfo();
   }, []);
 
   return (
-    <div className="container">
+    <div className="app-container">
       <Routes>
         <Route path="/" element={<>
           <ContentContainer />
-          <TabBar />
+          {!isVideoOperateVisible && <TabBar />}
         </>} />
         {/* 视频播放页路由 */}
         <Route path="/video/:id" element={<VideoDetail />} />
@@ -58,20 +67,20 @@ const AppContainer: React.FC = () => {
         <Route path="/edit" element={<EditPage />} />
         {/* 视频列表页路由 */}
         <Route path="/videolist" element={<VideoListPage />} />
-        {/* 视频操作页路由 */}
-        <Route path="/operate/:id" element={<VideoOperatePage />} />
-        <Route path="*" element={<Navigate to="/?tab=home" replace />} />
-
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}
       <Toast />
+      {/* 视频操作页作为模态层 */}
+      {isVideoOperateVisible && (
+        <VideoOperatePage 
+          videoId={searchParams.get('videoId')!}
+          initialIndex={parseInt(searchParams.get('initialIndex') || '0', 10)}
+          videoData={state?.videoData}
+        />
+      )}
     </div>
   );
 };
 
-function App() {
-  return <AppContainer />;
-}
-
-export default App
+export default AppContainer;
 

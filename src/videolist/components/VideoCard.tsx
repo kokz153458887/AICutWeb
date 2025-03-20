@@ -100,34 +100,50 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   };
   
   /**
-   * 处理卡片点击，跳转到视频操作页
+   * 处理卡片点击，显示视频操作页模态层
    */
   const handleCardClick = () => {
-    navigate(`/operate/${video.id}`, { 
+    // 使用 URL 参数控制模态层显示，同时传递视频数据
+    const newSearch = new URLSearchParams(location.search);
+    newSearch.set('videoId', video.id);
+    newSearch.set('initialIndex', '0');
+    navigate(`/?${newSearch.toString()}`, {
       state: { 
-        initialIndex: 0,
-        listState: {
-          videos: videos,
-          pageNum: videos.length / DEFAULT_PAGE_SIZE + 1,
-          hasMore: hasMore
+        videoData: {
+          generateId: video.id,
+          title: video.title,
+          text: video.content,
+          createTime: new Date(video.createTime).toISOString(),
+          status: video.status === 'generated' ? 'done' : video.status,
+          ratio: video.tags[0] || '16:9',
+          materialName: video.tags[1] || '',
+          videolist: video.videos
         }
-      } 
+      }
     });
   };
   
   /**
-   * 处理视频点击，跳转到视频操作页并播放指定视频
+   * 处理视频点击，显示视频操作页模态层并播放指定视频
    */
   const handleVideoClick = (videoIndex: number) => {
-    navigate(`/operate/${video.id}`, { 
+    // 使用 URL 参数控制模态层显示，同时传递视频数据
+    const newSearch = new URLSearchParams(location.search);
+    newSearch.set('videoId', video.id);
+    newSearch.set('initialIndex', videoIndex.toString());
+    navigate(`/?${newSearch.toString()}`, {
       state: { 
-        initialIndex: videoIndex,
-        listState: {
-          videos: videos,
-          pageNum: videos.length / DEFAULT_PAGE_SIZE + 1,
-          hasMore: hasMore
+        videoData: {
+          generateId: video.id,
+          title: video.title,
+          text: video.content,
+          createTime: new Date(video.createTime).toISOString(),
+          status: video.status === 'generated' ? 'done' : video.status,
+          ratio: video.tags[0] || '16:9',
+          materialName: video.tags[1] || '',
+          videolist: video.videos
         }
-      } 
+      }
     });
   };
   

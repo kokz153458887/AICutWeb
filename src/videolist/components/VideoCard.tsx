@@ -2,12 +2,15 @@
  * 视频卡片组件
  * 负责显示单个视频的详细信息，包括标题、状态、文本内容、标签和操作按钮
  */
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Video, VideoCardData } from '../api/videoListApi';
 import VideoCardSlider from './VideoCardSlider';
-import VideoPreview from './VideoPreview';
 import LoadingFooter from './LoadingFooter';
 import '../styles/VideoCard.css';
+
+// 默认分页大小
+const DEFAULT_PAGE_SIZE = 10;
 
 interface VideoCardProps {
   index: number; 
@@ -44,7 +47,7 @@ const convertToVideo = (videoCard: VideoCardData): Video => {
  */
 const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   const { videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry, lastAttemptedRange } = data;
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   console.log(`VideoCard渲染: index=${index}, hasMore=${hasMore}, loadMoreError=${loadMoreError}, videos.length=${videos.length}`);
   
@@ -58,7 +61,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
     return (
       <div style={style} className="footer-container">
         <LoadingFooter 
-          isLoading={loadingMore && !loadMoreError} // 确保当有错误时，不显示加载中状态
+          isLoading={loadingMore && !loadMoreError}
           error={loadMoreError}
           onRetry={() => {
             console.log('触发重试事件: index =', index);
@@ -70,14 +73,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   }
   
   // 当发生加载错误时，不显示未加载项的加载中状态
-  // 这样用户只会看到底部的错误提示，而不会看到多个加载中的卡片
   if (!videos[index]) {
-    // 如果发生加载错误，且当前索引在上次尝试加载的范围内，不显示加载中状态
     if (loadMoreError && lastAttemptedRange) {
-      // 只有当前索引在上次尝试加载的范围内，才隐藏加载状态
       if (index >= lastAttemptedRange.start && index <= lastAttemptedRange.end) {
         console.log(`因加载错误不显示loading: index=${index}, lastAttemptedRange=${JSON.stringify(lastAttemptedRange)}`);
-        return <div style={style}></div>; // 返回空白div，不显示加载中状态
+        return <div style={style}></div>;
       }
     }
     
@@ -99,25 +99,47 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   };
   
-  // 处理视频点击预览
-  const handleVideoClick = (videoUrl: string) => {
-    if (videoUrl) {
-      setPreviewUrl(videoUrl);
-    }
+  /**
+   * 处理卡片点击，跳转到视频操作页
+   */
+  const handleCardClick = () => {
+    navigate(`/operate/${video.id}`, { 
+      state: { 
+        initialIndex: 0,
+        listState: {
+          videos: videos,
+          pageNum: videos.length / DEFAULT_PAGE_SIZE + 1,
+          hasMore: hasMore
+        }
+      } 
+    });
   };
   
-  // 关闭视频预览
-  const closePreview = () => {
-    setPreviewUrl(null);
+  /**
+   * 处理视频点击，跳转到视频操作页并播放指定视频
+   */
+  const handleVideoClick = (videoIndex: number) => {
+    navigate(`/operate/${video.id}`, { 
+      state: { 
+        initialIndex: videoIndex,
+        listState: {
+          videos: videos,
+          pageNum: videos.length / DEFAULT_PAGE_SIZE + 1,
+          hasMore: hasMore
+        }
+      } 
+    });
   };
   
   // 处理编辑按钮点击
-  const handleEditClick = () => {
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
     onEdit(video.id);
   };
   
   // 处理重新生成按钮点击
-  const handleRegenerateClick = async () => {
+  const handleRegenerateClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
     try {
       await onRegenerate(video.id);
     } catch (error) {
@@ -158,7 +180,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
 
   return (
     <div style={style} className="video-card-wrapper">
-      <div className="video-card">
+      <div className="video-card" onClick={handleCardClick}>
         <div className="video-card-header">
           <h3 className="video-card-title">{video.title}</h3>
           <div className={`video-card-status ${getStatusClass()}`}>
@@ -202,11 +224,6 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
             再次生成
           </button>
         </div>
-        
-        {/* 视频预览弹窗 */}
-        {previewUrl && (
-          <VideoPreview videoUrl={previewUrl} onClose={closePreview} />
-        )}
       </div>
     </div>
   );

@@ -61,6 +61,7 @@ const AppContainer: React.FC = () => {
         {/* 视频操作页路由 */}
         <Route path="/operate/:id" element={<VideoOperatePage />} />
         <Route path="*" element={<Navigate to="/?tab=home" replace />} />
+
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}
       <Toast />
@@ -73,3 +74,4 @@ function App() {
 }
 
 export default App
+

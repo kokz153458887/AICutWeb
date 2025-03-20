@@ -8,7 +8,7 @@ import { PlayIcon, ArrowLeftIcon, ArrowRightIcon } from '../icons/SvgIcons';
 
 interface VideoCardSliderProps {
   videos: VideoItem[];
-  onVideoClick: (videoUrl: string) => void;
+  onVideoClick: (index: number) => void;
   isGenerating?: boolean;
 }
 
@@ -82,13 +82,6 @@ const VideoCardSlider: React.FC<VideoCardSliderProps> = ({
       });
     }
   };
-  
-  // 处理视频点击
-  const handleVideoClick = (videoUrl: string) => {
-    if (videoUrl) {
-      onVideoClick(videoUrl);
-    }
-  };
 
   return (
     <div className={`video-slider-container ${isGenerating ? 'generating' : ''}`}>
@@ -105,7 +98,10 @@ const VideoCardSlider: React.FC<VideoCardSliderProps> = ({
           <div 
             key={index} 
             className="video-slide"
-            onClick={() => handleVideoClick(video.videoUrl)}
+            onClick={(e) => {
+              e.stopPropagation(); // 阻止事件冒泡
+              onVideoClick(index);
+            }}
           >
             <img src={video.coverImg} alt={`视频封面 ${index + 1}`} />
             

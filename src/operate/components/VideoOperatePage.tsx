@@ -157,8 +157,12 @@ const VideoOperatePage: React.FC = () => {
    * 处理返回按钮点击
    */
   const handleBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    const state = location.state as { listState?: any };
+    navigate('/videolist', { 
+      state: state?.listState || undefined,
+      replace: true 
+    });
+  }, [navigate, location.state]);
 
   // 加载状态
   if (isLoading) {

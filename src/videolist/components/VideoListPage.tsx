@@ -3,6 +3,7 @@
  * 负责显示所有生成的视频卡片
  */
 import React, { useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { VideoCardData, Video, getVideoList, regenerateVideo, PaginationParams } from '../api/videoListApi';
 import VideoCard from './VideoCard';
 import VirtualizedVideoList from './VirtualizedVideoList';
@@ -27,15 +28,22 @@ const INITIAL_DATA_LENGTH = 10;
  * 视频列表页组件
  */
 const VideoListPage: React.FC = () => {
-  const [videos, setVideos] = useState<(VideoCardData | null)[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const location = useLocation();
+  const savedState = location.state as { 
+    videos?: (VideoCardData | null)[], 
+    pageNum?: number,
+    hasMore?: boolean 
+  } | null;
+
+  // 使用location.state中的数据初始化状态
+  const [videos, setVideos] = useState<(VideoCardData | null)[]>(savedState?.videos || []);
+  const [loading, setLoading] = useState<boolean>(!savedState?.videos);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [loadMoreError, setLoadMoreError] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [pageNum, setPageNum] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(savedState?.hasMore ?? true);
+  const [pageNum, setPageNum] = useState<number>(savedState?.pageNum || 1);
   const [showToast, setShowToast] = useState<boolean>(false);
-  // 记录上次尝试加载的范围，用于在错误时判断哪些项不应该显示
   const [lastAttemptedRange, setLastAttemptedRange] = useState<{start: number, end: number} | null>(null);
 
   /**
@@ -52,13 +60,18 @@ const VideoListPage: React.FC = () => {
    * 加载视频列表数据
    */
   const loadVideoList = async (reset: boolean = false) => {
+    // 如果有缓存数据且不是重置，则不重新加载
+    if (savedState?.videos && !reset) {
+      return;
+    }
+
     try {
       if (reset) {
         setLoading(true);
         setError(null);
         setPageNum(1);
         setHasMore(true);
-        setLoadMoreError(false); // 重置时也清除loadMoreError
+        setLoadMoreError(false);
       }
 
       const currentPageNum = reset ? 1 : pageNum;
@@ -73,21 +86,14 @@ const VideoListPage: React.FC = () => {
       console.log(`获取数据成功: 数据长度=${videoList.length}, 还有更多=${moreData}`);
       
       if (reset) {
-        // 直接使用获取到的数据，不再使用固定长度的INITIAL_DATA_LENGTH
-        // 这样避免了数组中出现多余的null值，从而导致底部出现空白的加载项
         setVideos([...videoList]);
-        
-        // 强制设置hasMore为true，即使API返回false
-        // 这样可以确保在初始加载后，用户滚动到底部时可以触发加载更多，并允许显示错误状态
         console.log(`初始加载后，强制设置hasMore=true，以支持错误状态显示`);
         setHasMore(true);
       } else {
         setVideos(prevVideos => {
           const newVideos = [...prevVideos];
-          // 计算起始索引
           const startIndex = (currentPageNum - 1) * DEFAULT_PAGE_SIZE;
           
-          // 填充新获取的数据
           videoList.forEach((video, index) => {
             const realIndex = startIndex + index;
             if (realIndex < newVideos.length) {
@@ -100,12 +106,11 @@ const VideoListPage: React.FC = () => {
           return newVideos;
         });
         
-        // 非重置加载时，使用API返回的hasMore值
         setHasMore(moreData);
       }
       
-      setPageNum(currentPageNum + 1); // 使用计算得到的页码值，而不是硬编码
-      setLoadMoreError(false); // 成功后确保清除错误状态
+      setPageNum(currentPageNum + 1);
+      setLoadMoreError(false);
     } catch (error) {
       console.error('加载视频列表失败:', error);
       const errorMessage = (error instanceof Error) 
@@ -115,10 +120,8 @@ const VideoListPage: React.FC = () => {
       if (reset) {
         setError(errorMessage);
       } else {
-        // 加载更多失败时设置错误状态
         console.log('设置loadMoreError为true');
         setLoadMoreError(true);
-        // 确保hasMore保持为true，以便显示错误状态
         setHasMore(true);
       }
     } finally {
@@ -129,7 +132,7 @@ const VideoListPage: React.FC = () => {
 
   // 首次加载时获取视频列表
   useEffect(() => {
-    loadVideoList(true);
+    loadVideoList(!savedState?.videos);
   }, []);
 
   /**

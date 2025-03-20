@@ -1,12 +1,18 @@
 /* 视频播放页样式 */
 .video-detail-container {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #000;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
+  z-index: 1000;
 }
 
 /* 顶部操作区样式 */
@@ -88,21 +94,38 @@
   text-align: center;
 }
 
+/* 视频内容区域 */
+.video-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: #000;
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* 为底部操作栏预留空间 */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+}
+
+.video-content::-webkit-scrollbar {
+  display: none;
+}
+
 /* 用户信息区域样式 */
 .user-info {
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
   background-color: #000;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   overflow: hidden;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 .user-avatar img {
@@ -114,7 +137,7 @@
 .user-name {
   color: #fff;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   flex: 1;
 }
 
@@ -122,38 +145,52 @@
   background-color: transparent;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 15px;
-  padding: 5px 15px;
+  border-radius: 16px;
+  padding: 6px 16px;
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.follow-button:active {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(0.95);
 }
 
 /* 视频文案区域样式 */
 .video-text {
-  padding: 15px;
+  padding: 16px;
   color: #fff;
-  font-size: 16px;
-  line-height: 1.5;
   background-color: #000;
-  flex: 1;
-  overflow-y: auto;
 }
 
-.video-question {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
+.video-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 12px;
   color: #fff;
+  letter-spacing: 0.3px;
+}
+
+.video-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: pre-wrap;
+  word-break: break-all;
+  letter-spacing: 0.2px;
 }
 
 /* 错误信息样式 */
 .error-message {
-  margin-top: 15px;
-  padding: 10px;
-  background-color: rgba(255, 0, 0, 0.1);
-  border-radius: 5px;
-  color: #ff6b6b;
+  margin-top: 12px;
+  padding: 12px;
+  background-color: rgba(255, 59, 48, 0.1);
+  border-radius: 8px;
+  color: #ff3b30;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 /* 底部操作栏样式 */
@@ -163,13 +200,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
-  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0.8) 100%);
   position: fixed;
   bottom: 0;
   left: 0;
   z-index: 10;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 点赞按钮样式 */
@@ -217,4 +254,15 @@
   color: #fff;
   font-size: 16px;
   background-color: #000;
+}
+
+/* 适配iPhone底部安全区域 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .video-content {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+  
+  .video-bottom-bar {
+    height: calc(60px + env(safe-area-inset-bottom));
+  }
 } 

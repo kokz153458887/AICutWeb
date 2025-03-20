@@ -107,6 +107,9 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
     const newSearch = new URLSearchParams(location.search);
     newSearch.set('videoId', video.id);
     newSearch.set('initialIndex', '0');
+    if (!newSearch.has('tab')) {
+      newSearch.set('tab', 'videolist');
+    }
     navigate(`/?${newSearch.toString()}`, {
       state: { 
         videoData: {
@@ -131,6 +134,9 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
     const newSearch = new URLSearchParams(location.search);
     newSearch.set('videoId', video.id);
     newSearch.set('initialIndex', videoIndex.toString());
+    if (!newSearch.has('tab')) {
+      newSearch.set('tab', 'videolist');
+    }
     navigate(`/?${newSearch.toString()}`, {
       state: { 
         videoData: {

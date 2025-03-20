@@ -110,10 +110,13 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
    * 处理返回按钮点击
    */
   const handleBack = useCallback(() => {
-    // 只移除 videoId 和 initialIndex 参数，保持其他参数不变
+    // 保持 tab=videolist 参数，移除 videoId 和 initialIndex 参数
     const newSearch = new URLSearchParams(location.search);
     newSearch.delete('videoId');
     newSearch.delete('initialIndex');
+    if (!newSearch.has('tab')) {
+      newSearch.set('tab', 'videolist');
+    }
     navigate(`/?${newSearch.toString()}`);
   }, [location.search, navigate]);
 
@@ -144,14 +147,23 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
         onShareClick={handleShare}
       />
 
-      {/* 视频播放器 */}
-      <VideoPlayer
-        videoUrl={videoData.videolist[currentIndex].videoUrl}
-        coverImg={videoData.videolist[currentIndex].coverImg}
-        ratio={videoData.ratio}
-        onVideoEnd={handleVideoEnd}
-        onError={handleVideoError}
-      />
+      {/* 可滚动的主内容区域 */}
+      <div className="video-main-content">
+        {/* 视频播放器 */}
+        <VideoPlayer
+          videoUrl={videoData.videolist[currentIndex].videoUrl}
+          coverImg={videoData.videolist[currentIndex].coverImg}
+          ratio={videoData.ratio}
+          onVideoEnd={handleVideoEnd}
+          onError={handleVideoError}
+        />
+
+        {/* 视频文案区域 */}
+        <div className="video-info-container">
+          <div className="video-title">{videoData.title}</div>
+          <div className="video-text">{videoData.text}</div>
+        </div>
+      </div>
 
       {/* 底部视频预览列表 */}
       <div className="bottom-container">

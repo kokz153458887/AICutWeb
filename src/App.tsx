@@ -65,8 +65,7 @@ const AppContainer: React.FC = () => {
         <Route path="/video/:id" element={<VideoDetail />} />
         {/* 视频编辑页路由 */}
         <Route path="/edit" element={<EditPage />} />
-        {/* 视频列表页路由 */}
-        <Route path="/videolist" element={<VideoListPage />} />
+        {/* 将 /videolist 路由移除，统一使用 tab 参数 */}
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}
       <Toast />

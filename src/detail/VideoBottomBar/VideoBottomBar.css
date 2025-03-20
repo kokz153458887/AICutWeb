@@ -5,13 +5,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
-  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0.8) 100%);
   position: fixed;
   bottom: 0;
   left: 0;
   z-index: 10;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 点赞按钮样式 */
@@ -19,12 +19,13 @@
   display: flex;
   align-items: center;
   color: #fff;
+  padding: 8px 0;
 }
 
 .like-icon-container {
   width: 24px;
   height: 24px;
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 .like-count {
@@ -39,8 +40,20 @@
   border-radius: 20px;
   padding: 8px 20px;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
   outline: none;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.make-same-button:active {
+  transform: scale(0.95);
+}
+
+/* 适配iPhone底部安全区域 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .video-bottom-bar {
+    height: calc(60px + env(safe-area-inset-bottom));
+  }
 } 

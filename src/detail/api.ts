@@ -7,6 +7,7 @@ import axios from 'axios';
 // 视频内容数据接口
 export interface VideoContent {
   videoUrl: string;
+  title?: string; // 可选的标题字段
   text: string;
   cover: string;
   stars: string;

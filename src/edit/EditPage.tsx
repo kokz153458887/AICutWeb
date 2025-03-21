@@ -41,19 +41,9 @@ const EditPage: React.FC = () => {
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
   
-  // 获取URL参数中的styleId
+  // 获取URL参数中的styleId并加载初始配置数据
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const urlStyleId = searchParams.get('styleId');
-    if (urlStyleId) {
-      setStyleId(urlStyleId);
-      console.log('从URL获取到styleId:', urlStyleId);
-    }
-  }, [location.search]);
-
-  // 加载初始配置数据
-  useEffect(() => {
-    const fetchConfigData = async () => {
+    const fetchConfigData = async (styleId?: string) => {
       try {
         setLoadingData(true);
         setError('');
@@ -103,9 +93,18 @@ const EditPage: React.FC = () => {
         setLoadingData(false);
       }
     };
+
+    // 从URL获取styleId并直接请求数据
+    const searchParams = new URLSearchParams(location.search);
+    const urlStyleId = searchParams.get('styleId') || undefined;
+    if (urlStyleId) {
+      setStyleId(urlStyleId);
+      console.log('从URL获取到styleId:', urlStyleId);
+    }
     
-    fetchConfigData();
-  }, [styleId]);
+    // 只发起一次请求
+    fetchConfigData(urlStyleId);
+  }, [location.search]); // 只依赖 location.search
 
   // 当文案变化时，自动生成标题
   useEffect(() => {

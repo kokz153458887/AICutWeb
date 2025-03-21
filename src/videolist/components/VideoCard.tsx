@@ -9,8 +9,6 @@ import VideoCardSlider from './VideoCardSlider';
 import LoadingFooter from './LoadingFooter';
 import '../styles/VideoCard.css';
 
-// 默认分页大小
-const DEFAULT_PAGE_SIZE = 10;
 
 interface VideoCardProps {
   index: number; 

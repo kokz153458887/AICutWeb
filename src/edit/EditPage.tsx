@@ -2,7 +2,7 @@
  * 视频生成配置编辑页组件
  * 负责整合各个配置项，提供用户编辑视频生成参数的界面
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './EditPage.css';
 import TextInputSection from './components/TextInputSection';
@@ -24,6 +24,16 @@ const EditPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
+  // 获取所有URL参数
+  const urlParams = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const params: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    return params;
+  }, [location.search]);
+  
   // 基本状态
   const [text, setText] = useState<string>('');
   const [title, setTitle] = useState<string>('');
@@ -43,15 +53,15 @@ const EditPage: React.FC = () => {
   
   // 获取URL参数中的styleId并加载初始配置数据
   useEffect(() => {
-    const fetchConfigData = async (styleId?: string) => {
+    const fetchConfigData = async () => {
       try {
         setLoadingData(true);
         setError('');
         
-        console.log('开始获取编辑页配置数据，styleId:', styleId || '无');
+        console.log('开始获取编辑页配置数据，URL参数:', urlParams);
         
-        // 发起API请求
-        const response = await EditService.getEditConfig(styleId);
+        // 发起API请求，传递所有URL参数
+        const response = await EditService.getEditConfig(urlParams);
         
         if (response.code === 0 && response.data) {
           const { config } = response.data;
@@ -80,6 +90,11 @@ const EditPage: React.FC = () => {
             setBackupCount(config.backupVideoNum);
           }
           
+          // 设置styleId
+          if (urlParams.styleId) {
+            setStyleId(urlParams.styleId);
+          }
+          
           console.log('配置数据加载成功', config);
         } else {
           throw new Error(response.message || '加载失败');
@@ -87,24 +102,15 @@ const EditPage: React.FC = () => {
       } catch (err) {
         console.error('加载配置数据失败:', err);
         setError('加载数据失败，请重试');
-        // 显示错误提示
-        alert('加载数据失败，请重试');
+        toast.error('加载数据失败，请重试');
       } finally {
         setLoadingData(false);
       }
     };
-
-    // 从URL获取styleId并直接请求数据
-    const searchParams = new URLSearchParams(location.search);
-    const urlStyleId = searchParams.get('styleId') || undefined;
-    if (urlStyleId) {
-      setStyleId(urlStyleId);
-      console.log('从URL获取到styleId:', urlStyleId);
-    }
     
-    // 只发起一次请求
-    fetchConfigData(urlStyleId);
-  }, [location.search]); // 只依赖 location.search
+    // 发起请求
+    fetchConfigData();
+  }, [urlParams]); // 依赖 urlParams
 
   // 当文案变化时，自动生成标题
   useEffect(() => {
@@ -202,9 +208,10 @@ const EditPage: React.FC = () => {
       
       console.log('准备提交数据，音量值:', voiceVolume, volume, '(0-5范围)');
       console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
+      console.log('URL参数:', urlParams);
       
-      // 发起提交请求
-      const response = await EditService.generateVideo(submitData);
+      // 发起提交请求，同时传递URL参数
+      const response = await EditService.generateVideo(submitData, urlParams);
       
       if (response.code === 0 && response.data) {
         console.log('提交成功，生成任务ID:', response.data.generateId);

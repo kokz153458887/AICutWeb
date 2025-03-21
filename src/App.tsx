@@ -52,6 +52,13 @@ const AppContainer: React.FC = () => {
   useEffect(() => {
     // 初始化设备信息收集
     initDeviceInfo();
+
+    // 打印环境配置信息
+    console.log('当前环境配置：', {
+      NODE_ENV: import.meta.env.VITE_NODE_ENV,
+      API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+      API_MOCK: import.meta.env.VITE_API_MOCK
+    });
   }, []);
 
   return (

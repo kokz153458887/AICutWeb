@@ -3,6 +3,7 @@
  * 负责获取视频详情数据
  */
 import axios from 'axios';
+import { API_CONFIG, API_PATHS, API_HEADERS, API_RESPONSE_CODE } from '../config/api';
 
 // 视频内容数据接口
 export interface VideoContent {
@@ -42,8 +43,14 @@ interface ApiResponse<T> {
  */
 export const getVideoDetail = async (id: string): Promise<VideoDetailData> => {
   try {
-    const response = await axios.get<ApiResponse<VideoDetailData>>(`/api/video/getVideoDetail?id=${id}`);
-    if (response.data.code === 0) {
+    const response = await axios.get<ApiResponse<VideoDetailData>>(API_PATHS.video.getDetail, {
+      baseURL: API_CONFIG.fullBaseURL,
+      params: { id },
+      timeout: API_CONFIG.timeout,
+      headers: API_HEADERS
+    });
+    
+    if (response.data.code === API_RESPONSE_CODE.SUCCESS) {
       return response.data.data;
     }
     throw new Error(response.data.message || '获取视频详情失败');

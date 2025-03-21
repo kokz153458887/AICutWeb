@@ -4,19 +4,15 @@
  */
 import axios from 'axios';
 import { ApiResponse, EditConfigResponse, VideoEditConfig, VideoGenerateResponse } from './types';
-
-// API基础URL
-const BASE_URL = '/api';
+import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
 
 /**
  * 创建axios实例
  */
 const apiClient = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: API_CONFIG.fullBaseURL,
+  timeout: API_CONFIG.timeout,
+  headers: API_HEADERS
 });
 
 /**
@@ -53,24 +49,29 @@ apiClient.interceptors.response.use(
 export class EditService {
   /**
    * 获取编辑页初始配置数据
-   * @param styleId 可选的风格ID
+   * @param params 所有URL参数
    */
-  static async getEditConfig(styleId?: string): Promise<ApiResponse<EditConfigResponse>> {
-    const params = styleId ? { styleId } : {};
-    return apiClient.get('/edit/config', { params });
+  static async getEditConfig(params: Record<string, string>): Promise<ApiResponse<EditConfigResponse>> {
+    console.log("getEditConfig params:", params);
+    return apiClient.get(API_PATHS.edit.getConfig, { params });
   }
 
   /**
    * 提交视频编辑配置，生成视频
    * @param config 编辑配置
+   * @param params URL参数
    * @returns 包含生成ID和成功跳转URL的响应
    */
-  static async generateVideo(config: VideoEditConfig): Promise<ApiResponse<VideoGenerateResponse>> {
-    // 只提交config数据，不需要包装code和message
+  static async generateVideo(
+    config: VideoEditConfig, 
+    params: Record<string, string>
+  ): Promise<ApiResponse<VideoGenerateResponse>> {
+    // 提交config数据和URL参数
     const formattedData = {
-      config: config
+      config: config,
+      params: params
     };
     
-    return apiClient.post('/edit/submit', formattedData);
+    return apiClient.post(API_PATHS.edit.submit, formattedData);
   }
 } 

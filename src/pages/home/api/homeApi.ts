@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { HomeApiResponse, HomeApiParams } from './homeApiModel';
+import { API_CONFIG, API_PATHS, API_HEADERS, API_RESPONSE_CODE } from '../../../config/api';
 
 /**
  * 首页API服务类
@@ -25,12 +26,11 @@ export class HomeApiService {
       console.log(`[HomeApi] 发起请求: tab=${mergedParams.tab}, pageNum=${mergedParams.pageNum}, pageSize=${mergedParams.pageSize}`);
       
       // 发起真实的API请求
-      const response = await axios.get<HomeApiResponse>('/api/home/getHomeData', {
+      const response = await axios.get<HomeApiResponse>(API_PATHS.home.getHomeData, {
+        baseURL: API_CONFIG.fullBaseURL,
         params: mergedParams,
-        timeout: 10000, // 10秒超时
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        timeout: API_CONFIG.timeout,
+        headers: API_HEADERS
       });
       
       // 检查响应状态

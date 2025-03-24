@@ -9,13 +9,16 @@ import './ContentCard.css';
 
 // 定义卡片数据接口
 export interface ContentCardItem {
+  _id: string;
   styleId: string;
   styleName?: string;
+  title?: string;
   text: string;
   cover: string;
-  stars: string;
+  stars: number;
   ratio?: string;
   coverRatio?: string;
+  videoUrl?: string;
   navUrl?: string;
 }
 
@@ -68,28 +71,16 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
     
     // 构建URL参数
     const params: Record<string, string> = {
-      title: item.styleName || item.text.split('.')[0] || '',
+      title: item.title || item.styleName || item.text.split('.')[0] || '',
       text: item.text || '',
       ratio: item.ratio || item.coverRatio || '16:9',
       cover: item.cover || ''
     };
     
     // 优先使用navUrl，如果没有则使用styleId构建路径
-    let url = item.navUrl || `/video/${item.styleId}`;
-    
-    // 将参数添加到URL中
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) searchParams.append(key, value);
-    });
-    
-    const queryString = searchParams.toString();
-    if (queryString) {
-      url = `${url}?${queryString}`;
-    }
-    
+    let url = item.navUrl || `/video/${item.styleId}`;  
     console.log(`[ContentCard] 点击卡片: ${item.styleId}, 跳转到: ${url}`);
-    navigate(url);
+    navigate(url, { state: { cardData: item } });
   };
   
   return (

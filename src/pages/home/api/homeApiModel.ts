@@ -17,11 +17,18 @@ export interface TopbarItem {
 }
 
 export interface ContentItem {
+  _id: string;
   styleId: string;
   styleName: string;
+  title: string;
   text: string;
   cover: string;
-  stars: string;
+  stars: number;
+  ratio?: string;
+  coverRatio?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  videoUrl?: string;
 }
 
 // 分页信息

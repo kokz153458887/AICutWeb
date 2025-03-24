@@ -20,6 +20,7 @@ const VideoDetail: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const cardData = location.state?.cardData;
   
   // 从URL参数中获取标题、文案、视频比例和封面图片
   const searchParams = new URLSearchParams(location.search);
@@ -39,6 +40,24 @@ const VideoDetail: React.FC = () => {
 
       try {
         setLoading(true);
+        // 如果有卡片数据，直接使用
+        if (cardData) {
+          setData({
+            content: {
+              ...cardData,
+              videoUrl: cardData.videoUrl || ''
+            },
+            template: {
+              styleId: cardData.styleId,
+              styleName: cardData.styleName || '',
+              styles: {}
+            }
+          });
+          setLoading(false);
+          return;
+        }
+        
+        // 否则从API获取数据
         const videoData = await getVideoDetail(id);
         
         // 检查文案是否有变化，只有在文案有变化时才更新数据
@@ -61,7 +80,7 @@ const VideoDetail: React.FC = () => {
     };
 
     fetchData();
-  }, [id, location.pathname]);
+  }, [id, location.pathname, cardData]);
 
   // 处理视频播放事件
   const handleVideoPlay = () => {
@@ -85,17 +104,23 @@ const VideoDetail: React.FC = () => {
 
   // 处理"做同款"按钮点击
   const handleNavClick = () => {
-    if (data?.content.navUrl) {
-      // 使用navigate跳转替代直接修改location
-      if (data.content.navUrl.startsWith('/edit')) {
-        // 跳转到编辑页面，确保styleId被传递
-        const styleId = data.template.styleId;
-        navigate(`/edit?styleId=${styleId}`);
-      } else {
-        // 对于外部链接，继续使用原来的方式
-        window.location.href = data.content.navUrl;
-      }
+    // 获取当前视频的 styleId
+    const styleId = cardData?.styleId || data?.template.styleId;
+    
+    // 构建编辑页URL参数
+    const editParams = new URLSearchParams();
+    
+    // 必要的参数
+    if (styleId) {
+      editParams.append('styleId', styleId);
     }
+    
+    // 构建完整的编辑页URL
+    const editUrl = `/edit?${editParams.toString()}`;
+    console.log('跳转到编辑页:', editUrl);
+    
+    // 使用 navigate 跳转到编辑页
+    navigate(editUrl);
   };
 
   // 处理返回按钮点击
@@ -131,23 +156,23 @@ const VideoDetail: React.FC = () => {
 
   // 获取要显示的标题和文案
   const getDisplayTitle = () => {
-    // 优先使用API返回的title
-    return data?.content.title || null;
+    // 优先使用卡片数据或API返回的title
+    return cardData?.title || data?.content.title || null;
   };
 
   const getDisplayText = () => {
-    return data?.content.text || urlText;
+    return cardData?.text || data?.content.text || urlText;
   };
 
   // 获取要显示的点赞数
   const getDisplayStars = () => {
-    return data?.content.stars || '';
+    return cardData?.stars || data?.content.stars || '';
   };
 
   // 获取要显示的封面图片
   const getDisplayCover = () => {
-    // 优先使用URL参数中的封面，如果没有则使用API返回的封面
-    return urlCover || (data?.content.cover || '');
+    // 优先使用卡片数据，然后是URL参数，最后是API返回的封面
+    return cardData?.cover || urlCover || (data?.content.cover || '');
   };
 
   // 渲染视频内容

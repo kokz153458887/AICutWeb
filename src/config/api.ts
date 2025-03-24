@@ -50,7 +50,9 @@ export const API_PATHS = {
   // 视频编辑相关
   edit: {
     getConfig: '/edit/config',
-    submit: '/edit/submit'
+    createConfig: '/edit/create',
+    generate: '/edit/generate',
+    updateConfig: '/edit/update'
   },
   
   // 视频详情相关

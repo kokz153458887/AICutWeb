@@ -176,7 +176,9 @@ const EditPage: React.FC = () => {
       return;
     }
     
-    if (!text.trim()) {
+    // 根据 apimodel 参数判断是否需要验证文案
+    const apiModel = urlParams.apimodel || 'generate';
+    if (apiModel === 'generate' && !text.trim()) {
       toast.error('请输入文案内容');
       return;
     }
@@ -210,8 +212,18 @@ const EditPage: React.FC = () => {
       console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
       console.log('URL参数:', urlParams);
       
-      // 发起提交请求，同时传递URL参数
-      const response = await EditService.generateVideo(submitData, urlParams);
+      // 根据 apimodel 参数选择不同的接口
+      let response;
+      if (apiModel === 'generate') {
+        console.log('使用 generateVideo 接口');
+        response = await EditService.generateVideo(submitData, urlParams);
+      } else if (apiModel === 'update') {
+        console.log('使用 updateConfig 接口');
+        response = await EditService.updateConfig(submitData, urlParams);
+      } else {
+        console.log('使用 createConfig 接口');
+        response = await EditService.createConfig(submitData, urlParams);
+      }
       
       if (response.code === 0 && response.data) {
         console.log('提交成功，生成任务ID:', response.data.generateId);
@@ -220,7 +232,9 @@ const EditPage: React.FC = () => {
         if (response.data.successUrl) {
           window.location.href = response.data.successUrl;
         } else {
-          toast.success(`视频生成请求已提交，视频生成ID: ${response.data.generateId}`);
+          const actionText = apiModel === 'generate' ? '视频生成' : 
+                            apiModel === 'update' ? '模板更新' : '模板生成';
+          toast.success(`${actionText}请求已提交，ID: ${response.data.generateId}`);
           // 跳转到主页的视频列表tab
           navigate('/?tab=videolist');
         }
@@ -229,7 +243,7 @@ const EditPage: React.FC = () => {
       }
     } catch (err) {
       console.error('提交配置失败:', err);
-      toast.error('视频生成失败，请重试');
+      toast.error('生成失败，请重试');
       setIsSubmitting(false);
     } finally {
       setLoading(false);

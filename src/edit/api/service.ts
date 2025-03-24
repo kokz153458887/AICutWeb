@@ -57,7 +57,43 @@ export class EditService {
   }
 
   /**
-   * 提交视频编辑配置，生成视频
+   * 提交视频编辑配置，生成视频模板
+   * @param config 编辑配置
+   * @param params URL参数
+   * @returns 包含生成ID和成功跳转URL的响应
+   */
+  static async createConfig(
+    config: VideoEditConfig, 
+    params: Record<string, string>
+  ): Promise<ApiResponse<VideoGenerateResponse>> {
+    const formattedData = {
+      config: config,
+      params: params
+    };
+    
+    return apiClient.post(API_PATHS.edit.createConfig, formattedData);
+  }
+
+  /**
+   * 更新视频编辑配置
+   * @param config 编辑配置
+   * @param params URL参数
+   * @returns 包含生成ID和成功跳转URL的响应
+   */
+  static async updateConfig(
+    config: VideoEditConfig, 
+    params: Record<string, string>
+  ): Promise<ApiResponse<VideoGenerateResponse>> {
+    const formattedData = {
+      config: config,
+      params: params
+    };
+    
+    return apiClient.post(API_PATHS.edit.updateConfig, formattedData);
+  }
+
+  /**
+   * 生成视频
    * @param config 编辑配置
    * @param params URL参数
    * @returns 包含生成ID和成功跳转URL的响应
@@ -66,12 +102,11 @@ export class EditService {
     config: VideoEditConfig, 
     params: Record<string, string>
   ): Promise<ApiResponse<VideoGenerateResponse>> {
-    // 提交config数据和URL参数
     const formattedData = {
       config: config,
       params: params
     };
     
-    return apiClient.post(API_PATHS.edit.submit, formattedData);
+    return apiClient.post(API_PATHS.edit.generate, formattedData);
   }
 } 

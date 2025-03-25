@@ -70,7 +70,6 @@ export const API_HEADERS = {
 // 导出响应码配置
 export const API_RESPONSE_CODE = {
   SUCCESS: 0,
-  SUCCESS_ALT: 200, // 某些接口可能使用200作为成功码
   ERROR: 500,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,

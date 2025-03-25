@@ -80,7 +80,7 @@ export const getVideoList = async (params?: PaginationParams): Promise<{
       headers: API_HEADERS
     });
 
-    if (response.data.code === API_RESPONSE_CODE.SUCCESS_ALT && response.data.data && response.data.data.videolist) {
+    if (response.data.code === API_RESPONSE_CODE.SUCCESS && response.data.data && response.data.data.videolist) {
       return {
         videoList: response.data.data.videolist,
         hasMore: response.data.data.hasMore ?? false
@@ -112,7 +112,7 @@ export const getVideoDetail = async (id: string): Promise<VideoCardData | null> 
       headers: API_HEADERS
     });
 
-    if (response.data.code === API_RESPONSE_CODE.SUCCESS_ALT && response.data.data) {
+    if (response.data.code === API_RESPONSE_CODE.SUCCESS && response.data.data) {
       return response.data.data;
     }
     return null;
@@ -138,7 +138,7 @@ export const regenerateVideo = async (generateId: string): Promise<RegenerateRes
       }
     );
 
-    if (response.data.code === API_RESPONSE_CODE.SUCCESS_ALT) {
+    if (response.data.code === API_RESPONSE_CODE.SUCCESS) {
       return response.data;
     }
 

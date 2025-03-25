@@ -51,7 +51,7 @@ export const API_PATHS = {
   edit: {
     getConfig: '/edit/config',
     createConfig: '/edit/create',
-    generate: '/edit/generate',
+    generate: '/ai/generate',
     updateConfig: '/edit/update'
   },
   

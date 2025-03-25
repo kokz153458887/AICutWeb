@@ -1,6 +1,6 @@
 {
   "getVideoList": {
-    "code": 200,
+    "code": 0,
     "message": "success",
     "data": {
       "hasMore": true,

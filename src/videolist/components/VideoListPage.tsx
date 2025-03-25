@@ -45,8 +45,6 @@ const VideoListPage: React.FC = () => {
   const [pageNum, setPageNum] = useState<number>(savedState?.pageNum || 1);
   const [showToast, setShowToast] = useState<boolean>(false);
   const [lastAttemptedRange, setLastAttemptedRange] = useState<{start: number, end: number} | null>(null);
-  // 新增：记录正在加载的页码集合
-  const [loadingPages, setLoadingPages] = useState<Set<number>>(new Set());
 
   /**
    * 显示Toast提示
@@ -74,22 +72,10 @@ const VideoListPage: React.FC = () => {
         setPageNum(1);
         setHasMore(true);
         setLoadMoreError(false);
-        // 重置时清空正在加载的页码集合
-        setLoadingPages(new Set());
       }
 
       const currentPageNum = reset ? 1 : pageNum;
-      
-      // 检查该页是否正在加载
-      if (loadingPages.has(currentPageNum)) {
-        console.log(`页码 ${currentPageNum} 正在加载中，跳过重复请求`);
-        return;
-      }
-
       console.log(`加载视频列表: pageNum=${currentPageNum}, reset=${reset}`);
-      
-      // 添加到正在加载的页码集合
-      setLoadingPages(prev => new Set(prev).add(currentPageNum));
       
       const params: PaginationParams = {
         pageNum: currentPageNum,
@@ -106,22 +92,13 @@ const VideoListPage: React.FC = () => {
       } else {
         setVideos(prevVideos => {
           const newVideos = [...prevVideos];
+          const startIndex = (currentPageNum - 1) * DEFAULT_PAGE_SIZE;
           
-          // 使用 Map 存储现有数据，以 generateId 为键
-          const existingVideosMap = new Map(
-            newVideos.filter(v => v !== null).map(v => [v!.generateId, v])
-          );
-          
-          // 处理新数据
-          videoList.forEach(video => {
-            if (existingVideosMap.has(video.generateId)) {
-              // 如果存在相同 generateId 的数据，更新它
-              const index = newVideos.findIndex(v => v?.generateId === video.generateId);
-              if (index !== -1) {
-                newVideos[index] = video;
-              }
+          videoList.forEach((video, index) => {
+            const realIndex = startIndex + index;
+            if (realIndex < newVideos.length) {
+              newVideos[realIndex] = video;
             } else {
-              // 如果是新数据，添加到列表末尾
               newVideos.push(video);
             }
           });
@@ -148,12 +125,6 @@ const VideoListPage: React.FC = () => {
         setHasMore(true);
       }
     } finally {
-      // 从正在加载的页码集合中移除
-      setLoadingPages(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(pageNum);
-        return newSet;
-      });
       setLoading(false);
       setLoadingMore(false);
     }
@@ -260,22 +231,11 @@ const VideoListPage: React.FC = () => {
     
     // 计算应该加载的页码
     const targetPageNum = Math.floor(startIndex / DEFAULT_PAGE_SIZE) + 1;
-
-    // 检查该页是否正在加载
-    if (loadingPages.has(targetPageNum)) {
-      console.log(`页码 ${targetPageNum} 正在加载中，跳过重复请求`);
-      setLoadingMore(false);
-      return Promise.resolve();
-    }
-    
     if (targetPageNum !== pageNum) {
       setPageNum(targetPageNum);
     }
     
     try {
-      // 添加到正在加载的页码集合
-      setLoadingPages(prev => new Set(prev).add(targetPageNum));
-
       const params: PaginationParams = {
         pageNum: targetPageNum,
         pageSize: DEFAULT_PAGE_SIZE
@@ -295,29 +255,19 @@ const VideoListPage: React.FC = () => {
       
       setVideos(prevVideos => {
         const newVideos = [...prevVideos];
-        
-        // 使用 Map 存储现有数据，以 generateId 为键
-        const existingVideosMap = new Map(
-          newVideos.filter(v => v !== null).map(v => [v!.generateId, v])
-        );
-        
-        // 处理新数据
-        videoList.forEach(video => {
-          if (existingVideosMap.has(video.generateId)) {
-            // 如果存在相同 generateId 的数据，更新它
-            const index = newVideos.findIndex(v => v?.generateId === video.generateId);
-            if (index !== -1) {
-              newVideos[index] = video;
-            }
+        // 填充新获取的数据
+        videoList.forEach((video, idx) => {
+          const realIndex = startIndex + idx;
+          if (realIndex < newVideos.length) {
+            newVideos[realIndex] = video;
           } else {
-            // 如果是新数据，添加到列表末尾
             newVideos.push(video);
           }
         });
-        
         return newVideos;
       });
       
+      // 更新hasMore状态 - 只有当返回数据不为空且API指示还有更多数据时才设置为true
       setHasMore(moreData && videoList.length > 0);
       setPageNum(targetPageNum + 1);
       
@@ -326,20 +276,26 @@ const VideoListPage: React.FC = () => {
       // 成功加载后清除上次尝试加载的范围
       setLastAttemptedRange(null);
       
+      // 重要：确保在成功时也将loadingMore设置为false
+      setLoadingMore(false);
+      return Promise.resolve();
     } catch (error) {
       console.error('加载更多视频失败:', error);
-      setLoadMoreError(true);
-      setHasMore(true);
-    } finally {
-      // 从正在加载的页码集合中移除
-      setLoadingPages(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(targetPageNum);
-        return newSet;
-      });
+      
+      // 确保即使发生错误，也重置加载状态并设置错误状态
       setLoadingMore(false);
+      setLoadMoreError(true);
+      
+      // 重要：发生错误时，不修改hasMore状态，保持为true，以便显示错误状态
+      console.log('发生错误，hasMore状态保持为: true');
+      setHasMore(true);
+      
+      // 注意：错误时保留lastAttemptedRange，供VideoCard组件判断哪些项不应显示
+      
+      // 返回拒绝的Promise以便上层组件可以处理
+      return Promise.reject(error);
     }
-  }, [hasMore, loadingMore, pageNum, loadingPages]);
+  }, [hasMore, loadingMore, pageNum]);
 
   // 处理重试加载，确保传入正确的索引范围
   const handleRetry = useCallback((index: number) => {

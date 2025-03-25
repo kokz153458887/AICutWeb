@@ -104,7 +104,7 @@ export class VideoListRoutes {
       
       if (video) {
         return res.status(200).json({
-          code: 200,
+          code: 0,
           message: 'success',
           data: video
         });

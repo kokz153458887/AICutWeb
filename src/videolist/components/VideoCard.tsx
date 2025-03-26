@@ -52,14 +52,14 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   // 是否为加载更多的底部项
   const isLoadMoreItem = index === videos.length && hasMore;
   
-  // 如果是底部加载项，显示加载更多或错误状态
-  if (isLoadMoreItem) {
+  // 如果是底部项，显示加载更多或错误状态
+  if (isLoadMoreItem || index === videos.length) {
     console.log(`VideoCard render footer: loadingMore=${loadingMore}, loadMoreError=${loadMoreError}`);
     
     return (
       <div style={style} className="footer-container">
         <LoadingFooter 
-          isLoading={loadingMore && !loadMoreError}
+          isLoading={loadingMore && !loadMoreError && hasMore}
           error={loadMoreError}
           onRetry={() => {
             console.log('触发重试事件: index =', index);

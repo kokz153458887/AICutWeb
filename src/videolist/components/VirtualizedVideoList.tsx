@@ -42,7 +42,7 @@ const VirtualizedVideoList: React.FC<VirtualizedVideoListProps> = ({
   
   // 计算项目总数 - 当有更多数据时，需要增加一个条目用于显示加载更多
   const itemCount = useMemo(() => {
-    return hasMore ? videos.length + 1 : videos.length;
+    return videos.length + 1;
   }, [videos.length, hasMore]);
 
   // 创建一个内部容器组件，可以自定义样式
@@ -83,7 +83,7 @@ const VirtualizedVideoList: React.FC<VirtualizedVideoListProps> = ({
                 height={height}
                 width={width}
                 itemCount={itemCount}
-                itemSize={430}
+                itemSize={370}
                 itemData={itemData}
                 onItemsRendered={onItemsRendered}
                 ref={(listInstance: any) => {

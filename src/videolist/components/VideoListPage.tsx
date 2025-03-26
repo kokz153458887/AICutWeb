@@ -6,6 +6,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { VideoCardData, getVideoList, regenerateVideo, PaginationParams } from '../api/videoListApi';
 import VirtualizedVideoList from './VirtualizedVideoList';
+import Toast from '../../components/Toast';
 import '../styles/VideoList.css';
 
 /**
@@ -305,6 +306,7 @@ const VideoListPage: React.FC = () => {
           />
         )}
       </div>
+      <Toast />
     </div>
   );
 };

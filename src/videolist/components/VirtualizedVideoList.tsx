@@ -83,7 +83,7 @@ const VirtualizedVideoList: React.FC<VirtualizedVideoListProps> = ({
                 height={height}
                 width={width}
                 itemCount={itemCount}
-                itemSize={370}
+                itemSize={400}
                 itemData={itemData}
                 onItemsRendered={onItemsRendered}
                 ref={(listInstance: any) => {

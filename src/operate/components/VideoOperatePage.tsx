@@ -40,16 +40,29 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
   const [error, setError] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
+  console.log('VideoOperatePage render:', { 
+    videoData, 
+    currentIndex, 
+    error,
+    videolistLength: videoData?.videolist?.length 
+  });
+
   // 在 useEffect 中进行数据验证
   useEffect(() => {
+    console.log('VideoOperatePage useEffect - data validation');
     if (!videoData) {
       setError('视频数据不存在');
       return;
     }
 
-    console.log('videoData: ', videoData);
     if (!videoData.videolist || videoData.videolist.length === 0) {
-      setError('没有可用的视频');
+      if (videoData.status === 'generating') {
+        console.log('Video is generating, clearing error');
+        setError(null);
+      } else {
+        console.log('No videos available, setting error');
+        setError('没有可用的视频');
+      }
       return;
     }
 
@@ -148,6 +161,7 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
    * 处理返回按钮点击
    */
   const handleBack = useCallback(() => {
+    console.log('handleBack clicked');
     // 保持 tab=videolist 参数，移除 videoId 和 initialIndex 参数
     const newSearch = new URLSearchParams(location.search);
     newSearch.delete('videoId');
@@ -158,14 +172,9 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
     navigate(`/?${newSearch.toString()}`);
   }, [location.search, navigate]);
 
-  // 检查当前索引是否有效
-  if (videoData && currentIndex >= videoData.videolist.length) {
-    setCurrentIndex(0);
-    return null;
-  }
-
   // 错误状态
   if (error || !videoData) {
+    console.log('Rendering error state:', { error });
     return (
       <div className="video-operate-page">
         <VideoTopBar 
@@ -178,6 +187,52 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
       </div>
     );
   }
+
+  // 生成中状态
+  if (videoData.status === 'generating') {
+    console.log('Rendering generating state');
+    return (
+      <div className="video-operate-page">
+        <VideoTopBar 
+          onBackClick={handleBack}
+          onShareClick={handleShare}
+          onShareTemplateClick={handleShareTemplate}
+          title={videoData.title || "视频操作"}
+        />
+        <div className="video-main-content">
+          <div className="loading-container">
+            <LoadingView />
+            <div className="loading-text">视频生成中，请稍候...</div>
+          </div>
+          <div className="video-info-container">
+            <div className="video-title">{videoData.title}</div>
+            <div className="video-text">{videoData.text}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 检查当前索引是否有效
+  if (currentIndex >= videoData.videolist.length) {
+    console.log('Invalid index, returning error view');
+    return (
+      <div className="video-operate-page">
+        <VideoTopBar 
+          onBackClick={handleBack}
+          onShareClick={handleShare}
+          onShareTemplateClick={handleShareTemplate}
+          title={videoData.title || "视频操作"}
+        />
+        <div className="error-container">
+          <ErrorView onRetry={() => setError(null)} />
+          <div className="error-text">暂无可用视频</div>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('Rendering normal state');
 
   return (
     <div className="video-operate-page">

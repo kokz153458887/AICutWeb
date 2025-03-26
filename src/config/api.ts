@@ -3,10 +3,30 @@
  * 统一管理所有接口的host和port配置
  */
 
+// 获取API基础URL
+const getApiBaseUrl = () => {
+  const configuredHost = import.meta.env.VITE_API_HOST;
+  const apiPort = import.meta.env.VITE_API_PORT || '5127';
+
+  // 如果配置了域名，优先使用配置的域名
+  if (configuredHost) {
+    return `${configuredHost}:${apiPort}`;
+  }
+
+  // 否则使用当前域名
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:${apiPort}`;
+  }
+
+  // 降级方案：使用 localhost
+  return `http://localhost:${apiPort}`;
+};
+
 // 环境变量配置
 const ENV_CONFIG = {
   env: import.meta.env.VITE_NODE_ENV || 'development',
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
+  baseUrl: getApiBaseUrl(),
   useMock: import.meta.env.VITE_API_MOCK === 'true'
 };
 

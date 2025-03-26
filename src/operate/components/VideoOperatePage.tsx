@@ -12,6 +12,7 @@ import LoadingView from '../../components/LoadingView';
 import ErrorView from '../../components/ErrorView';
 import Toast, { toast } from '../../components/Toast';
 import { VideoOperateData } from '../api/types';
+import { createFromVideoTask } from '../api/operateApi';
 import '../styles/VideoOperatePage.css';
 
 interface VideoOperatePageProps {
@@ -37,6 +38,7 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [error, setError] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   // 在 useEffect 中进行数据验证
   useEffect(() => {
@@ -45,6 +47,7 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
       return;
     }
 
+    console.log('videoData: ', videoData);
     if (!videoData.videolist || videoData.videolist.length === 0) {
       setError('没有可用的视频');
       return;
@@ -93,6 +96,41 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
   }, []);
 
   /**
+   * 处理分享模版按钮点击
+   */
+  const handleShareTemplate = useCallback(async () => {
+    if (!videoData) {
+      toast.error('视频数据不存在');
+      return;
+    }
+
+    if (isSharing) {
+      return;
+    }
+
+    try {
+      setIsSharing(true);
+      toast.loading('分享中...');
+
+      const response = await createFromVideoTask(videoData.generateId, currentIndex);
+      
+      toast.dismiss();
+      
+      if (response.code === 0) {
+        toast.success('成功分享出去啦~~');
+      } else {
+        toast.error(response.message || '分享失败');
+      }
+    } catch (error) {
+      console.error('分享模版失败:', error);
+      toast.dismiss();
+      toast.error('分享失败，请稍后重试');
+    } finally {
+      setIsSharing(false);
+    }
+  }, [videoData, currentIndex, isSharing]);
+
+  /**
    * 处理发布按钮点击
    */
   const handlePublish = useCallback(() => {
@@ -133,6 +171,8 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
         <VideoTopBar 
           onBackClick={handleBack}
           onShareClick={handleShare}
+          onShareTemplateClick={handleShareTemplate}
+          title="视频操作"
         />
         <ErrorView onRetry={() => setError(null)} />
       </div>
@@ -145,6 +185,8 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
       <VideoTopBar 
         onBackClick={handleBack}
         onShareClick={handleShare}
+        onShareTemplateClick={isSharing ? undefined : handleShareTemplate}
+        title={videoData.title || "视频操作"}
       />
 
       {/* 可滚动的主内容区域 */}

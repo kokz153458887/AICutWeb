@@ -27,4 +27,10 @@ export interface VideoPlayerState {
   duration: number;
   loading: boolean;
   error: string | null;
+}
+
+// 分享模版接口响应
+export interface ShareTemplateResponse {
+  code: number;
+  message: string;
 } 

@@ -8,6 +8,7 @@ import './styles.css';
 export interface ToastItem {
   id: number;
   message: string;
+  type?: 'info' | 'success' | 'error' | 'loading';
 }
 
 // Toast管理器单例
@@ -34,16 +35,29 @@ class ToastManager {
     this.listeners = this.listeners.filter(l => l !== listener);
   }
 
-  show(message: string, duration: number = 2000) {
+  show(message: string, type: ToastItem['type'] = 'info', duration?: number) {
     const id = ++this.counter;
-    const toast = { id, message };
+    const toast = { id, message, type };
     this.toasts.push(toast);
     this.notifyListeners();
 
-    setTimeout(() => {
+    // 如果是 loading 类型，不自动关闭
+    if (type !== 'loading' && duration !== undefined) {
+      setTimeout(() => {
+        this.dismiss(id);
+      }, duration);
+    }
+
+    return id;
+  }
+
+  dismiss(id?: number) {
+    if (id) {
       this.toasts = this.toasts.filter(t => t.id !== id);
-      this.notifyListeners();
-    }, duration);
+    } else {
+      this.toasts = [];
+    }
+    this.notifyListeners();
   }
 
   private notifyListeners() {
@@ -53,17 +67,23 @@ class ToastManager {
 
 // 导出静态方法供直接调用
 export const toast = {
-  show: (message: string, duration?: number) => {
-    ToastManager.getInstance().show(message, duration);
+  show: (message: string, duration: number = 2000) => {
+    return ToastManager.getInstance().show(message, 'info', duration);
   },
-  info: (message: string, duration?: number) => {
-    ToastManager.getInstance().show(message, duration);
+  info: (message: string, duration: number = 2000) => {
+    return ToastManager.getInstance().show(message, 'info', duration);
   },
-  error: (message: string, duration?: number) => {
-    ToastManager.getInstance().show(message, duration);
+  error: (message: string, duration: number = 2000) => {
+    return ToastManager.getInstance().show(message, 'error', duration);
   },
-  success: (message: string, duration?: number) => {
-    ToastManager.getInstance().show(message, duration);
+  success: (message: string, duration: number = 2000) => {
+    return ToastManager.getInstance().show(message, 'success', duration);
+  },
+  loading: (message: string) => {
+    return ToastManager.getInstance().show(message, 'loading');
+  },
+  dismiss: (id?: number) => {
+    ToastManager.getInstance().dismiss(id);
   }
 };
 
@@ -88,7 +108,8 @@ const Toast: React.FC = () => {
   return (
     <div className="toast-container">
       {toasts.map(toast => (
-        <div key={toast.id} className="toast-item">
+        <div key={toast.id} className={`toast-item ${toast.type || 'info'}`}>
+          {toast.type === 'loading' && <div className="toast-loading-spinner" />}
           {toast.message}
         </div>
       ))}

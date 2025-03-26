@@ -9,16 +9,33 @@ import { BackIcon, ShareIcon } from '../icons';
 interface VideoTopBarProps {
   onBackClick: () => void;
   onShareClick: () => void;
+  onShareTemplateClick?: () => void;
+  title?: string;
 }
 
-const VideoTopBar: React.FC<VideoTopBarProps> = ({ onBackClick, onShareClick }) => {
+const VideoTopBar: React.FC<VideoTopBarProps> = ({ 
+  onBackClick, 
+  onShareClick, 
+  onShareTemplateClick,
+  title 
+}) => {
   return (
     <div className="video-top-bar">
       <div className="back-button" onClick={onBackClick}>
         <BackIcon />
       </div>
-      <div className="share-button" onClick={onShareClick}>
-        <ShareIcon />
+      
+      {title && <div className="title">{title}</div>}
+      
+      <div className="right-buttons">
+        {onShareTemplateClick && (
+          <button className="share-template-button" onClick={onShareTemplateClick}>
+            分享模版
+          </button>
+        )}
+        <div className="share-button" onClick={onShareClick}>
+          <ShareIcon />
+        </div>
       </div>
     </div>
   );

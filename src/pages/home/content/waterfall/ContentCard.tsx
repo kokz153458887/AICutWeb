@@ -69,17 +69,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
       return;
     }
     
-    // 构建URL参数
-    const params: Record<string, string> = {
-      title: item.title || item.styleName || item.text.split('.')[0] || '',
-      text: item.text || '',
-      ratio: item.ratio || item.coverRatio || '16:9',
-      cover: item.cover || ''
-    };
-    
     // 优先使用navUrl，如果没有则使用styleId构建路径
     let url = item.navUrl || `/video/${item.styleId}`;  
     console.log(`[ContentCard] 点击卡片: ${item.styleId}, 跳转到: ${url}`);
+    console.log(`[ContentCard] 卡片数据: ${JSON.stringify(item)}`);
     navigate(url, { state: { cardData: item } });
   };
   

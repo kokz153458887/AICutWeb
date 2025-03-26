@@ -26,8 +26,8 @@ const VideoDetail: React.FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const urlTitle = searchParams.get('title') || '视频标题';
   const urlText = searchParams.get('text') || '视频文案加载中...';
-  const urlRatio = searchParams.get('ratio') || '16:9'; // 默认16:9比例
-  const urlCover = searchParams.get('cover') || ''; // 从URL参数中获取封面图片
+  const urlRatio = searchParams.get('ratio');
+  const urlCover = searchParams.get('cover') || '';
 
   // 获取视频数据
   useEffect(() => {
@@ -137,9 +137,10 @@ const VideoDetail: React.FC = () => {
 
   // 计算视频容器高度
   const calculateVideoHeight = (): string => {
-    // 优先使用URL参数中的ratio
-    const ratioToUse = urlRatio || (data?.content.ratio || '16:9');
+    // 优先使用API返回的ratio，然后是URL参数中的ratio，最后是默认值
+    const ratioToUse = data?.content.ratio || urlRatio || '16:9';
     
+    console.log(`[VideoDetail] 计算视频容器高度, data: ${JSON.stringify(data)}`);
     console.log(`使用视频比例: ${ratioToUse}`);
     
     const [width, height] = ratioToUse.split(':').map(Number);

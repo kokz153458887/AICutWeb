@@ -6,8 +6,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import './VideoDetail.css';
 import { getVideoDetail, VideoDetailData } from './api';
-import VideoTopBar from '../components/VideoTopBar';
-import VideoBottomBar from './VideoBottomBar';
+import VideoTopBar from '../components/VideoTopBar/VideoTopBar';
+import VideoBottomBar from './VideoBottomBar/VideoBottomBar';
+import { BackIcon, ShareIcon } from '../components/icons';
 
 const VideoDetail: React.FC = () => {
   // 状态管理
@@ -218,40 +219,38 @@ const VideoDetail: React.FC = () => {
   // 即使在加载中或出错时，也渲染基本UI结构
   return (
     <div className="video-detail-container">
-      {/* 顶部操作区 - 只保留返回和分享按钮 */}
       <VideoTopBar 
-        onBackClick={handleBackClick} 
-        onShareClick={handleShareClick} 
+        onBackClick={handleBackClick}
+        onShareClick={handleShareClick}
       />
-      
-      {/* 视频播放区域 */}
-      {renderVideoContent()}
+      <div className="content-wrapper">
+        {/* 视频播放区域 */}
+        {renderVideoContent()}
 
-      {/* 视频内容区域 */}
-      <div className="video-content">
-        {/* 用户信息区域 */}
-        <div className="user-info">
-          <div className="user-avatar">
-            <img src="https://picsum.photos/50/50" alt="用户头像" />
+        {/* 视频内容区域 */}
+        <div className="video-content">
+          {/* 用户信息区域 */}
+          <div className="user-info">
+            <div className="user-avatar">
+              <img src="https://picsum.photos/50/50" alt="用户头像" />
+            </div>
+            <div className="user-name">吾明亮</div>
+            <button className="follow-button">关注</button>
           </div>
-          <div className="user-name">吾明亮</div>
-          <button className="follow-button">关注</button>
-        </div>
 
-        {/* 视频文案区域 - 只在有标题时显示标题 */}
-        <div className="video-text">
-          {getDisplayTitle() && (
-            <div className="video-title">{getDisplayTitle()}</div>
-          )}
-          <div className="video-description">{getDisplayText()}</div>
-          {error && <div className="error-message">{error}</div>}
+          {/* 视频文案区域 */}
+          <div className="video-text">
+            {getDisplayTitle() && (
+              <div className="video-title">{getDisplayTitle()}</div>
+            )}
+            <div className="video-description">{getDisplayText()}</div>
+            {error && <div className="error-message">{error}</div>}
+          </div>
         </div>
       </div>
-
-      {/* 底部操作栏 */}
       <VideoBottomBar 
         stars={getDisplayStars()} 
-        onNavClick={handleNavClick} 
+        onNavClick={handleNavClick}
       />
     </div>
   );

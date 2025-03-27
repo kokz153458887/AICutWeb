@@ -154,8 +154,26 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
    * 处理下载按钮点击
    */
   const handleDownload = useCallback(() => {
-    toast.info('下载功能开发中');
-  }, []);
+    if (!videoData || !videoData.videolist[currentIndex]) {
+      toast.error('视频数据不存在');
+      return;
+    }
+
+    const videoUrl = videoData.videolist[currentIndex].videoUrl;
+    if (!videoUrl) {
+      toast.error('视频地址不存在');
+      return;
+    }
+
+    try {
+      // 在新窗口中打开下载链接
+      window.open(videoUrl, '_blank');
+      toast.success('正在打开下载窗口');
+    } catch (error) {
+      console.error('下载失败:', error);
+      toast.error('下载失败，请稍后重试');
+    }
+  }, [videoData, currentIndex]);
 
   /**
    * 处理返回按钮点击
@@ -171,6 +189,51 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
     }
     navigate(`/?${newSearch.toString()}`);
   }, [location.search, navigate]);
+
+  /**
+   * 处理复制按钮点击
+   */
+  const handleCopy = useCallback(() => {
+    if (!videoData) {
+      toast.error('视频数据不存在');
+      return;
+    }
+
+    try {
+      const textToCopy = videoData.text || '';
+      
+      // 创建临时文本区域
+      const textArea = document.createElement('textarea');
+      textArea.value = textToCopy;
+      
+      // 设置样式使其不可见
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '0';
+      textArea.style.opacity = '0';
+      
+      document.body.appendChild(textArea);
+      
+      // 选择文本
+      textArea.select();
+      textArea.setSelectionRange(0, textArea.value.length);
+      
+      // 执行复制
+      const successful = document.execCommand('copy');
+      
+      // 清理
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        toast.success('文案已复制到剪贴板');
+      } else {
+        throw new Error('复制失败');
+      }
+    } catch (error) {
+      console.error('复制失败:', error);
+      toast.error('复制失败，请重试');
+    }
+  }, [videoData]);
 
   // 错误状态
   if (error || !videoData) {
@@ -257,7 +320,12 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
 
         {/* 视频文案区域 */}
         <div className="video-info-container">
-          <div className="video-title">{videoData.title}</div>
+          <div className="video-title-container">
+            <div className="video-title">{videoData.title}</div>
+            <button className="copy-button" onClick={handleCopy}>
+              复制
+            </button>
+          </div>
           <div className="video-text">{videoData.text}</div>
         </div>
       </div>

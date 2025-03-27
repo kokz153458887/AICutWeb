@@ -15,7 +15,7 @@ interface LoadingFooterProps {
  * 加载底部组件
  */
 const LoadingFooter: React.FC<LoadingFooterProps> = ({ isLoading, error, onRetry }) => {
-  console.log(`LoadingFooter 渲染: isLoading=${isLoading}, error=${error}`);
+  // console.log(`LoadingFooter 渲染: isLoading=${isLoading}, error=${error}`);
   
   if (isLoading) {
     console.log('LoadingFooter 显示加载中状态');

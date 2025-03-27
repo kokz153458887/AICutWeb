@@ -5,6 +5,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { VideoCardData, getVideoList, regenerateVideo, PaginationParams } from '../api/videoListApi';
+import { useVideoGenerationSocket } from '../hooks/useVideoGenerationSocket';
 import VirtualizedVideoList from './VirtualizedVideoList';
 import Toast from '../../components/Toast';
 import '../styles/VideoList.css';
@@ -153,7 +154,7 @@ const VideoListPage: React.FC = () => {
    * 检查项目是否已加载
    */
   const isItemLoaded = useCallback((index: number) => {
-    console.log(`isItemLoaded检查: index=${index}, videos.length=${videos.length}`);
+    // console.log(`isItemLoaded检查: index=${index}, videos.length=${videos.length}`);
     return index < videos.length && videos[index] !== null;
   }, [videos]);
 
@@ -256,6 +257,43 @@ const VideoListPage: React.FC = () => {
       return Promise.reject(error);
     }
   }, [videos]);
+
+  /**
+   * 处理视频状态更新
+   */
+  const handleVideoStatusUpdate = useCallback((
+    generateId: string, 
+    status: VideoCardData['status'],
+    videoCardData?: VideoCardData
+  ) => {
+    console.log('handleVideoStatusUpdate 处理视频状态更新:', generateId, "status:", status, "videoCardData:", videoCardData);
+    setVideos(prevVideos => {
+      // 找到需要更新的视频索引
+      const videoIndex = prevVideos.findIndex(v => v?.generateId === generateId);
+      
+      if (videoIndex === -1) return prevVideos;
+      
+      // 创建新的视频数组
+      const newVideos = [...prevVideos];
+      if (newVideos[videoIndex]) {
+        if (videoCardData) {
+          // 如果有完整的视频数据，更新整个对象
+          newVideos[videoIndex] = videoCardData;
+        } else {
+          // 否则只更新状态
+          newVideos[videoIndex] = {
+            ...newVideos[videoIndex]!,
+            status
+          };
+        }
+      }
+      
+      return newVideos;
+    });
+  }, []);
+
+  // 使用Socket Hook监听视频状态更新
+  useVideoGenerationSocket(videos, handleVideoStatusUpdate);
 
   return (
     <div className="video-list-page">

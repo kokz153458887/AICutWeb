@@ -57,7 +57,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
   
   // 处理图片加载失败
   const handleImageError = () => {
-    console.log(`[ContentCard] 图片加载失败: ${item.styleId}`);
+    // console.log(`[ContentCard] 图片加载失败: ${item.styleId}`);
     setImageError(true);
   };
   

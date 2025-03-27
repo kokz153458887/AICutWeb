@@ -48,7 +48,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   const { videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry, lastAttemptedRange } = data;
   const navigate = useNavigate();
   
-  console.log(`VideoCard渲染: index=${index}, hasMore=${hasMore}, loadMoreError=${loadMoreError}, videos.length=${videos.length}`);
+  // console.log(`VideoCard渲染: index=${index}, hasMore=${hasMore}, loadMoreError=${loadMoreError}, videos.length=${videos.length}`);
   
   // 是否为加载更多的底部项
   const isLoadMoreItem = index === videos.length && hasMore;

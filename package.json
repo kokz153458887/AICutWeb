@@ -15,8 +15,10 @@
     "mock": "node scripts/setupMock.js"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.0.0",
     "@types/react-virtualized": "^9.22.2",
     "axios": "^1.6.2",
+    "classnames": "^2.5.1",
     "masonic": "^4.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",

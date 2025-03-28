@@ -3,7 +3,7 @@
  * 负责处理素材库选择相关的API请求
  */
 import axios from 'axios';
-import { ApiResponse, MaterialListResponse } from './types';
+import { ApiResponse, MaterialListResponse, MusicLibItem } from './types';
 import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
 
 /**
@@ -44,7 +44,8 @@ apiClient.interceptors.response.use(
 );
 
 /**
- * 素材库选择API服务类
+ * 编辑页选择器API服务
+ * 负责处理编辑页各种选择器相关的API请求
  */
 export class EditSelectAPI {
   /**
@@ -57,6 +58,23 @@ export class EditSelectAPI {
     console.log(`[EditSelectAPI] 获取素材库列表: page=${page}, limit=${limit}`);
     
     return apiClient.get(API_PATHS.material.list, {
+      params: {
+        page,
+        limit
+      }
+    });
+  }
+
+  /**
+   * 获取音乐列表
+   * @param page 页码，默认1
+   * @param limit 每页记录数，默认20，设置为-1时返回所有记录
+   * @returns 音乐列表响应
+   */
+  static async getMusicList(page: number = 1, limit: number = -1): Promise<ApiResponse<{data: MusicLibItem[]}>> {
+    console.log(`[EditSelectAPI] 获取音乐列表: page=${page}, limit=${limit}`);
+    
+    return apiClient.get(API_PATHS.music.list, {
       params: {
         page,
         limit

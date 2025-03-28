@@ -10,13 +10,28 @@ export interface ContentModel {
   volume: number;
 }
 
+// 音乐库项模型
+export interface MusicLibItem {
+  id: string;
+  _id: string; // 保留原始 _id
+  name: string;
+  url: string;
+  duration: number;
+  start_time?: string;
+  end_time?: string;
+  discription: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // 背景音乐模型
 export interface BackgroundMusicModel {
-  name: string;
   musicId: string;
+  name: string;
   url: string;
-  start_time: string;
-  end_time: string;
+  start_time?: string;
+  end_time?: string;
+  discription: string;
   volume: number;
   isloop: boolean;
 }

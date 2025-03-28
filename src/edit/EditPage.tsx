@@ -12,10 +12,12 @@ import BackgroundMusicSection from './components/BackgroundMusicSection';
 import BackgroundImageSection from './components/BackgroundImageSection';
 import MaterialSection from './components/MaterialSection';
 import BackupVideoSection from './components/BackupVideoSection';
+import MusicSelectModal from './components/musicSelect/MusicSelectModal';
 import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
-import { EditService, VideoEditConfig } from './api';
+import { EditService, VideoEditConfig, BackgroundMusicModel } from './api';
+import { MusicLibItem } from './api/types';
 
 /**
  * 编辑页主组件
@@ -47,6 +49,7 @@ const EditPage: React.FC = () => {
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
   const [speaker, setSpeaker] = useState({ name: '龙小明', tag: '温柔' });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // 防止重复提交
+  const [showMusicModal, setShowMusicModal] = useState<boolean>(false);
   
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
@@ -331,9 +334,39 @@ const EditPage: React.FC = () => {
           startTime={configData?.backgroundMusic?.start_time || ""}
           endTime={configData?.backgroundMusic?.end_time || ""}
           volume={volume}
-          onMusicClick={() => handleConfigClick('music')}
+          onMusicClick={() => {
+            if (configData) {
+              setShowMusicModal(true);
+            }
+          }}
           onVolumeChange={handleMusicVolumeChange}
         />
+
+        {/* 音乐选择弹窗 */}
+        {showMusicModal && configData && (
+          <MusicSelectModal
+            visible={showMusicModal}
+            currentMusicId={configData.backgroundMusic.musicId}
+            onClose={() => setShowMusicModal(false)}
+            onSelect={(music: MusicLibItem) => {
+              setConfigData({
+                ...configData,
+                backgroundMusic: {
+                  ...configData.backgroundMusic,
+                  musicId: music._id,
+                  name: music.name,
+                  url: music.url,
+                  start_time: music.start_time || "00:00:00",
+                  end_time: music.end_time || "00:00:00",
+                  discription: music.discription,
+                  volume: configData.backgroundMusic.volume,
+                  isloop: configData.backgroundMusic.isloop
+                }
+              });
+              setShowMusicModal(false);
+            }}
+          />
+        )}
 
         {/* 背景图片选择 */}
         <BackgroundImageSection

@@ -83,6 +83,11 @@ export const API_PATHS = {
   // 素材库相关
   material: {
     list: '/material/list'
+  },
+
+  // 音乐库相关
+  music: {
+    list: '/music/list'
   }
 };
 

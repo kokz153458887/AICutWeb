@@ -4,4 +4,5 @@
  */
 
 export * from './service';
-export * from './types'; 
+export * from './types';
+export * from './EditSelectAPI'; 

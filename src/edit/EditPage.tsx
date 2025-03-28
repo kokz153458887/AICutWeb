@@ -346,9 +346,18 @@ const EditPage: React.FC = () => {
         {/* 素材库选择 */}
         <MaterialSection
           materialName={configData?.material?.name || ""}
+          materialId={configData?.material?.materialID || ""}
           previewUrl={configData?.material?.previewUrl || ""}
           onMaterialClick={() => handleConfigClick('material')}
           onPreviewClick={handleMaterialPreviewClick}
+          onMaterialSelect={(material) => {
+            if (configData) {
+              setConfigData({
+                ...configData,
+                material: material
+              });
+            }
+          }}
         />
 
         {/* 备用视频数量 */}
@@ -382,4 +391,4 @@ const EditPage: React.FC = () => {
   );
 };
 
-export default EditPage; 
+export default EditPage;

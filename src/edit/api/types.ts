@@ -125,4 +125,30 @@ export interface EditConfigResponse {
     name: string;
     previewUrl: string;
   }>;
+}
+
+// 素材库数据项模型
+export interface MaterialLibItem {
+  _id: string;
+  name: string;
+  url: string;
+  fileName?: string;
+  type?: string;
+  previewUrl?: string;
+  coverUrl?: string;
+  nums?: number;
+  diskSize?: number;
+  diskSizeMB?: number;
+  updateTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// 素材库列表响应模型
+export interface MaterialListResponse {
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+  data: MaterialLibItem[];
 } 

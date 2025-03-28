@@ -78,6 +78,11 @@ export const API_PATHS = {
   // 视频详情相关
   video: {
     getDetail: '/video/getVideoDetail'
+  },
+  
+  // 素材库相关
+  material: {
+    list: '/material/list'
   }
 };
 

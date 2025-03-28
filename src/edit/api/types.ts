@@ -75,6 +75,7 @@ export interface MaterialModel {
   materialID: string;
   previewUrl: string; // 视频预览URL
   previewImage?: string; // 保留旧属性以保持兼容性
+  url?: string; // 素材URL
 }
 
 // 视频编辑配置模型

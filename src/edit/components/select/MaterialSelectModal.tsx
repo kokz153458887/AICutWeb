@@ -3,7 +3,8 @@
  * 负责展示素材库列表，支持选择和预览功能
  */
 import React, { useState, useEffect } from 'react';
-import '../styles/MaterialSelectModal.css';
+import '../../styles/MaterialSelectModal.css';
+import '../../styles/MeterialCommon.css';
 import MaterialItem from './MaterialItem';
 import { MaterialLibItem, MaterialModel } from '../../api/types';
 import { EditSelectAPI } from '../../api/EditSelectAPI';
@@ -116,7 +117,8 @@ const MaterialSelectModal: React.FC<MaterialSelectModalProps> = ({
       onSelect({
         name: selectedMaterial.name,
         materialID: selectedMaterial._id,
-        previewUrl: selectedMaterial.previewUrl || ''
+        previewUrl: selectedMaterial.previewUrl || '',
+        url: selectedMaterial.url || ''
       });
     }
   };

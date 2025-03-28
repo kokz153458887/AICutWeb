@@ -348,13 +348,20 @@ const EditPage: React.FC = () => {
           materialName={configData?.material?.name || ""}
           materialId={configData?.material?.materialID || ""}
           previewUrl={configData?.material?.previewUrl || ""}
+          url={configData?.material?.url || ""}
           onMaterialClick={() => handleConfigClick('material')}
           onPreviewClick={handleMaterialPreviewClick}
           onMaterialSelect={(material) => {
             if (configData) {
+              console.log('选择素材:', material);
               setConfigData({
                 ...configData,
-                material: material
+                material: {
+                  name: material.name,
+                  materialID: material.materialID,
+                  previewUrl: material.previewUrl,
+                  url: material.url
+                }
               });
             }
           }}

@@ -3,7 +3,8 @@
  * 负责展示单个素材库的信息，包括封面图、名称、标签和素材数量
  */
 import React from 'react';
-import '../styles/MaterialItem.css';
+import '../../styles/MaterialItem.css';
+import '../../styles/MeterialCommon.css';
 import { MaterialLibItem } from '../../api/types';
 
 interface MaterialItemProps {

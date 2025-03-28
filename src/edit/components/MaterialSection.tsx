@@ -4,13 +4,14 @@
  */
 import React, { useState } from 'react';
 import ConfigItem from './ConfigItem';
-import MaterialSelectModal from '../select/components/MaterialSelectModal';
+import MaterialSelectModal from './select/MaterialSelectModal';
 import { MaterialModel } from '../api/types';
 
 interface MaterialSectionProps {
   materialName: string;
   materialId?: string;
   previewUrl: string;
+  url?: string;
   onMaterialClick: () => void;
   onPreviewClick: () => void;
   onMaterialSelect?: (material: MaterialModel) => void;
@@ -23,6 +24,7 @@ const MaterialSection: React.FC<MaterialSectionProps> = ({
   materialName,
   materialId,
   previewUrl,
+  url,
   onMaterialClick,
   onPreviewClick,
   onMaterialSelect
@@ -48,7 +50,13 @@ const MaterialSection: React.FC<MaterialSectionProps> = ({
    */
   const handleMaterialSelect = (material: MaterialModel) => {
     if (onMaterialSelect) {
-      onMaterialSelect(material);
+      // 确保所有必要的字段都被正确传递
+      onMaterialSelect({
+        name: material.name,
+        materialID: material.materialID,
+        previewUrl: material.previewUrl,
+        url: material.url
+      });
     }
     setShowModal(false);
   };

@@ -95,6 +95,7 @@ const VideoDetail: React.FC = () => {
   // 处理视频加载完成事件
   const handleVideoLoaded = () => {
     if (videoRef.current) {
+      videoRef.current.volume = 0.5;
       videoRef.current.play().catch(error => {
         console.log('自动播放失败:', error);
         // 自动播放失败时保留封面
@@ -192,7 +193,6 @@ const VideoDetail: React.FC = () => {
             onPlay={handleVideoPlay}
             onLoadedData={handleVideoLoaded}
             playsInline
-            muted // 移动端自动播放通常需要静音
           />
           
           {/* 视频封面 */}

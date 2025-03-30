@@ -50,6 +50,33 @@
   letter-spacing: 0.3px;
 }
 
+/* 操作区域，包含添加和关闭按钮 */
+.style-select-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 创建按钮样式 */
+.style-create-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(33, 150, 243, 0.15);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.style-create-button:active {
+  background-color: rgba(33, 150, 243, 0.25);
+  transform: scale(0.92);
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .style-select-close {
   width: 32px;
   height: 32px;

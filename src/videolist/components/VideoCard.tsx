@@ -245,9 +245,14 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
         
         {/* 标签列表 */}
         <div className="video-card-tags">
-          {video.tags && video.tags.map((tag: string, idx: number) => (
-            <span key={idx} className="video-card-tag">{tag}</span>
-          ))}
+          {/* 展示视频显示比例标签 */}
+          {videoCard.videoShowRatio && (
+            <span className="video-card-tag">{videoCard.videoShowRatio}</span>
+          )}
+          {/* 展示素材名称标签 */}
+          {videoCard.materialName && (
+            <span className="video-card-tag">{videoCard.materialName}</span>
+          )}
         </div>
         
         {/* 视频预览区域 */}

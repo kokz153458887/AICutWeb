@@ -19,6 +19,7 @@ export interface VideoCardData {
   createTime: string;
   status: 'done' | 'generating' | 'failed';
   ratio: string;
+  videoShowRatio: string;
   materialName: string;
   videolist: VideoItem[];
 }

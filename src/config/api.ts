@@ -92,7 +92,9 @@ export const API_PATHS = {
   
   // 视频风格相关
   videoStyle: {
-    list: '/videostyle/list'
+    list: '/videostyle/list',
+    base: '/videostyle',
+    create: '/videostyle/create'
   }
 };
 

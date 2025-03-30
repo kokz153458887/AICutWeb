@@ -98,4 +98,51 @@ export class EditSelectAPI {
       }
     });
   }
+  
+  /**
+   * 创建视频风格
+   * @param styleData 风格数据对象
+   * @returns 创建结果
+   */
+  static async createStyle(styleData: {
+    styleName: string;
+    ratio: string;
+    resolution: string;
+    videoShowRatio: {
+      ratio: string;
+      cut_style: string;
+    };
+    font: {
+      voice_font_style: any;
+      title_font_style: any;
+    };
+  }): Promise<ApiResponse<VideoStyleItem>> {
+    console.log(`[EditSelectAPI] 创建视频风格: name=${styleData.styleName}`);
+    
+    return apiClient.post(API_PATHS.videoStyle.create, styleData);
+  }
+  
+  /**
+   * 更新视频风格
+   * @param id 风格ID
+   * @param styleData 风格数据对象
+   * @returns 更新结果
+   */
+  static async updateStyle(id: string, styleData: {
+    styleName: string;
+    ratio: string;
+    resolution: string;
+    videoShowRatio: {
+      ratio: string;
+      cut_style: string;
+    };
+    font: {
+      voice_font_style: any;
+      title_font_style: any;
+    };
+  }): Promise<ApiResponse<VideoStyleItem>> {
+    console.log(`[EditSelectAPI] 更新视频风格: id=${id}, name=${styleData.styleName}`);
+    
+    return apiClient.put(`${API_PATHS.videoStyle.base}/${id}`, styleData);
+  }
 } 

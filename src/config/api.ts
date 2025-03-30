@@ -88,6 +88,11 @@ export const API_PATHS = {
   // 音乐库相关
   music: {
     list: '/music/list'
+  },
+  
+  // 视频风格相关
+  videoStyle: {
+    list: '/videostyle/list'
   }
 };
 

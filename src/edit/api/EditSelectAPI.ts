@@ -3,7 +3,7 @@
  * 负责处理素材库选择相关的API请求
  */
 import axios from 'axios';
-import { ApiResponse, MaterialListResponse, MusicLibItem } from './types';
+import { ApiResponse, MaterialListResponse, MusicLibItem, StyleListResponse, VideoStyleItem } from './types';
 import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
 
 /**
@@ -75,6 +75,23 @@ export class EditSelectAPI {
     console.log(`[EditSelectAPI] 获取音乐列表: page=${page}, limit=${limit}`);
     
     return apiClient.get(API_PATHS.music.list, {
+      params: {
+        page,
+        limit
+      }
+    });
+  }
+
+  /**
+   * 获取视频风格列表
+   * @param page 页码，默认1
+   * @param limit 每页记录数，默认20，设置为-1时返回所有记录
+   * @returns 视频风格列表响应
+   */
+  static async getStyleList(page: number = 1, limit: number = -1): Promise<ApiResponse<VideoStyleItem[]>> {
+    console.log(`[EditSelectAPI] 获取视频风格列表: page=${page}, limit=${limit}`);
+    
+    return apiClient.get(API_PATHS.videoStyle.list, {
       params: {
         page,
         limit

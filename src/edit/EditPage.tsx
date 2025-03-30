@@ -17,7 +17,8 @@ import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
 import { EditService, VideoEditConfig, BackgroundMusicModel } from './api';
-import { MusicLibItem } from './api/types';
+import { MusicLibItem, StyleModel } from './api/types';
+import { cleanTitle, cleanContent } from '../utils/textUtils';
 
 /**
  * 编辑页主组件
@@ -94,7 +95,9 @@ const EditPage: React.FC = () => {
           }
           
           // 设置styleId
-          if (urlParams.styleId) {
+          if (config.style._id) {
+            setStyleId(config.style._id);
+          } else if (urlParams.styleId) {
             setStyleId(urlParams.styleId);
           }
           
@@ -195,13 +198,20 @@ const EditPage: React.FC = () => {
       setLoading(true);
       setIsSubmitting(true);
       
+      // 清洗标题和内容文本，去除特殊字符
+      const cleanedTitle = cleanTitle(title);
+      const cleanedText = cleanContent(text);
+      
+      console.log('文本清洗前:', { title, text: text.substring(0, 50) + '...' });
+      console.log('文本清洗后:', { cleanedTitle, cleanedText: cleanedText.substring(0, 50) + '...' });
+      
       // 准备提交数据
       const submitData: VideoEditConfig = {
         ...configData,
-        title: title,
+        title: cleanedTitle,
         content: {
           ...configData.content,
-          text: text,
+          text: cleanedText,
           volume: voiceVolume
         },
         backgroundMusic: {
@@ -284,6 +294,20 @@ const EditPage: React.FC = () => {
   };
 
   /**
+   * 处理视频风格选择事件
+   */
+  const handleStyleSelect = (style: StyleModel) => {
+    if (configData) {
+      console.log('选择视频风格:', style);
+      setStyleId(style._id || '');
+      setConfigData({
+        ...configData,
+        style: style
+      });
+    }
+  };
+
+  /**
    * 处理备用视频数量变化
    */
   const handleBackupCountChange = (newCount: number) => {
@@ -325,6 +349,8 @@ const EditPage: React.FC = () => {
           stylePreviewUrl={configData?.style?.stylePreviewUrl || ""}
           onStyleClick={() => handleConfigClick('style')}
           onVideoPreviewClick={handleStyleVideoPreviewClick}
+          onStyleSelect={handleStyleSelect}
+          styleId={styleId}
         />
 
         {/* 背景音乐选择 */}

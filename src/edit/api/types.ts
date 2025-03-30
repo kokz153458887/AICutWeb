@@ -82,6 +82,21 @@ export interface StyleModel {
   stylePreviewUrl?: string; // 风格预览视频URL
   videoShowRatio: VideoRatioModel;
   font: FontModel;
+  _id?: string; // 风格ID
+}
+
+// 视频风格库项模型
+export interface VideoStyleItem {
+  _id: string;
+  styleName: string;
+  ratio: string;
+  resolution: string;
+  videoShowRatio: VideoRatioModel;
+  font: FontModel;
+  previewUrl: string;
+  updateTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // 素材模型
@@ -167,4 +182,9 @@ export interface MaterialListResponse {
   limit: number;
   hasMore: boolean;
   data: MaterialLibItem[];
+}
+
+// 视频风格库列表响应模型 - 不再使用，保留为文档
+export interface StyleListResponse {
+  data: VideoStyleItem[];
 } 

@@ -98,7 +98,8 @@ export const API_PATHS = {
   },
 
   image: {
-    list: '/image/list'
+    list: '/image/list',
+    upload: '/image/upload'
   }
 };
 

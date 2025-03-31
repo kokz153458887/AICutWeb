@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../../styles/ImageSelectModal.css';
 import { toast } from '../../../components/Toast';
 import LoadingView from '../../../components/LoadingView';
-import { CloseIcon } from '../icons/SvgIcons';
+import { CloseIcon, EditIcon } from '../icons/SvgIcons';
 import { EditSelectAPI } from '../../api/EditSelectAPI';
 import { ImageLibItem } from '../../api/types';
 
@@ -23,7 +23,9 @@ const ImageSelectModal: React.FC<ImageSelectModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [imageList, setImageList] = useState<ImageLibItem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const CACHE_KEY = 'background_image_cache';
   const CACHE_EXPIRY = 5 * 60 * 1000; // 5分钟缓存过期
 
@@ -84,6 +86,44 @@ const ImageSelectModal: React.FC<ImageSelectModalProps> = ({
   }, [getLocalData, updateLocalCache]);
 
   /**
+   * 处理文件选择
+   */
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      const response = await EditSelectAPI.uploadImage(file);
+      
+      if (response.code === 0 && response.data?.image) {
+        // 更新图片列表
+        setImageList(prevList => [response.data.image, ...prevList]);
+        updateLocalCache([response.data.image, ...imageList]);
+        toast.success('上传成功');
+      } else {
+        throw new Error(response.message || '上传失败');
+      }
+    } catch (error: any) {
+      console.error('上传图片失败:', error);
+      toast.error(error.message || '上传失败');
+    } finally {
+      setUploading(false);
+      // 清空文件输入框，以便可以重复选择同一个文件
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  /**
+   * 触发文件选择
+   */
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  /**
    * 格式化文件大小
    */
   const formatFileSize = (bytes: number): string => {
@@ -116,16 +156,29 @@ const ImageSelectModal: React.FC<ImageSelectModalProps> = ({
             选择背景图片
             {refreshing && <span className="loading-dot" />}
           </span>
-          <div className="image-select-close" onClick={onClose}>
-            <CloseIcon />
+          <div className="image-select-actions">
+            <div className="image-select-upload" onClick={handleUploadClick}>
+              <EditIcon />
+            </div>
+            <div className="image-select-close" onClick={onClose}>
+              <CloseIcon />
+            </div>
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
         </div>
 
         {/* 内容区域 */}
         <div className="image-select-content">
-          {loading ? (
+          {(loading || uploading) ? (
             <div className="image-select-loading">
               <LoadingView />
+              {uploading && <div className="loading-text">文件上传中，请稍后...</div>}
             </div>
           ) : (
             <div className="image-grid">

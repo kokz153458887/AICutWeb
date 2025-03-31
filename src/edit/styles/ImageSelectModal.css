@@ -61,6 +61,13 @@
   animation: spin 1s linear infinite;
 }
 
+.image-select-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.image-select-upload,
 .image-select-close {
   width: 24px;
   height: 24px;
@@ -69,6 +76,12 @@
   justify-content: center;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease;
+}
+
+.image-select-upload:hover,
+.image-select-close:hover {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .image-select-content {
@@ -79,9 +92,16 @@
 
 .image-select-loading {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
+  gap: 16px;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .image-grid {

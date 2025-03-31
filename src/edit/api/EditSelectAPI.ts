@@ -162,4 +162,34 @@ export class EditSelectAPI {
       params
     });
   }
+
+  /**
+   * 上传背景图片
+   * @param file 图片文件
+   * @returns 上传结果
+   */
+  static async uploadImage(file: File): Promise<ApiResponse<{image: ImageLibItem}>> {
+    console.log(`[EditSelectAPI] 上传背景图片: name=${file.name}, size=${file.size}`);
+    
+    // 检查文件大小限制（10MB）
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      throw new Error('文件大小不能超过10MB');
+    }
+
+    // 检查文件类型
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('只支持jpg、jpeg、png、gif、webp格式的图片');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return apiClient.post(API_PATHS.image.upload, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
 } 

@@ -429,7 +429,7 @@ const EditPage: React.FC = () => {
         {/* 备用视频数量 */}
         <BackupVideoSection
           backupCount={backupCount}
-          onConfigClick={() => handleConfigClick('backup')}
+          onConfigClick={() => {}}
           onBackupCountChange={handleBackupCountChange}
         />
       </div>

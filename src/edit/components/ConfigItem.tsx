@@ -12,7 +12,7 @@ interface ConfigItemProps {
   value: string;
   subValue?: string;
   tag?: string;
-  onClick: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   // 自定义渲染函数
   renderCustomValue?: () => React.ReactNode;
   // 音量控制相关属性
@@ -33,6 +33,7 @@ interface ConfigItemProps {
   hasVideoPreview?: boolean;
   previewVideoUrl?: string;
   onVideoPreviewClick?: () => void;
+  onVolumeClick?: () => void;
 }
 
 /**
@@ -245,7 +246,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   }, []);
 
   return (
-    <div className="config-item" onClick={onClick}>
+    <div className="config-item" onClick={(e: React.MouseEvent) => onClick?.(e)}>
       <div className="config-title" style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>{title}</div>
       <div className="config-value-container" style={{ position: 'relative' }}>
         <div className="config-value-wrapper">

@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ConfigItem from './ConfigItem';
+import ImageSelectModal from './imageSelect/ImageSelectModal';
+
+interface BackgroundImageModel {
+  url: string;
+  backgroundId: string;
+  scaleType: string;
+  name?: string;
+}
 
 interface BackgroundImageSectionProps {
   imageName: string;
   imageUrl: string;
-  onImageClick: () => void;
+  onImageChange: (image: BackgroundImageModel) => void;
   onPreviewClick: () => void;
 }
 
@@ -15,18 +23,45 @@ interface BackgroundImageSectionProps {
 const BackgroundImageSection: React.FC<BackgroundImageSectionProps> = ({
   imageName,
   imageUrl,
-  onImageClick,
+  onImageChange,
   onPreviewClick
 }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  /**
+   * 处理图片选择
+   */
+  const handleImageSelect = (image: any) => {
+    // 从文件URL中提取文件名
+    const name = image.url.split('/').pop()?.split('.')[0] || '';
+    
+    onImageChange({
+      url: image.url,
+      backgroundId: '', // 保持原有值不变
+      scaleType: '', // 保持原有值不变
+      name: name
+    });
+    
+    setShowModal(false);
+  };
+
   return (
-    <ConfigItem
-      title="背景图片"
-      value={imageName || ""}
-      onClick={onImageClick}
-      hasPreview={true}
-      previewImage={imageUrl}
-      onPreviewClick={onPreviewClick}
-    />
+    <>
+      <ConfigItem
+        title="背景图片"
+        value={imageName || ""}
+        onClick={() => setShowModal(true)}
+        hasPreview={true}
+        previewImage={imageUrl}
+        onPreviewClick={onPreviewClick}
+      />
+
+      <ImageSelectModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        onSelect={handleImageSelect}
+      />
+    </>
   );
 };
 

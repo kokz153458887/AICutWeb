@@ -3,7 +3,7 @@
  * 负责处理素材库选择相关的API请求
  */
 import axios from 'axios';
-import { ApiResponse, MaterialListResponse, MusicLibItem, StyleListResponse, VideoStyleItem } from './types';
+import { ApiResponse, MaterialListResponse, MusicLibItem, StyleListResponse, VideoStyleItem, ImageLibItem } from './types';
 import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
 
 /**
@@ -144,5 +144,22 @@ export class EditSelectAPI {
     console.log(`[EditSelectAPI] 更新视频风格: id=${id}, name=${styleData.styleName}`);
     
     return apiClient.put(`${API_PATHS.videoStyle.base}/${id}`, styleData);
+  }
+
+  /**
+   * 获取背景图片列表
+   * @param params 查询参数
+   * @returns 图片列表响应
+   */
+  static async getImageList(params?: {
+    ratio?: string;
+    resolutionWidth?: number;
+    resolutionHeight?: number;
+  }): Promise<ApiResponse<{images: ImageLibItem[]}>> {
+    console.log(`[EditSelectAPI] 获取背景图片列表:`, params);
+    
+    return apiClient.get(API_PATHS.image.list, {
+      params
+    });
   }
 } 

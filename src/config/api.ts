@@ -95,6 +95,10 @@ export const API_PATHS = {
     list: '/videostyle/list',
     base: '/videostyle',
     create: '/videostyle/create'
+  },
+
+  image: {
+    list: '/image/list'
   }
 };
 

@@ -91,4 +91,13 @@ export const VideoPreviewIcon: React.FC<{width?: number, height?: number}> = ({w
     <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
     <path d="M10 8L16 12 10 16 10 8Z" fill="currentColor" />
   </svg>
+);
+
+/**
+ * 关闭图标组件
+ */
+export const CloseIcon: React.FC = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
 ); 

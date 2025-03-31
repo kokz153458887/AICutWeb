@@ -187,4 +187,15 @@ export interface MaterialListResponse {
 // 视频风格库列表响应模型 - 不再使用，保留为文档
 export interface StyleListResponse {
   data: VideoStyleItem[];
+}
+
+/**
+ * 背景图片项类型
+ */
+export interface ImageLibItem {
+  url: string;
+  resolutionWidth: number;
+  resolutionHeight: number;
+  ratio: string;
+  size: number;
 } 

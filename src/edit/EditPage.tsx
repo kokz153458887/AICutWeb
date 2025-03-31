@@ -16,7 +16,7 @@ import MusicSelectModal from './components/musicSelect/MusicSelectModal';
 import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
-import { EditService, VideoEditConfig, BackgroundMusicModel } from './api';
+import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
 import { MusicLibItem, StyleModel } from './api/types';
 import { cleanTitle, cleanContent } from '../utils/textUtils';
 
@@ -314,6 +314,22 @@ const EditPage: React.FC = () => {
     setBackupCount(newCount);
   };
 
+  /**
+   * 处理背景图片选择
+   */
+  const handleBackgroundImageChange = (image: BackgroundImageModel) => {
+    if (configData) {
+      console.log('选择背景图片:', image);
+      setConfigData({
+        ...configData,
+        backgroundImage: {
+          ...configData.backgroundImage,
+          ...image
+        }
+      });
+    }
+  };
+
   return (
     <div className="edit-page">
       {/* 顶部导航栏 */}
@@ -398,7 +414,7 @@ const EditPage: React.FC = () => {
         <BackgroundImageSection
           imageName={configData?.backgroundImage?.name || ""}
           imageUrl={configData?.backgroundImage?.url || ""}
-          onImageClick={() => handleConfigClick('background')}
+          onImageChange={handleBackgroundImageChange}
           onPreviewClick={handleBackgroundImagePreviewClick}
         />
 

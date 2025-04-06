@@ -85,6 +85,12 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
   const getSliderPercent = useCallback((value: number) => {
     return `${((value + 10) / 20) * 100}%`;
   }, []);
+  
+  // 阻止触摸滑动事件的默认行为(防止页面被拖动)
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
   return (
     <div className="voice-setting-backdrop" onClick={handleClose}>
@@ -115,6 +121,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
                 step="0.1"
                 value={speed}
                 onChange={handleSpeedChange}
+                onTouchMove={handleTouchMove}
                 style={{ '--slider-percent': getSliderPercent(speed) } as React.CSSProperties}
               />
               <div className="voice-setting-marks">
@@ -140,6 +147,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
                 step="0.1"
                 value={pitch}
                 onChange={handlePitchChange}
+                onTouchMove={handleTouchMove}
                 style={{ '--slider-percent': getSliderPercent(pitch) } as React.CSSProperties}
               />
               <div className="voice-setting-marks">
@@ -166,6 +174,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
                   step="0.1"
                   value={intensity}
                   onChange={handleIntensityChange}
+                  onTouchMove={handleTouchMove}
                   style={{ '--slider-percent': getSliderPercent(intensity) } as React.CSSProperties}
                 />
                 <div className="voice-setting-marks">

@@ -24,6 +24,9 @@
   justify-content: center;
   z-index: 10000;
   animation: fadeIn 0.2s ease-out;
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+  touch-action: none;
 }
 
 .voice-setting-panel {
@@ -32,9 +35,12 @@
   background-color: var(--voice-panel-bg);
   backdrop-filter: blur(10px);
   border-radius: 16px 16px 0 0;
-  padding: 0px;
+  padding: 16px;
   color: var(--voice-text-color);
   animation: slideUp 0.3s ease-out;
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+  touch-action: pan-x pan-y;
 }
 
 .voice-setting-header {
@@ -68,8 +74,11 @@
 .voice-setting-content {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding-bottom: 45px;
+  gap: 24px;
+  padding-bottom: 10px;
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+  touch-action: none;
 }
 
 .voice-setting-item {
@@ -99,6 +108,13 @@
 .voice-setting-slider-container {
   position: relative;
   padding: 6px 0;
+  touch-action: none;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Safari */
+  -khtml-user-select: none;    /* Konqueror HTML */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;
 }
 
 .voice-setting-slider {
@@ -107,8 +123,10 @@
   background: var(--voice-slider-bg);
   border-radius: 4px;
   -webkit-appearance: none;
-  margin: 2px 0;
+  margin: 8px 0;
   cursor: pointer;
+  touch-action: none;
+  -webkit-user-drag: none;
 }
 
 .voice-setting-slider::-webkit-slider-thumb {

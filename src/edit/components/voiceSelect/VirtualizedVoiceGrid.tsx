@@ -9,9 +9,9 @@ import VoiceItem from './VoiceItem';
 import '../../styles/VirtualizedVoiceGrid.css';
 
 // 网格项之间的间距
-const GAP = 8;
+const GAP = 5;
 // 最小列宽
-const MIN_COLUMN_WIDTH = 100;
+const MIN_COLUMN_WIDTH = 20;
 
 interface VirtualizedVoiceGridProps {
   voices: VoiceInfo[];

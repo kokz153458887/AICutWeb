@@ -7,35 +7,35 @@ import '../styles/TextInputSection.css';
 import { SpeakerIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
 import { toast } from '../../components/Toast';
+import { VoiceInfo } from '../mock/voiceData';
+import VoiceSelectModal from './voiceSelect/VoiceSelectModal';
 
 interface TextInputSectionProps {
-  value: string;
-  onChange: (value: string) => void;
+  text: string;
+  onTextChange: (text: string) => void;
+  disabled?: boolean;
   placeholder?: string;
-  voiceVolume?: number;
-  onVoiceVolumeChange?: (volume: number) => void;
-  speaker?: { name: string; tag: string };
-  onSpeakerClick?: () => void;
+  onVoiceSelect?: (voice: VoiceInfo) => void;
 }
 
 /**
  * 文本输入区域组件
  */
 const TextInputSection: React.FC<TextInputSectionProps> = ({
-  value,
-  onChange,
-  placeholder = '这一刻的想法...',
-  voiceVolume = 1, // 默认为1 (100%)
-  onVoiceVolumeChange,
-  speaker,
-  onSpeakerClick
+  text,
+  onTextChange,
+  disabled = false,
+  placeholder = '请输入需要配音的文字，精彩文案由你创作...',
+  onVoiceSelect
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputSectionRef = useRef<HTMLDivElement>(null);
+  const [voiceVolume, setVoiceVolume] = useState<number>(0.8); // 默认音量80%
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
   const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const inputSectionRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [inputSectionPosition, setInputSectionPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
   
   // 从配置文件获取最大行数
   const maxRows = titleConfig.textareaMaxRows || 12;
@@ -44,7 +44,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    * 处理文本变化事件
    */
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
+    onTextChange(e.target.value);
   };
 
   /**
@@ -82,7 +82,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    */
   useEffect(() => {
     adjustTextareaHeight();
-  }, [value, maxRows]);
+  }, [text, maxRows]);
 
   /**
    * 处理喇叭点击事件
@@ -96,13 +96,8 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   /**
    * 处理说话人按钮点击事件
    */
-  const handleSpeakerButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onSpeakerClick) {
-      onSpeakerClick();
-    } else {
-      toast.info('说话人选择功能待实现');
-    }
+  const handleSpeakerButtonClick = () => {
+    setShowVoiceModal(true);
   };
 
   /**
@@ -141,9 +136,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    * 处理音量滑动条变化
    */
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (onVoiceVolumeChange) {
-      onVoiceVolumeChange(Number(e.target.value));
-    }
+    setVoiceVolume(Number(e.target.value));
     
     // 清除之前的定时器
     if (volumeTimeoutRef.current) {
@@ -219,68 +212,90 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
     e.stopPropagation();
   };
 
+  const handleVoiceModalClose = () => {
+    setShowVoiceModal(false);
+  };
+
+  /**
+   * 处理音色选择
+   */
+  const handleVoiceSelect = (selectedVoice: VoiceInfo | null) => {
+    if (selectedVoice && onVoiceSelect) {
+      onVoiceSelect(selectedVoice);
+      toast.success(`已选择音色: ${selectedVoice.voicer}`);
+    }
+    setShowVoiceModal(false);
+  };
+
   return (
-    <div className="text-input-section" ref={inputSectionRef}>
-      <textarea
-        ref={textareaRef}
-        className="text-input"
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        style={{ resize: 'none' }}
-      />
-      
-      <div className="input-controls">
-        {/* 音量文字按钮 - 显示当前音量值 */}
-        <div className="volume-text" onClick={handleVolumeTextClick}>
-          音量 <span className="volume-badge">{getDisplayVolume()}%</span>
-        </div>
+    <>
+      <div className="text-input-section" ref={inputSectionRef}>
+        <textarea
+          ref={textareaRef}
+          className="text-input"
+          value={text}
+          onChange={handleChange}
+          placeholder={placeholder}
+          style={{ resize: 'none' }}
+          disabled={disabled}
+        />
         
-        {/* 说话人按钮 */}
-        {speaker && (
+        <div className="input-controls">
+          {/* 音量文字按钮 - 显示当前音量值 */}
+          <div className="volume-text" onClick={handleVolumeTextClick}>
+            音量 <span className="volume-badge">{getDisplayVolume()}%</span>
+          </div>
+          
+          {/* 说话人按钮 */}
           <div className="speaker-button" onClick={handleSpeakerButtonClick}>
-            <span className="speaker-name">{speaker.name}</span>
-            {speaker.tag && <span className="speaker-tag">{speaker.tag}</span>}
+            <span className="speaker-name">选择音色</span>
+            <span className="speaker-tag">推荐</span>
           </div>
-        )}
-        
-        {/* 喇叭图标 */}
-        <div className="speaker-icon" onClick={handleSpeakerClick}>
-          <SpeakerIcon />
-        </div>
-        
-        {/* 音量滑动控制条 */}
-        {showVolumeSlider && (
-          <div 
-            className="volume-slider-container" 
-            ref={sliderRef}
-            onClick={handleVolumeSliderClick}
-            onTouchMove={handleTouchMove}
-            style={{
-              top: `${inputSectionPosition.top}px`,
-              left: `${inputSectionPosition.left}px`,
-              position: 'fixed',
-              width: `${inputSectionPosition.width}px`
-            }}
-          >
-            <input
-              type="range"
-              min={0}
-              max={5}
-              value={voiceVolume}
-              step={0.1}
-              onChange={handleVolumeChange}
-              onMouseUp={handleVolumeMouseUp}
-              onTouchEnd={handleVolumeMouseUp}
+          
+          {/* 喇叭图标 */}
+          <div className="speaker-icon" onClick={handleSpeakerClick}>
+            <SpeakerIcon />
+          </div>
+          
+          {/* 音量滑动控制条 */}
+          {showVolumeSlider && (
+            <div 
+              className="volume-slider-container" 
+              ref={sliderRef}
+              onClick={handleVolumeSliderClick}
               onTouchMove={handleTouchMove}
-              className="volume-slider"
-              onClick={(e) => e.stopPropagation()}
-              style={{ flex: 1 }}
-            />
-          </div>
-        )}
+              style={{
+                top: `${inputSectionPosition.top}px`,
+                left: `${inputSectionPosition.left}px`,
+                position: 'fixed',
+                width: `${inputSectionPosition.width}px`
+              }}
+            >
+              <input
+                type="range"
+                min={0}
+                max={1}
+                value={voiceVolume}
+                step={0.01}
+                onChange={handleVolumeChange}
+                onMouseUp={handleVolumeMouseUp}
+                onTouchEnd={handleVolumeMouseUp}
+                onTouchMove={handleTouchMove}
+                className="volume-slider"
+                onClick={(e) => e.stopPropagation()}
+                style={{ flex: 1 }}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      
+      <VoiceSelectModal 
+        show={showVoiceModal}
+        onClose={handleVoiceModalClose}
+        onSelect={handleVoiceSelect}
+      />
+    </>
   );
 };
 

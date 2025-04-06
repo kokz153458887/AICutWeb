@@ -97,9 +97,16 @@ export const API_PATHS = {
     create: '/videostyle/create'
   },
 
+  // 图片相关
   image: {
     list: '/image/list',
     upload: '/image/upload'
+  },
+  
+  // 音频合成相关
+  audio: {
+    synthesize: '/audio/synthesize',
+    getVoices: '/audio/voices'
   }
 };
 

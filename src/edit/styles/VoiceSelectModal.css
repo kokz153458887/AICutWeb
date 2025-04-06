@@ -1,0 +1,383 @@
+/**
+ * 音色选择弹窗样式
+ */
+
+:root {
+  --voice-modal-bg: #222222;
+  --voice-modal-text: #ffffff;
+  --voice-modal-secondary-text: rgba(255, 255, 255, 0.6);
+  --voice-modal-border: rgba(255, 255, 255, 0.1);
+  --voice-modal-primary: #ff4757;
+  --voice-modal-confirm-bg: #333333;
+  --voice-modal-radius: 16px;
+  --voice-modal-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  --voice-modal-tab-height: 44px;
+  --voice-modal-header-height: 56px;
+  --voice-modal-footer-height: 64px;
+  --voice-favorite-color: #ff4757;
+}
+
+/* 浮层背景 */
+.voice-select-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.voice-select-modal-backdrop.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.voice-select-modal-backdrop.closing {
+  opacity: 0;
+}
+
+/* 浮层主体 */
+.voice-select-modal {
+  background-color: var(--voice-modal-bg);
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.voice-select-modal.visible {
+  transform: translateY(0);
+}
+
+.voice-select-modal.closing {
+  transform: translateY(100%);
+}
+
+/* 浮层头部 */
+.voice-select-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--voice-modal-border);
+}
+
+/* 标题 */
+.voice-select-modal-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--voice-modal-text);
+}
+
+/* 筛选按钮 */
+.voice-select-modal-filter {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.voice-select-modal-filter:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.voice-select-modal-filter:active {
+  background-color: rgba(255, 255, 255, 0.18);
+  transform: scale(0.95);
+}
+
+/* 标签栏容器 */
+.voice-select-modal-tabs-container {
+  flex: 1;
+  overflow: hidden;
+  margin: 0 12px;
+}
+
+/* 标签栏 */
+.voice-select-modal-tabs {
+  display: flex;
+  padding: 0;
+  overflow-x: auto;
+  gap: 24px;
+  scrollbar-width: none;
+  height: 100%;
+  align-items: center;
+}
+
+.voice-select-modal-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.voice-select-modal-tab {
+  font-size: 15px;
+  color: var(--voice-modal-secondary-text);
+  padding: 6px 2px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.voice-select-modal-tab:hover {
+  color: var(--voice-modal-text);
+}
+
+.voice-select-modal-tab.active {
+  color: var(--voice-modal-primary);
+  font-weight: 500;
+}
+
+.voice-select-modal-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -13px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--voice-modal-primary);
+  border-radius: 1px;
+}
+
+/* 头部操作区 */
+.voice-select-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 确认和关闭按钮 */
+.voice-select-modal-confirm,
+.voice-select-modal-close {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: all 0.15s ease;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.voice-select-modal-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.voice-select-modal-header-actions .voice-select-modal-confirm {
+  background-color: transparent;
+  color: #ffffff;
+  width: auto;
+  height: auto;
+}
+
+.voice-select-modal-header-actions .voice-select-modal-confirm:hover {
+  background-color: transparent;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.voice-select-modal-header-actions .voice-select-modal-confirm:active {
+  background-color: transparent;
+  transform: scale(0.96);
+}
+
+.voice-select-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.voice-select-modal-close:active {
+  background-color: rgba(255, 255, 255, 0.18);
+  transform: scale(0.96);
+}
+
+/* 内容区域 */
+.voice-select-modal-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.voice-select-modal-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* 加载状态 */
+.voice-select-modal-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--voice-modal-secondary-text);
+  font-size: 16px;
+}
+
+/* 空状态 */
+.voice-select-modal-empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-select-modal-empty-text {
+  margin-top: 12px;
+  color: var(--voice-modal-secondary-text);
+  font-size: 15px;
+}
+
+/* 错误状态容器 */
+.voice-select-modal-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--voice-modal-secondary-text);
+  font-size: 16px;
+}
+
+/* 底部操作区 */
+.voice-select-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--voice-modal-border);
+  gap: 12px;
+}
+
+.voice-select-modal-cancel,
+.voice-select-modal-footer .voice-select-modal-confirm {
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voice-select-modal-cancel {
+  background: transparent;
+  border: 1px solid var(--voice-modal-border);
+  color: var(--voice-modal-text);
+}
+
+.voice-select-modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.voice-select-modal-footer .voice-select-modal-confirm {
+  background: var(--voice-modal-primary);
+  border: none;
+  color: white;
+}
+
+.voice-select-modal-footer .voice-select-modal-confirm:hover {
+  background: #ff2f42;
+}
+
+.voice-select-modal-footer .voice-select-modal-confirm:disabled {
+  background: #7e7e7e;
+  cursor: not-allowed;
+}
+
+/* 进场动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .voice-select-modal-tab {
+    font-size: 14px;
+  }
+  
+  .voice-select-modal-cancel {
+    padding: 2px 2px;
+    font-size: 2px;
+  }
+  
+  .voice-select-modal-confirm {
+    padding: 2px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .voice-select-modal {
+    width: 95%;
+    height: 85vh;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .voice-select-modal-header,
+  .voice-select-modal-footer {
+    padding: 10px 12px;
+  }
+  
+  .voice-select-modal-tabs-container {
+    margin: 0 8px;
+  }
+  
+  .voice-select-modal-tabs {
+    gap: 16px;
+  }
+  
+  .voice-select-modal-tab {
+    font-size: 13px;
+  }
+} 

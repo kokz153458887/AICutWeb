@@ -19,6 +19,7 @@ import Toast, { toast } from '../components/Toast';
 import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
 import { MusicLibItem, StyleModel } from './api/types';
 import { cleanTitle, cleanContent } from '../utils/textUtils';
+import { VoiceInfo } from './mock/voiceData';
 
 /**
  * 编辑页主组件
@@ -48,9 +49,10 @@ const EditPage: React.FC = () => {
   const [backupCount, setBackupCount] = useState<number>(1);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
-  const [speaker, setSpeaker] = useState({ name: '龙小明', tag: '温柔' });
+  const [speaker, setSpeaker] = useState<{ name: string; tag: string }>({ name: '选择说话人', tag: '' });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // 防止重复提交
   const [showMusicModal, setShowMusicModal] = useState<boolean>(false);
+  const [selectedVoice, setSelectedVoice] = useState<VoiceInfo | null>(null);
   
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
@@ -162,7 +164,20 @@ const EditPage: React.FC = () => {
    * 处理说话人点击事件
    */
   const handleSpeakerClick = () => {
-    toast.info('说话人选择功能待开发');
+    // 不再显示Toast，音色选择功能已实现
+    console.log('打开音色选择');
+  };
+
+  /**
+   * 处理音色选择事件
+   */
+  const handleVoiceSelect = (voice: VoiceInfo) => {
+    setSelectedVoice(voice);
+    setSpeaker({
+      name: voice.voicer,
+      tag: voice.tag?.[0] || ''
+    });
+    console.log('选择音色成功:', voice.voicer);
   };
 
   /**
@@ -343,13 +358,9 @@ const EditPage: React.FC = () => {
       <div className="edit-content">
         {/* 文案输入区域 */}
         <TextInputSection 
-          value={text} 
-          onChange={handleTextChange}
-          placeholder="这一刻的想法..."
-          voiceVolume={voiceVolume}
-          onVoiceVolumeChange={handleVoiceVolumeChange}
-          speaker={speaker}
-          onSpeakerClick={handleSpeakerClick}
+          text={text} 
+          onTextChange={handleTextChange}
+          onVoiceSelect={handleVoiceSelect}
         />
 
         {/* 标题输入区域 */}

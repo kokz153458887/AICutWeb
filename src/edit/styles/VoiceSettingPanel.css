@@ -1,0 +1,242 @@
+/**
+ * 音色设置面板样式
+ */
+:root {
+  --voice-primary-color: #ff4757;
+  --voice-panel-bg: rgba(0, 0, 0, 0.95);
+  --voice-text-color: #ffffff;
+  --voice-secondary-text: rgba(255, 255, 255, 0.6);
+  --voice-slider-bg: rgba(255, 255, 255, 0.1);
+  --voice-slider-active: var(--voice-primary-color);
+  --slider-track-height: 4px;
+  --slider-thumb-size: 18px;
+}
+
+.voice-setting-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.voice-setting-panel {
+  position: relative;
+  width: 100%;
+  background-color: var(--voice-panel-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 16px 16px 0 0;
+  padding: 0px;
+  color: var(--voice-text-color);
+  animation: slideUp 0.3s ease-out;
+}
+
+.voice-setting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.voice-setting-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--voice-text-color);
+}
+
+.voice-setting-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.voice-setting-close:hover {
+  opacity: 1;
+}
+
+.voice-setting-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 5px;
+}
+
+.voice-setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.voice-setting-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.voice-setting-label-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--voice-text-color);
+}
+
+.voice-setting-value {
+  font-size: 15px;
+  color: var(--voice-primary-color);
+  font-weight: 500;
+}
+
+.voice-setting-slider-container {
+  position: relative;
+  padding: 6px 0;
+}
+
+.voice-setting-slider {
+  width: 100%;
+  height: var(--slider-track-height);
+  background: var(--voice-slider-bg);
+  border-radius: 4px;
+  -webkit-appearance: none;
+  margin: 2px 0;
+  cursor: pointer;
+}
+
+.voice-setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  background: var(--voice-slider-active);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+  margin-top: calc(-1 * (var(--slider-thumb-size) - var(--slider-track-height)) / 2);
+}
+
+.voice-setting-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.voice-setting-slider::-webkit-slider-runnable-track {
+  height: var(--slider-track-height);
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--voice-slider-active) var(--slider-percent), var(--voice-slider-bg) var(--slider-percent));
+}
+
+.voice-setting-marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0 6px;
+}
+
+.voice-setting-mark {
+  position: relative;
+  color: var(--voice-secondary-text);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.voice-setting-mark::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 6px;
+  background-color: var(--voice-slider-bg);
+}
+
+.voice-setting-mark.active {
+  color: var(--voice-slider-active);
+}
+
+.voice-setting-mark.active::before {
+  background-color: var(--voice-slider-active);
+}
+
+/* 语速特殊样式 */
+.voice-setting-speed-marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 0 10px;
+}
+
+.voice-setting-speed-mark {
+  position: relative;
+  color: var(--voice-secondary-text);
+  font-size: 12px;
+  text-align: center;
+}
+
+.voice-setting-speed-mark::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 6px;
+  background-color: var(--voice-slider-bg);
+}
+
+.voice-setting-speed-mark[data-value="1.0x"] {
+  color: var(--voice-slider-active);
+}
+
+.voice-setting-speed-mark[data-value="1.0x"]::before {
+  background-color: var(--voice-slider-active);
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.voice-setting-panel.closing {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .voice-setting-panel {
+    padding: 12px;
+  }
+  
+  .voice-setting-title {
+    font-size: 15px;
+  }
+  
+  .voice-setting-label-text {
+    font-size: 14px;
+  }
+  
+  .voice-setting-value {
+    font-size: 14px;
+  }
+} 

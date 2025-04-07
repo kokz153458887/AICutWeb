@@ -37,7 +37,6 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
   
   // 处理点击事件 - 只负责选中该项
   const handleClick = useCallback(() => {
-    // 点击Item仅用于选中该项，不自动弹出设置面板
     onClick(id);
   }, [id, onClick]);
   
@@ -50,7 +49,6 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
   // 处理设置点击 - 专门负责弹出设置面板
   const handleSettingsClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    // 点击设置按钮时才弹出设置面板
     onSettingsClick(id);
   }, [id, onSettingsClick]);
   
@@ -76,6 +74,10 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
           className="voice-item-avatar"
           src={avatar} 
           alt={name}
+          onError={(e) => {
+            // 图片加载失败时使用默认头像
+            (e.target as HTMLImageElement).src = '/assets/images/default-avatar.png';
+          }}
         />
         
         {/* 多情绪标签 */}

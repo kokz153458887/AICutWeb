@@ -1,73 +1,33 @@
+根据 @音色查询接口文档 的描述来接入音色选择的API数据，具体要求如下：
+1. 在进入 音色选择 浮层后，先加载 local 存储里的缓存数据（如果有的话），渲染缓存数据，同时请求远程接口数据，在请求成功后刷新数据，在没有本地缓存的情况下，音色选择 的浮层面板的内容区显示 “加载中,请稍后” 的提示
+2. 支持分页加载，一页100个，虚拟容器滚动到底部区域附近的时候请求下一页数据
+3. 多Tab的处理：当用户点击顶部tab的时候，会根据tab的参数请求数据，获取 topbar.type、topbar.filter 获取到筛选参数，作为接口的请求参数，缓存每个TAB的数据到本地磁盘缓存里。
 
-# 音色查询接口
-域名：http://localhost:8100/
-API地址：api/voice/query
-完整示例：http://localhost:8100/api/voice/query
-
-## 接口参数
-Get请求
-
-### 参数：id 
-例如：fav、hot、man、woman、boy 等字符串，标识需要请求的数据的ID
-
-### 参数： pageSize
-一页多少个ITEM，默认100个
-
-### 参数： pageIndex
-请求第几页数据
-
-## 接口返回
-### pages 分页信息
-hasMore： 是否有更多的翻页数据
-pageNum： 当前第几页
-pageSize： 一页有多少个
-total： 一共有多少条数据
-
-### topbar 顶部Bar信息
-id: 顶部Bar的id
-text： 文本
-
-### content 数据内容
-
-
-{
-    "status": "success",
-    "msg": "success",
-    "data": {
-        "pages": {
-            "pageNum": 1,
-            "pageSize": 30,
-            "total": 100,
-            "hasMore": true
+"topbar": [
+    {
+        "type": "fav",
+        "text": "收藏"
+    },
+    {
+        "type": "hot",
+        "text": "热门"
+    },
+    {
+        "type": "tag",
+        "text": "超拟人",
+        "filter": {
+            "tag": "超拟人"
         }
-        "topbar": [
-            {
-                "id": "fav",
-                "text": "收藏"
-            },
-            {
-                "id": "useful",
-                "text": "热门"
-            },
-            {
-                "id": "other",
-                "text": "其他"
-            },
-            {
-                "id": "jieshuo",
-                "text": "解说"
-            }
-        ],
-        "content": [
-            {
-                "voiceCode": "aliyun_longchen_龙臣",
-                "voicer": "龙臣",
-                "avatar": "assets\image\1.jpg"
-                "speech": {
-                    "text": "让我为您讲述这部精彩的影片",
-                    "url": "assets\audio\youdao\youdao_shulongyeye_龙族的智慧需要传承。.mp3"
-                }
-            }
-        ]
     }
-}
+],
+
+4. 缓存和数据加载的逻辑：
+- 首次打开浮层，默认请求全部tab下的数据（也就是说，请求参数不需要设置筛选项），与此同时，检查磁盘内是否有这份缓存数据，如果有先渲染这份缓存数据；无论是否有磁盘缓存都需要请求接口数据来拿到最新的数据。在数据获取成功后，更新数据到磁盘缓存里，仅对第一页数据做缓存。
+- 在获取到网络数据成功的情况下，将这份数据缓存至内存，每次打开浮层的时候检查内存缓存，如果内存有缓存了，则不用再次请求网络数据和加载磁盘数据了
+- 在打开浮层获取到数据后（缓存或网络），更新顶部bar的位置到 “全部”的tab下，对应的数据是 data.topbar: {"type": "all", "text": "全部"}
+- 点击其他tab的时候，先检查其他tab筛选下的缓存数据情况，与 “全部” tab下的逻辑保持一致，请求该tab下的数据并切换顶部bar的选中位置
+- 顶部bar的刷新逻辑：音色选择浮窗的顶部bar只会跟随数据自动刷新一次，后续的接口返回不更新顶部bar的渲染和刷新，后续的顶部bar状态全部交由用户的手势点选操作。
+
+5. 分页的逻辑
+
+6. 

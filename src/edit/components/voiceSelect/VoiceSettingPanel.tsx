@@ -3,11 +3,20 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { CloseIcon } from '../icons/SvgIcons';
-import { VoiceInfo } from '../../mock/voiceData';
 import '../../styles/VoiceSettingPanel.css';
 
 interface VoiceSettingPanelProps {
-  voice: VoiceInfo;
+  voice: {
+    voiceCode: string;
+    voicer: string;
+    supportVoiceParam: string[];
+    emotion?: Array<{ id: string; name: string }>;
+    settings?: {
+      speed: number;
+      pitch: number;
+      intensity: number;
+    };
+  };
   onClose: () => void;
   onSettingsChange: (voiceCode: string, settings: { speed: number; pitch: number; intensity: number }) => void;
 }
@@ -21,17 +30,21 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
   onSettingsChange
 }) => {
   // 状态管理
-  const [speed, setSpeed] = useState(0);
-  const [pitch, setPitch] = useState(0);
-  const [intensity, setIntensity] = useState(0);
+  const [settings, setSettings] = useState({
+    speed: 0,
+    pitch: 0,
+    intensity: 0
+  });
   const [isClosing, setIsClosing] = useState(false);
 
   // 加载初始设置
   useEffect(() => {
     if (voice.settings) {
-      setSpeed(voice.settings.speed || 0);
-      setPitch(voice.settings.pitch || 0);
-      setIntensity(voice.settings.intensity || 0);
+      setSettings({
+        speed: voice.settings.speed || 0,
+        pitch: voice.settings.pitch || 0,
+        intensity: voice.settings.intensity || 0
+      });
     }
   }, [voice]);
 
@@ -43,38 +56,15 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
     }, 300);
   }, [onClose]);
 
-  // 处理语速变化
-  const handleSpeedChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setSpeed(value);
-    onSettingsChange(voice.voiceCode, { 
-      speed: value, 
-      pitch, 
-      intensity 
-    });
-  }, [voice.voiceCode, pitch, intensity, onSettingsChange]);
-
-  // 处理语调变化
-  const handlePitchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setPitch(value);
-    onSettingsChange(voice.voiceCode, { 
-      speed, 
-      pitch: value, 
-      intensity 
-    });
-  }, [voice.voiceCode, speed, intensity, onSettingsChange]);
-
-  // 处理情感强度变化
-  const handleIntensityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setIntensity(value);
-    onSettingsChange(voice.voiceCode, { 
-      speed, 
-      pitch, 
-      intensity: value 
-    });
-  }, [voice.voiceCode, speed, pitch, onSettingsChange]);
+  // 处理参数变化
+  const handleSettingChange = useCallback((param: 'speed' | 'pitch' | 'intensity', value: number) => {
+    const newSettings = {
+      ...settings,
+      [param]: value
+    };
+    setSettings(newSettings);
+    onSettingsChange(voice.voiceCode, newSettings);
+  }, [voice.voiceCode, settings, onSettingsChange]);
 
   // 格式化值显示
   const formatValueDisplay = useCallback((value: number) => {
@@ -110,7 +100,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
           <div className="voice-setting-item">
             <div className="voice-setting-label">
               <span className="voice-setting-label-text">语速</span>
-              <span className="voice-setting-value">{formatValueDisplay(speed)}</span>
+              <span className="voice-setting-value">{formatValueDisplay(settings.speed)}</span>
             </div>
             <div className="voice-setting-slider-container">
               <input
@@ -119,10 +109,10 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
                 min="-10"
                 max="10"
                 step="0.1"
-                value={speed}
-                onChange={handleSpeedChange}
+                value={settings.speed}
+                onChange={(e) => handleSettingChange('speed', parseFloat(e.target.value))}
                 onTouchMove={handleTouchMove}
-                style={{ '--slider-percent': getSliderPercent(speed) } as React.CSSProperties}
+                style={{ '--slider-percent': getSliderPercent(settings.speed) } as React.CSSProperties}
               />
               <div className="voice-setting-marks">
                 <span className="voice-setting-mark">-10</span>
@@ -136,7 +126,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
           <div className="voice-setting-item">
             <div className="voice-setting-label">
               <span className="voice-setting-label-text">语调</span>
-              <span className="voice-setting-value">{formatValueDisplay(pitch)}</span>
+              <span className="voice-setting-value">{formatValueDisplay(settings.pitch)}</span>
             </div>
             <div className="voice-setting-slider-container">
               <input
@@ -145,10 +135,10 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
                 min="-10"
                 max="10"
                 step="0.1"
-                value={pitch}
-                onChange={handlePitchChange}
+                value={settings.pitch}
+                onChange={(e) => handleSettingChange('pitch', parseFloat(e.target.value))}
                 onTouchMove={handleTouchMove}
-                style={{ '--slider-percent': getSliderPercent(pitch) } as React.CSSProperties}
+                style={{ '--slider-percent': getSliderPercent(settings.pitch) } as React.CSSProperties}
               />
               <div className="voice-setting-marks">
                 <span className="voice-setting-mark">-10</span>
@@ -163,7 +153,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
             <div className="voice-setting-item">
               <div className="voice-setting-label">
                 <span className="voice-setting-label-text">情感强度</span>
-                <span className="voice-setting-value">{formatValueDisplay(intensity)}</span>
+                <span className="voice-setting-value">{formatValueDisplay(settings.intensity)}</span>
               </div>
               <div className="voice-setting-slider-container">
                 <input
@@ -172,10 +162,10 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
                   min="-10"
                   max="10"
                   step="0.1"
-                  value={intensity}
-                  onChange={handleIntensityChange}
+                  value={settings.intensity}
+                  onChange={(e) => handleSettingChange('intensity', parseFloat(e.target.value))}
                   onTouchMove={handleTouchMove}
-                  style={{ '--slider-percent': getSliderPercent(intensity) } as React.CSSProperties}
+                  style={{ '--slider-percent': getSliderPercent(settings.intensity) } as React.CSSProperties}
                 />
                 <div className="voice-setting-marks">
                   <span className="voice-setting-mark">-10</span>

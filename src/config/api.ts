@@ -107,6 +107,11 @@ export const API_PATHS = {
   audio: {
     synthesize: '/audio/synthesize',
     getVoices: '/audio/voices'
+  },
+
+  // 语音相关
+  voice: {
+    query: '/voice/query'
   }
 };
 

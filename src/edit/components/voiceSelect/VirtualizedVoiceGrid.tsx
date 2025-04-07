@@ -4,7 +4,8 @@
  */
 import React, { memo, useEffect, useMemo } from 'react';
 import { FixedSizeList } from 'react-window';
-import { VoiceInfo } from '../../mock/voiceData';
+import InfiniteLoader from 'react-window-infinite-loader';
+import { VoiceInfo } from '../../api/VoiceQueryAPI';
 import VoiceItem from './VoiceItem';
 import '../../styles/VirtualizedVoiceGrid.css';
 
@@ -21,6 +22,9 @@ interface VirtualizedVoiceGridProps {
   onVoiceSelect: (id: string) => void;
   onFavoriteToggle: (id: string, isFavorite: boolean) => void;
   onSettingsClick: (id: string) => void;
+  hasMore: boolean;
+  isItemLoaded: (index: number) => boolean;
+  loadMoreItems: (startIndex: number, stopIndex: number) => Promise<void>;
 }
 
 interface RowProps {
@@ -53,17 +57,17 @@ const Row = memo(({ data, index, style }: RowProps) => {
         const voice = voices[voiceIndex];
         return (
           <div 
-            key={voice.id} 
+            key={voice.voiceCode} 
             className="voice-grid-item"
             style={{ width: `${itemWidth}px` }}
           >
             <VoiceItem
-              id={voice.id}
+              id={voice.voiceCode}
               name={voice.voicer}
-              avatar={voice.avatar || ""}
-              emotion={voice.emotion || []}
-              isFavorite={voice.favorite || false}
-              isSelected={selectedVoiceId === voice.id}
+              avatar={voice.avatar}
+              emotion={voice.emotion?.map(e => e.name) || []}
+              isFavorite={voice.isFav}
+              isSelected={selectedVoiceId === voice.voiceCode}
               onClick={onVoiceSelect}
               onFavoriteToggle={onFavoriteToggle}
               onSettingsClick={onSettingsClick}
@@ -85,7 +89,10 @@ const VirtualizedVoiceGrid: React.FC<VirtualizedVoiceGridProps> = ({
   containerHeight,
   onVoiceSelect,
   onFavoriteToggle,
-  onSettingsClick
+  onSettingsClick,
+  hasMore,
+  isItemLoaded,
+  loadMoreItems
 }) => {
   // 根据容器宽度计算可以显示的列数
   const columns = useMemo(() => {
@@ -111,7 +118,7 @@ const VirtualizedVoiceGrid: React.FC<VirtualizedVoiceGridProps> = ({
   }, [containerWidth]);
   
   // 计算行数
-  const rowCount = Math.ceil(voices.length / columns);
+  const rowCount = Math.ceil((voices.length + (hasMore ? 1 : 0)) / columns);
   
   // 行渲染函数数据
   const itemData = {
@@ -133,9 +140,10 @@ const VirtualizedVoiceGrid: React.FC<VirtualizedVoiceGridProps> = ({
       columns,
       itemWidth,
       rowHeight,
-      rowCount
+      rowCount,
+      hasMore
     });
-  }, [containerWidth, containerHeight, voices.length, columns, itemWidth, rowHeight, rowCount]);
+  }, [containerWidth, containerHeight, voices.length, columns, itemWidth, rowHeight, rowCount, hasMore]);
   
   if (containerWidth === 0 || containerHeight === 0) {
     console.warn('VirtualizedVoiceGrid: 容器尺寸为0，无法渲染');
@@ -144,22 +152,41 @@ const VirtualizedVoiceGrid: React.FC<VirtualizedVoiceGridProps> = ({
   
   return (
     <div className="virtualized-voice-grid">
-      <FixedSizeList
-        className="voice-grid-list"
-        height={containerHeight}
-        width={containerWidth}
+      <InfiniteLoader
+        isItemLoaded={isItemLoaded}
         itemCount={rowCount}
-        itemSize={rowHeight}
-        itemData={itemData}
-        overscanCount={2}
-        style={{
-          position: 'relative',
-          outline: 'none',
-          height: '100%'
-        }}
+        loadMoreItems={loadMoreItems}
+        threshold={2}
       >
-        {Row}
-      </FixedSizeList>
+        {({ onItemsRendered, ref }: { 
+          onItemsRendered: (params: {
+            overscanStartIndex: number;
+            overscanStopIndex: number;
+            visibleStartIndex: number;
+            visibleStopIndex: number;
+          }) => void;
+          ref: (node: any) => void;
+        }) => (
+          <FixedSizeList
+            className="voice-grid-list"
+            height={containerHeight}
+            width={containerWidth}
+            itemCount={rowCount}
+            itemSize={rowHeight}
+            itemData={itemData}
+            onItemsRendered={onItemsRendered}
+            ref={ref}
+            overscanCount={2}
+            style={{
+              position: 'relative',
+              outline: 'none',
+              height: '100%'
+            }}
+          >
+            {Row}
+          </FixedSizeList>
+        )}
+      </InfiniteLoader>
     </div>
   );
 };

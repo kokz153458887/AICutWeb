@@ -105,15 +105,16 @@
 .voice-item-name {
   width: 100%;
   color: #fff;
-  font-size: 13px;
-  font-weight: 400;
+  font-size: 17px;
+  font-weight: bold;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: 0.3px;
-  margin-top: 4px;
+  margin-top: 0px;
   display: block;
+
 }
 
 .voice-item-emotion-tag {

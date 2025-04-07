@@ -68,6 +68,7 @@ const Row = memo(({ data, index, style }: RowProps) => {
               emotion={voice.emotion?.map(e => e.name) || []}
               isFavorite={voice.isFav}
               isSelected={selectedVoiceId === voice.voiceCode}
+              speechUrl={voice.speech?.url}
               onClick={onVoiceSelect}
               onFavoriteToggle={onFavoriteToggle}
               onSettingsClick={onSettingsClick}

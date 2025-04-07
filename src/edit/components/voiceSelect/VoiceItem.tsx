@@ -4,6 +4,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { SettingOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
+import AudioPlayer from '../../utils/AudioPlayer';
 import '../../styles/VoiceItem.css';
 
 interface VoiceItemProps {
@@ -13,6 +14,7 @@ interface VoiceItemProps {
   emotion?: string[];
   isFavorite: boolean;
   isSelected: boolean;
+  speechUrl?: string;  // 新增：音频URL
   onClick: (id: string) => void;
   onFavoriteToggle: (id: string, isFavorite: boolean) => void;
   onSettingsClick: (id: string) => void;
@@ -28,6 +30,7 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
   emotion = [],
   isFavorite,
   isSelected,
+  speechUrl,  // 新增：音频URL
   onClick,
   onFavoriteToggle,
   onSettingsClick
@@ -38,7 +41,12 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
   // 处理点击事件 - 只负责选中该项
   const handleClick = useCallback(() => {
     onClick(id);
-  }, [id, onClick]);
+    console.log("handleClick", id,"speechUrl:", speechUrl);
+    // 如果有音频URL，播放音频
+    if (speechUrl) {
+      AudioPlayer.getInstance().play(speechUrl);
+    }
+  }, [id, onClick, speechUrl]);
   
   // 处理收藏切换
   const handleFavoriteToggle = useCallback((e: React.MouseEvent) => {

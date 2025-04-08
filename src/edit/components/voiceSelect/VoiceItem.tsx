@@ -7,6 +7,26 @@ import { SettingOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
 import AudioPlayer from '../../utils/AudioPlayer';
 import '../../styles/VoiceItem.css';
 
+// 默认错误图标SVG
+const DefaultErrorAvatar = () => (
+  <svg 
+    width="100%" 
+    height="100%" 
+    viewBox="0 0 120 120" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      background: 'var(--voice-item-bg)',
+      borderRadius: '50%'
+    }}
+  >
+    <path
+      d="M60 30C43.432 30 30 43.432 30 60C30 76.568 43.432 90 60 90C76.568 90 90 76.568 90 60C90 43.432 76.568 30 60 30ZM66.464 75L60 68.536L53.536 75L45 66.464L51.464 60L45 53.536L53.536 45L60 51.464L66.464 45L75 53.536L68.536 60L75 66.464L66.464 75Z"
+      fill="#FF6B6B"
+    />
+  </svg>
+);
+
 interface VoiceItemProps {
   id: string;
   name: string;
@@ -37,6 +57,8 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
 }) => {
   // 是否显示设置图标
   const [showSettings, setShowSettings] = useState(false);
+  // 图片是否加载失败
+  const [imageError, setImageError] = useState(false);
   
   // 处理点击事件 - 负责选中该项和播放音频
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -102,15 +124,18 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
       onMouseLeave={handleMouseLeave}
     >
       <div className="voice-item-avatar-container">
-        <img 
-          className="voice-item-avatar"
-          src={avatar} 
-          alt={name}
-          onError={(e) => {
-            // 图片加载失败时使用默认头像
-            (e.target as HTMLImageElement).src = '/assets/images/default-avatar.png';
-          }}
-        />
+        {(!avatar || imageError) ? (
+          <div className="voice-item-avatar">
+            <DefaultErrorAvatar />
+          </div>
+        ) : (
+          <img 
+            className="voice-item-avatar"
+            src={avatar} 
+            alt={name}
+            onError={() => setImageError(true)}
+          />
+        )}
         
         {/* 多情绪标签 */}
         {emotion.length > 1 && (

@@ -16,7 +16,7 @@ interface TextInputSectionProps {
   disabled?: boolean;
   placeholder?: string;
   onVoiceSelect?: (voice: VoiceInfo) => void;
-  selectedVoice?: VoiceInfo | null;  // 新增：当前选中的音色
+  selectedVoice?: VoiceInfo | null;
 }
 
 /**
@@ -32,11 +32,6 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
-  const [voiceVolume, setVoiceVolume] = useState<number>(0.8); // 默认音量80%
-  const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
-  const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const [inputSectionPosition, setInputSectionPosition] = useState({ top: 0, left: 0, width: 0 });
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   
   // 从配置文件获取最大行数
@@ -103,76 +98,6 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   };
 
   /**
-   * 处理音量文字点击事件
-   */
-  const handleVolumeTextClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡
-    
-    // 获取输入区域元素的位置和宽度信息
-    if (inputSectionRef.current) {
-      const rect = inputSectionRef.current.getBoundingClientRect();
-      setInputSectionPosition({
-        top: rect.bottom + window.scrollY + 5, // 输入区域底部位置加5px间距
-        left: rect.left, // 与输入区域左侧对齐
-        width: rect.width // 使用输入区域的宽度
-      });
-    }
-    
-    setShowVolumeSlider(prev => !prev);
-    
-    // 清除之前的定时器
-    if (volumeTimeoutRef.current) {
-      clearTimeout(volumeTimeoutRef.current);
-      volumeTimeoutRef.current = null;
-    }
-  };
-
-  /**
-   * 获取显示用的音量值（百分比形式）
-   */
-  const getDisplayVolume = () => {
-    return Math.round(voiceVolume * 100);
-  };
-
-  /**
-   * 处理音量滑动条变化
-   */
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVoiceVolume(Number(e.target.value));
-    
-    // 清除之前的定时器
-    if (volumeTimeoutRef.current) {
-      clearTimeout(volumeTimeoutRef.current);
-      volumeTimeoutRef.current = null;
-    }
-  };
-
-  /**
-   * 处理鼠标抬起事件，延迟隐藏音量控制条
-   */
-  const handleVolumeMouseUp = () => {
-    volumeTimeoutRef.current = setTimeout(() => {
-      setShowVolumeSlider(false);
-    }, 500);
-  };
-
-  /**
-   * 点击外部时隐藏音量控制条
-   */
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sliderRef.current && !sliderRef.current.contains(event.target as Node)) {
-        setShowVolumeSlider(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  /**
    * 组件初始化时，调整文本区域高度
    */
   useEffect(() => {
@@ -187,32 +112,6 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
       window.removeEventListener('resize', adjustTextareaHeight);
     };
   }, []);
-
-  /**
-   * 组件卸载时清除定时器
-   */
-  useEffect(() => {
-    return () => {
-      if (volumeTimeoutRef.current) {
-        clearTimeout(volumeTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  /**
-   * 处理音量滑动条点击事件，防止事件穿透
-   */
-  const handleVolumeSliderClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发整个输入区域的点击
-  };
-
-  /**
-   * 处理滑块触摸移动事件，阻止页面滚动
-   */
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault(); // 阻止默认的触摸行为（页面滚动）
-    e.stopPropagation();
-  };
 
   const handleVoiceModalClose = () => {
     setShowVoiceModal(false);
@@ -243,52 +142,15 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         />
         
         <div className="input-controls">
-          {/* 音量文字按钮 - 显示当前音量值 */}
-          <div className="volume-text" onClick={handleVolumeTextClick}>
-            音量 <span className="volume-badge">{getDisplayVolume()}%</span>
-          </div>
-          
           {/* 说话人按钮 */}
           <div className="speaker-button" onClick={handleSpeakerButtonClick}>
             <span className="speaker-name">{selectedVoice ? selectedVoice.voicer : '选择音色'}</span>
-         
           </div>
           
           {/* 喇叭图标 */}
           <div className="speaker-icon" onClick={handleSpeakerClick}>
             <SpeakerIcon />
           </div>
-          
-          {/* 音量滑动控制条 */}
-          {showVolumeSlider && (
-            <div 
-              className="volume-slider-container" 
-              ref={sliderRef}
-              onClick={handleVolumeSliderClick}
-              onTouchMove={handleTouchMove}
-              style={{
-                top: `${inputSectionPosition.top}px`,
-                left: `${inputSectionPosition.left}px`,
-                position: 'fixed',
-                width: `${inputSectionPosition.width}px`
-              }}
-            >
-              <input
-                type="range"
-                min={0}
-                max={1}
-                value={voiceVolume}
-                step={0.01}
-                onChange={handleVolumeChange}
-                onMouseUp={handleVolumeMouseUp}
-                onTouchEnd={handleVolumeMouseUp}
-                onTouchMove={handleTouchMove}
-                className="volume-slider"
-                onClick={(e) => e.stopPropagation()}
-                style={{ flex: 1 }}
-              />
-            </div>
-          )}
         </div>
       </div>
       

@@ -67,7 +67,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       const currentPageIndex = reset ? 1 : pageIndex;
       const currentTab = topBar.find(t => t.id === tabId);
       const params = {
-        pageSize: 100,
+        pageSize: 1000,
         pageIndex: currentPageIndex,
         ...(currentTab?.type !== 'all' && {
           ...(currentTab?.type === 'fav' ? { fav: true } : {}),
@@ -296,6 +296,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
     speed: number; 
     pitch: number; 
     intensity: number;
+    volume: number;
     emotion?: string;
   }) => {
     // 更新音色列表中的设置

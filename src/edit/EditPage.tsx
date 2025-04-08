@@ -44,8 +44,7 @@ const EditPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingData, setLoadingData] = useState<boolean>(true); // 数据加载状态
   const [error, setError] = useState<string>(''); // 错误信息
-  const [volume, setVolume] = useState<number>(1); // 默认音量为1 (100%)
-  const [voiceVolume, setVoiceVolume] = useState<number>(1); // 默认音量为1 (100%)
+  const [volume, setVolume] = useState<number>(5); // 默认音量为5 (100%)
   const [backupCount, setBackupCount] = useState<number>(1);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
@@ -80,12 +79,6 @@ const EditPage: React.FC = () => {
           // 更新UI状态
           setText(config.content.text || '');
           setTitle(config.title || '');
-          
-          // 语音音量处理 - API 字段为 0-5 范围
-          const voiceVol = config.content.volume !== undefined ? config.content.volume : 1;
-          console.log('设置语音音量:', voiceVol, '(0-5范围)');
-          setVoiceVolume(voiceVol);
-          
           // 背景音乐音量处理 - API 字段为 0-5 范围
           const musicVol = config.backgroundMusic.volume !== undefined ? config.backgroundMusic.volume : 1;
           console.log('设置背景音乐音量:', musicVol, '(0-5范围)');
@@ -135,12 +128,6 @@ const EditPage: React.FC = () => {
     setText(newText);
   };
 
-  /**
-   * 处理语音音量变化
-   */
-  const handleVoiceVolumeChange = (newVolume: number) => {
-    setVoiceVolume(newVolume);
-  };
 
   /**
    * 处理背景音乐音量变化
@@ -188,9 +175,10 @@ const EditPage: React.FC = () => {
         voiceService: voice.voiceServer,
         voiceInfo: voice,
         voiceParams: {
-          speed: voice.settings?.speed || 0,
-          pitch: voice.settings?.pitch || 0,
-          intensity: voice.settings?.intensity || 0,
+          speed: voice.settings?.speed ?? 0,
+          pitch: voice.settings?.pitch ?? 0,
+          intensity: voice.settings?.intensity ?? 0,
+          volume: voice.settings?.volume !== undefined ? voice.settings.volume : 5.0,
           emotion: voice.settings?.emotion
         }
       }
@@ -246,8 +234,7 @@ const EditPage: React.FC = () => {
         title: cleanedTitle,
         content: {
           ...configData.content,
-          text: cleanedText,
-          volume: voiceVolume
+          text: cleanedText
         },
         backgroundMusic: {
           ...configData.backgroundMusic,
@@ -256,7 +243,7 @@ const EditPage: React.FC = () => {
         backupVideoNum: backupCount
       };
       
-      console.log('准备提交数据，音量值:', voiceVolume, volume, '(0-5范围)');
+      console.log('准备提交数据，音量值:', volume, '(0-5范围)');
       console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
       console.log('URL参数:', urlParams);
       

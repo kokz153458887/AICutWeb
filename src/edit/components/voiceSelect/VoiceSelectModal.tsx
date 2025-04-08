@@ -5,10 +5,12 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
  import VoiceSettingPanel from './VoiceSettingPanel';
 import VirtualizedVoiceGrid from './VirtualizedVoiceGrid';
-import { VoiceQueryAPI, VoiceInfo, TopBarItem } from '../../api/VoiceQueryAPI';
+import { VoiceService, VoiceInfo, TopBarItem } from '../../api/VoiceService';
 import '../../styles/VoiceSelectModal.css';
 import { FilterIcon, CheckmarkIcon, CloseIcon } from '../icons/SvgIcons';
 import { toast } from '../../../components/Toast';
+import { ApiResponse } from '../../../types/api';
+import { VoiceQueryResponse } from '../../api/VoiceService';
 
 interface VoiceSelectModalProps {
   show: boolean;
@@ -83,12 +85,12 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       }
 
       // 生成缓存键
-      const cacheKey = VoiceQueryAPI.generateCacheKey(params);
+      const cacheKey = VoiceService.generateCacheKey(params);
       console.log('loadVoiceData 生成缓存键', cacheKey);
 
       // 如果是重置加载，先尝试从磁盘缓存获取数据
       if (reset) {
-        const cachedData = VoiceQueryAPI.getFromCache(cacheKey);
+        const cachedData = VoiceService.getFromCache(cacheKey);
         console.log('loadVoiceData 从磁盘缓存获取数据', cachedData);
         if (cachedData) {
           setVoices(cachedData.data.content);
@@ -119,9 +121,9 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       }
       console.log('loadVoiceData 请求新数据', params);
       // 请求新数据
-      const response = await VoiceQueryAPI.queryVoices(params);
-      
-      if (response.status === 'success') {
+      const response: VoiceQueryResponse = await VoiceService.queryVoices(params);
+      console.log('loadVoiceData 请求新数据', response);
+      if (response.code === 0) {
         // 成功响应时，清空错误状态
         setError(null);
         
@@ -146,7 +148,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
             // 只有在有数据的情况下才进行缓存
             memoryCache.current[tabId] = response.data.content;
             // 只缓存第一页数据到磁盘
-            VoiceQueryAPI.saveToCache(cacheKey, response);
+            VoiceService.saveToCache(cacheKey, response);
             console.log('loadVoiceData 缓存数据', response.data.content);
           } else {
             setVoices(prev => [...prev, ...response.data.content]);
@@ -163,7 +165,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
         }
       } else {
         console.log("loadVoiceData response:", response);
-        throw new Error(response.msg || '加载音色数据失败');
+        throw new Error(response.message || '加载音色数据失败');
       }
     } catch (err) {
       console.error('加载音色数据失败:', err);
@@ -244,6 +246,12 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   // 处理确认
   const handleConfirm = useCallback(() => {
     if (selectedVoice) {
+      console.log('handleConfirm 确认选择音色:', {
+        voiceCode: selectedVoice.voiceCode,
+        voiceName: selectedVoice.voiceName,
+        voiceServer: selectedVoice.voiceServer,
+        settings: selectedVoice.settings
+      });
       onSelect?.(selectedVoice);
     }
     handleClose();
@@ -251,14 +259,8 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   
   // 处理音色点击
   const handleVoiceSelect = useCallback((id: string) => {
-    setSelectedVoiceId(prevId => {
-      // 如果当前已选中了点击的音色，则不做任何更改
-      if (prevId === id) {
-        return prevId;
-      }
-      // 否则选中新点击的音色
-      return id;
-    });
+    // 不再在这里处理选中状态，而是在 VoiceItem 中处理
+    setSelectedVoiceId(id);
   }, []);
   
   // 处理收藏切换
@@ -280,24 +282,36 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   
   // 处理设置点击
   const handleSettingsClick = useCallback((id: string) => {
-    // 确保弹出的设置面板对应当前选中的音色
+    console.log('handleSettingsClick 点击设置按钮', id);
+    // 如果点击了未选中Item的设置按钮，先选中该Item
+    setSelectedVoiceId(id);
+    // 只有在当前已选中的情况下才显示设置面板
     if (id === selectedVoiceId) {
       setShowSettings(true);
-    } else {
-      // 如果点击了未选中Item的设置按钮，先选中该Item
-      setSelectedVoiceId(id);
-      // 不立即显示设置面板，用户需要再次点击设置按钮
     }
   }, [selectedVoiceId]);
   
   // 处理设置变更
-  const handleSettingsChange = useCallback((voiceCode: string, settings: { speed: number; pitch: number; intensity: number }) => {
-    // 保存到本地存储
-    try {
-      localStorage.setItem(`voice_settings_${voiceCode}`, JSON.stringify(settings));
-    } catch (error) {
-      console.error('保存音色设置失败:', error);
-    }
+  const handleSettingsChange = useCallback((voiceCode: string, settings: { 
+    speed: number; 
+    pitch: number; 
+    intensity: number;
+    emotion?: string;
+  }) => {
+    // 更新音色列表中的设置
+    setVoices(prev => prev.map(v => {
+      if (v.voiceCode === voiceCode) {
+        console.log('更新音色设置:', {
+          voiceCode,
+          settings
+        });
+        return { 
+          ...v, 
+          settings
+        };
+      }
+      return v;
+    }));
   }, []);
   
   // 处理筛选点击

@@ -38,27 +38,51 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
   // 是否显示设置图标
   const [showSettings, setShowSettings] = useState(false);
   
-  // 处理点击事件 - 只负责选中该项
-  const handleClick = useCallback(() => {
-    onClick(id);
+  // 处理点击事件 - 负责选中该项和播放音频
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // 检查是否点击了设置按钮
+    const target = e.target as HTMLElement;
+    const isSettingsButton = target.closest('.voice-item-settings');
+    const isSettingsVisible = showSettings || isSelected;
+
     console.log("handleClick", id,"speechUrl:", speechUrl);
-    // 如果有音频URL，播放音频
+    // 如果点击了可见状态的设置按钮，不播放音频
+    if (isSettingsButton && isSettingsVisible) {
+      return;
+    }
+
+    // 选中该项
+    onClick(id);
+
+    // 播放音频
     if (speechUrl) {
+      console.log("播放音频:", id, "speechUrl:", speechUrl);
       AudioPlayer.getInstance().play(speechUrl);
     }
-  }, [id, onClick, speechUrl]);
+  }, [id, onClick, speechUrl, showSettings, isSelected]);
   
   // 处理收藏切换
   const handleFavoriteToggle = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // 阻止冒泡，避免触发音频播放
     onFavoriteToggle(id, !isFavorite);
   }, [id, isFavorite, onFavoriteToggle]);
   
-  // 处理设置点击 - 专门负责弹出设置面板
+  // 处理设置按钮点击
   const handleSettingsClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSettingsClick(id);
-  }, [id, onSettingsClick]);
+    // 只有在按钮可见时才处理点击事件
+    if (showSettings || isSelected) {
+      console.log("handleSettingsClick onSettingsClick", id, "showSettings:", showSettings, "isSelected:", isSelected);
+      e.stopPropagation(); // 阻止冒泡，避免触发音频播放
+      onSettingsClick(id);
+      
+      if (! isSelected) {
+        if (speechUrl) {
+          console.log("播放音频:", id, "speechUrl:", speechUrl);
+          AudioPlayer.getInstance().play(speechUrl);
+        }
+      }
+    } 
+  }, [id, showSettings, isSelected, onSettingsClick]);
   
   // 鼠标进入事件
   const handleMouseEnter = useCallback(() => {
@@ -105,7 +129,11 @@ const VoiceItem: React.FC<VoiceItemProps> = ({
         {/* 选中状态的遮罩和设置按钮 */}
         {(isSelected || showSettings) && (
           <div className="voice-item-overlay">
-            <div className="voice-item-settings" onClick={handleSettingsClick}>
+            <div 
+              className={`voice-item-settings ${(showSettings || isSelected) ? 'visible' : ''}`}
+              onClick={handleSettingsClick}
+              style={{ pointerEvents: (showSettings || isSelected) ? 'auto' : 'none' }}
+            >
               <SettingOutlined style={{ fontSize: '22px', color: 'white' }} />
             </div>
           </div>

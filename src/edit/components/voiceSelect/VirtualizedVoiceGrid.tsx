@@ -5,7 +5,7 @@
 import React, { memo, useEffect, useMemo } from 'react';
 import { FixedSizeList } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
-import { VoiceInfo } from '../../api/VoiceQueryAPI';
+import { VoiceInfo } from '../../api/VoiceService';
 import VoiceItem from './VoiceItem';
 import '../../styles/VirtualizedVoiceGrid.css';
 

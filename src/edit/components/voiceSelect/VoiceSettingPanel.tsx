@@ -4,13 +4,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CloseIcon } from '../icons/SvgIcons';
 import '../../styles/VoiceSettingPanel.css';
+import AudioPlayer from '../../utils/AudioPlayer';
 
 interface VoiceSettingPanelProps {
   voice: {
     voiceCode: string;
     voicer: string;
     supportVoiceParam: string[];
-    emotion?: Array<{ id: string; name: string }>;
+    emotion?: Array<{ 
+      id: string; 
+      name: string;
+      speech: {
+        text: string;
+        url: string;
+      };
+    }>;
     settings?: {
       speed: number;
       pitch: number;
@@ -36,6 +44,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
     intensity: 0
   });
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
 
   // 加载初始设置
   useEffect(() => {
@@ -60,9 +69,36 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
   const handleSettingChange = useCallback((param: 'speed' | 'pitch' | 'intensity', value: number) => {
     const newSettings = {
       ...settings,
-      [param]: value
+      [param]: value,
+      emotion: selectedEmotion
     };
     setSettings(newSettings);
+    console.log('音色参数更新:', {
+      voiceCode: voice.voiceCode,
+      param,
+      value,
+      emotion: selectedEmotion,
+      settings: newSettings
+    });
+    onSettingsChange(voice.voiceCode, newSettings);
+  }, [voice.voiceCode, settings, selectedEmotion, onSettingsChange]);
+
+  // 处理情绪标签点击
+  const handleEmotionClick = useCallback((emotion: { id: string; name: string; speech: { url: string } }) => {
+    setSelectedEmotion(emotion.id);
+    // 使用统一的 AudioPlayer 播放音频
+    AudioPlayer.getInstance().play(emotion.speech.url);
+    // 更新设置
+    const newSettings = {
+      ...settings,
+      emotion: emotion.id
+    };
+    setSettings(newSettings);
+    console.log('情绪选择更新:', {
+      voiceCode: voice.voiceCode,
+      emotionId: emotion.id,
+      settings: newSettings
+    });
     onSettingsChange(voice.voiceCode, newSettings);
   }, [voice.voiceCode, settings, onSettingsChange]);
 
@@ -82,6 +118,13 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
     e.stopPropagation();
   }, []);
 
+  // 组件卸载时停止播放
+  useEffect(() => {
+    return () => {
+      AudioPlayer.getInstance().stop();
+    };
+  }, []);
+
   return (
     <div className="voice-setting-backdrop" onClick={handleClose}>
       <div 
@@ -89,13 +132,87 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
         onClick={e => e.stopPropagation()}
       >
         <div className="voice-setting-header">
-          <div className="voice-setting-title">调整参数</div>
+          <div className="voice-setting-title">音色设置</div>
           <div className="voice-setting-close" onClick={handleClose}>
             <CloseIcon width={20} height={20} />
           </div>
         </div>
 
         <div className="voice-setting-content">
+          {/* 情绪标签区域 */}
+          {voice.emotion && voice.emotion.length > 0 && (
+            <>
+              
+              <div className="voice-setting-emotions">
+                {voice.emotion.map(emotion => (
+                  <div
+                    key={emotion.id}
+                    className={`voice-emotion-tag ${selectedEmotion === emotion.id ? 'active' : ''}`}
+                    onClick={() => handleEmotionClick(emotion)}
+                  >
+                    {emotion.name}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* 情绪强度调整 */}
+          {voice.supportVoiceParam.includes('emotion_intensity') && (
+            <div className="voice-setting-item">
+              <div className="voice-setting-label">
+                <span className="voice-setting-label-text">情绪强度</span>
+                <span className="voice-setting-value">{formatValueDisplay(settings.intensity)}</span>
+              </div>
+              <div className="voice-setting-slider-container">
+                <input
+                  type="range"
+                  className="voice-setting-slider"
+                  min="-10"
+                  max="10"
+                  step="0.1"
+                  value={settings.intensity}
+                  onChange={(e) => handleSettingChange('intensity', parseFloat(e.target.value))}
+                  onTouchMove={handleTouchMove}
+                  style={{ '--slider-percent': getSliderPercent(settings.intensity) } as React.CSSProperties}
+                />
+                <div className="voice-setting-marks">
+                  <span className="voice-setting-mark">-10</span>
+                  <span className="voice-setting-mark active">0</span>
+                  <span className="voice-setting-mark">10</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 语调调整 */}
+          {voice.supportVoiceParam.includes('pitch') && (
+            <div className="voice-setting-item">
+              <div className="voice-setting-label">
+                <span className="voice-setting-label-text">语调</span>
+                <span className="voice-setting-value">{formatValueDisplay(settings.pitch)}</span>
+              </div>
+              <div className="voice-setting-slider-container">
+                <input
+                  type="range"
+                  className="voice-setting-slider"
+                  min="-10"
+                  max="10"
+                  step="0.1"
+                  value={settings.pitch}
+                  onChange={(e) => handleSettingChange('pitch', parseFloat(e.target.value))}
+                  onTouchMove={handleTouchMove}
+                  style={{ '--slider-percent': getSliderPercent(settings.pitch) } as React.CSSProperties}
+                />
+                <div className="voice-setting-marks">
+                  <span className="voice-setting-mark">-10</span>
+                  <span className="voice-setting-mark active">0</span>
+                  <span className="voice-setting-mark">10</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 语速调整 */}
           <div className="voice-setting-item">
             <div className="voice-setting-label">
@@ -121,60 +238,6 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
               </div>
             </div>
           </div>
-
-          {/* 语调调整 */}
-          <div className="voice-setting-item">
-            <div className="voice-setting-label">
-              <span className="voice-setting-label-text">语调</span>
-              <span className="voice-setting-value">{formatValueDisplay(settings.pitch)}</span>
-            </div>
-            <div className="voice-setting-slider-container">
-              <input
-                type="range"
-                className="voice-setting-slider"
-                min="-10"
-                max="10"
-                step="0.1"
-                value={settings.pitch}
-                onChange={(e) => handleSettingChange('pitch', parseFloat(e.target.value))}
-                onTouchMove={handleTouchMove}
-                style={{ '--slider-percent': getSliderPercent(settings.pitch) } as React.CSSProperties}
-              />
-              <div className="voice-setting-marks">
-                <span className="voice-setting-mark">-10</span>
-                <span className="voice-setting-mark active">0</span>
-                <span className="voice-setting-mark">10</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 情感强度调整 */}
-          {voice.emotion && voice.emotion.length > 0 && (
-            <div className="voice-setting-item">
-              <div className="voice-setting-label">
-                <span className="voice-setting-label-text">情感强度</span>
-                <span className="voice-setting-value">{formatValueDisplay(settings.intensity)}</span>
-              </div>
-              <div className="voice-setting-slider-container">
-                <input
-                  type="range"
-                  className="voice-setting-slider"
-                  min="-10"
-                  max="10"
-                  step="0.1"
-                  value={settings.intensity}
-                  onChange={(e) => handleSettingChange('intensity', parseFloat(e.target.value))}
-                  onTouchMove={handleTouchMove}
-                  style={{ '--slider-percent': getSliderPercent(settings.intensity) } as React.CSSProperties}
-                />
-                <div className="voice-setting-marks">
-                  <span className="voice-setting-mark">-10</span>
-                  <span className="voice-setting-mark active">0</span>
-                  <span className="voice-setting-mark">10</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

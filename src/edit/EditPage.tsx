@@ -18,8 +18,8 @@ import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
 import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
 import { MusicLibItem, StyleModel } from './api/types';
+import { VoiceInfo } from './api/VoiceService';
 import { cleanTitle, cleanContent } from '../utils/textUtils';
-import { VoiceInfo } from './mock/voiceData';
 
 /**
  * 编辑页主组件
@@ -161,23 +161,43 @@ const EditPage: React.FC = () => {
   };
 
   /**
-   * 处理说话人点击事件
-   */
-  const handleSpeakerClick = () => {
-    // 不再显示Toast，音色选择功能已实现
-    console.log('打开音色选择');
-  };
-
-  /**
    * 处理音色选择事件
    */
   const handleVoiceSelect = (voice: VoiceInfo) => {
+    if (!configData) return;
+
+    console.log('处理音色选择:', {
+      voiceCode: voice.voiceCode,
+      voiceName: voice.voiceName,
+      voiceServer: voice.voiceServer,
+      settings: voice.settings,
+    });
+
     setSelectedVoice(voice);
     setSpeaker({
       name: voice.voicer,
-      tag: voice.tag?.[0] || ''
+      tag: ''
     });
-    console.log('选择音色成功:', voice.voicer);
+
+    // 更新配置数据
+    const newConfig = {
+      ...configData,
+      content: {
+        ...configData.content,
+        speakerID: voice.voiceName, 
+        voiceService: voice.voiceServer,
+        voiceInfo: voice,
+        voiceParams: {
+          speed: voice.settings?.speed || 0,
+          pitch: voice.settings?.pitch || 0,
+          intensity: voice.settings?.intensity || 0,
+          emotion: voice.settings?.emotion
+        }
+      }
+    };
+
+    setConfigData(newConfig);
+    console.log('更新配置数据:', newConfig);
   };
 
   /**
@@ -361,6 +381,7 @@ const EditPage: React.FC = () => {
           text={text} 
           onTextChange={handleTextChange}
           onVoiceSelect={handleVoiceSelect}
+          selectedVoice={selectedVoice}
         />
 
         {/* 标题输入区域 */}

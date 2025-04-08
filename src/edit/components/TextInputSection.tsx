@@ -7,7 +7,7 @@ import '../styles/TextInputSection.css';
 import { SpeakerIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
 import { toast } from '../../components/Toast';
-import { VoiceInfo } from '../mock/voiceData';
+import { VoiceInfo } from '../api/VoiceService';
 import VoiceSelectModal from './voiceSelect/VoiceSelectModal';
 
 interface TextInputSectionProps {
@@ -16,6 +16,7 @@ interface TextInputSectionProps {
   disabled?: boolean;
   placeholder?: string;
   onVoiceSelect?: (voice: VoiceInfo) => void;
+  selectedVoice?: VoiceInfo | null;  // 新增：当前选中的音色
 }
 
 /**
@@ -26,7 +27,8 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   onTextChange,
   disabled = false,
   placeholder = '请输入需要配音的文字，精彩文案由你创作...',
-  onVoiceSelect
+  onVoiceSelect,
+  selectedVoice
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
@@ -248,8 +250,8 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
           
           {/* 说话人按钮 */}
           <div className="speaker-button" onClick={handleSpeakerButtonClick}>
-            <span className="speaker-name">选择音色</span>
-            <span className="speaker-tag">推荐</span>
+            <span className="speaker-name">{selectedVoice ? selectedVoice.voicer : '选择音色'}</span>
+         
           </div>
           
           {/* 喇叭图标 */}
@@ -294,6 +296,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         show={showVoiceModal}
         onClose={handleVoiceModalClose}
         onSelect={handleVoiceSelect}
+        initialSelectedVoiceId={selectedVoice?.voiceCode}
       />
     </>
   );

@@ -8,6 +8,15 @@ export interface ContentModel {
   text: string;
   splitType: string;
   volume: number;
+  speakerID?: string;
+  voiceService?: string;
+  voiceInfo?: any;
+  voiceParams?: {
+    speed: number;
+    pitch: number;
+    intensity: number;
+    emotion?: string;
+  };
 }
 
 // 音乐库项模型

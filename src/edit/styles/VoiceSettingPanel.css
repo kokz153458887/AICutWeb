@@ -47,7 +47,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .voice-setting-title {
@@ -107,7 +107,7 @@
 
 .voice-setting-slider-container {
   position: relative;
-  padding: 6px 0;
+  padding: 16px 0;
   touch-action: none;
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none;   /* Safari */
@@ -123,33 +123,45 @@
   background: var(--voice-slider-bg);
   border-radius: 4px;
   -webkit-appearance: none;
-  margin: 8px 0;
+  margin: 10px 0;
   cursor: pointer;
   touch-action: none;
   -webkit-user-drag: none;
+  position: relative;
 }
 
 .voice-setting-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: var(--slider-thumb-size);
-  height: var(--slider-thumb-size);
+  width: 20px;
+  height: 20px;
   background: var(--voice-slider-active);
   border: 2px solid #fff;
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
-  margin-top: calc(-1 * (var(--slider-thumb-size) - var(--slider-track-height)) / 2);
+  margin-top: -8px;
 }
 
 .voice-setting-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .voice-setting-slider::-webkit-slider-runnable-track {
   height: var(--slider-track-height);
   border-radius: 4px;
   background: linear-gradient(to right, var(--voice-slider-active) var(--slider-percent), var(--voice-slider-bg) var(--slider-percent));
+  cursor: pointer;
+}
+
+.voice-setting-slider::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  cursor: pointer;
 }
 
 .voice-setting-marks {
@@ -257,4 +269,38 @@
   .voice-setting-value {
     font-size: 14px;
   }
+}
+
+.voice-setting-emotions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 16px 16px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.voice-emotion-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.voice-emotion-tag:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.voice-emotion-tag.active {
+  background-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
 } 

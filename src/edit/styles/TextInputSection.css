@@ -98,15 +98,9 @@
 
 .speaker-name {
   font-size: 14px;
-}
-
-.speaker-tag {
-  font-size: 12px;
+  font-weight: 500;
+  padding: 0px 3px;
   color: #00e676;
-  font-weight: 600;
-  background-color: rgba(0, 230, 118, 0.1);
-  padding: 2px 6px;
-  border-radius: 10px;
 }
 
 /* 音量文字按钮样式 */

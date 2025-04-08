@@ -1,9 +1,10 @@
 /**
- * 音色查询API服务
- * 负责处理音色查询相关的API请求
+ * 语音服务API
+ * 负责处理语音查询和语音生成相关的API请求
  */
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
+import { ApiResponse } from '../../types/api';
 
 /**
  * 创建axios实例
@@ -54,6 +55,25 @@ export interface VoiceQueryParams {
   voice_server?: string;
 }
 
+// 语音生成参数接口
+export interface VoiceGenerateParams {
+  voice_server?: string;
+  text: string;
+  voice_name: string;
+  voice_code?: string;
+  speed?: number;
+  volume?: number;
+  pitch?: number;
+  emotion?: string;
+  emotion_intensity?: number;
+}
+
+// 语音生成响应接口
+export interface VoiceGenerateResponse {
+  audio_url: string;
+  duration: number;
+}
+
 // 音色示例语音接口
 export interface SpeechInfo {
   text: string;
@@ -71,6 +91,8 @@ export interface EmotionInfo {
 export interface VoiceInfo {
   voiceCode: string;
   voicer: string;
+  voiceServer?: string;
+  voiceName?: string;
   avatar: string;
   speech: SpeechInfo;
   isFav: boolean;
@@ -80,6 +102,8 @@ export interface VoiceInfo {
     speed: number;
     pitch: number;
     intensity: number;
+    volume?: number;
+    emotion?: string;
   };
 }
 
@@ -104,8 +128,8 @@ export interface PagesInfo {
 
 // 查询响应接口
 export interface VoiceQueryResponse {
-  status: string;
-  msg: string;
+  code: number;
+  message: string;
   data: {
     pages: PagesInfo;
     topbar: TopBarItem[];
@@ -114,9 +138,9 @@ export interface VoiceQueryResponse {
 }
 
 /**
- * 音色查询API类
+ * 语音服务API类
  */
-export class VoiceQueryAPI {
+export class VoiceService {
   private static readonly CACHE_KEY = 'voice_query_cache';
   private static readonly CACHE_EXPIRY = 1000 * 60 * 60 * 24; // 24小时后缓存过期
 
@@ -134,6 +158,60 @@ export class VoiceQueryAPI {
       });
     } catch (error) {
       console.error('查询音色列表失败:', error);
+      return {
+        code: -1,
+        message: error instanceof Error ? error.message : '查询音色列表失败',
+        data: {
+          pages: {
+            hasMore: false,
+            pageNum: 1,
+            pageSize: params.pageSize || 100,
+            total: 0
+          },
+          topbar: [],
+          content: []
+        }
+      };
+    }
+  }
+
+  /**
+   * 生成语音
+   * @param params 语音生成参数
+   * @returns 生成的语音URL和时长
+   */
+  static async generateVoice(params: VoiceGenerateParams): Promise<VoiceGenerateResponse> {
+    try {
+      console.log('生成语音，参数:', params);
+      
+      // 参数验证
+      if (!params.text) {
+        throw new Error('文本内容不能为空');
+      }
+      
+      if (!params.voice_code && !params.voice_name) {
+        throw new Error('音色名称或音色代码不能为空');
+      }
+
+      // 参数范围验证和转换
+      const normalizedParams = {
+        ...params,
+        speed: params.speed !== undefined ? Math.max(-10, Math.min(10, params.speed)) : 1.0,
+        volume: params.volume !== undefined ? Math.max(-10, Math.min(10, params.volume)) : 1.0,
+        pitch: params.pitch !== undefined ? Math.max(-10, Math.min(10, params.pitch)) : 0.0,
+        emotion_intensity: params.emotion_intensity !== undefined ? 
+          Math.max(-10, Math.min(10, params.emotion_intensity)) : 0.0
+      };
+
+      const response: ApiResponse<VoiceGenerateResponse> = await apiClient.post('/voice/generate', normalizedParams);
+      
+      if (response.code === 0 && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.message || '生成语音失败');
+      }
+    } catch (error) {
+      console.error('生成语音失败:', error);
       throw error;
     }
   }

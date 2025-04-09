@@ -260,7 +260,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
           )}
 
           {/* 情绪强度调整 */}
-          {voice.supportVoiceParam.includes('emotion_intensity') && (
+          {voice.supportVoiceParam && voice.supportVoiceParam.includes('emotion_intensity') && (
             <div className="voice-setting-item">
               <div className="voice-setting-label">
                 <span className="voice-setting-label-text">情绪强度</span>
@@ -288,7 +288,7 @@ const VoiceSettingPanel: React.FC<VoiceSettingPanelProps> = ({
           )}
 
           {/* 语调调整 */}
-          {voice.supportVoiceParam.includes('pitch') && (
+          {voice.supportVoiceParam && voice.supportVoiceParam.includes('pitch') && (
             <div className="voice-setting-item">
               <div className="voice-setting-label">
                 <span className="voice-setting-label-text">语调</span>

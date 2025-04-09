@@ -145,16 +145,41 @@
   background-color: rgba(20, 20, 20, 0.85);
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   z-index: 5;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* 喇叭图标悬停效果 */
+.speaker-icon:hover {
+  transform: scale(1.05);
+  background-color: rgba(20, 20, 20, 0.95);
+  color: #ffffff;
+}
+
 /* 喇叭图标按下效果 */
 .speaker-icon:active {
-  transform: scale(0.9);
+  transform: scale(0.95);
+}
+
+/* 加载状态样式 */
+.speaker-icon.loading {
   background-color: rgba(20, 20, 20, 0.95);
+  color: #ffffff;
+}
+
+.speaker-icon.loading .loading-icon {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 音量图标样式 */

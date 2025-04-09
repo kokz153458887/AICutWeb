@@ -4,7 +4,7 @@
  */
 
 // 获取API基础URL
-const getApiBaseUrl = () => {
+export const getApiBaseUrl = () => {
   const configuredHost = import.meta.env.VITE_API_HOST;
   const apiPort = import.meta.env.VITE_API_PORT || '5127';
 

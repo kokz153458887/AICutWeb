@@ -79,6 +79,18 @@ const EditPage: React.FC = () => {
           // 更新UI状态
           setText(config.content.text || '');
           setTitle(config.title || '');
+          
+          // 设置音色信息
+          if (config.content.voiceInfo) {
+            const voiceInfo = config.content.voiceInfo as VoiceInfo;
+            console.log('设置初始音色信息:', voiceInfo);
+            setSelectedVoice(voiceInfo);
+            setSpeaker({
+              name: voiceInfo.voicer,
+              tag: ''
+            });
+          }
+          
           // 背景音乐音量处理 - API 字段为 0-5 范围
           const musicVol = config.backgroundMusic.volume !== undefined ? config.backgroundMusic.volume : 1;
           console.log('设置背景音乐音量:', musicVol, '(0-5范围)');
@@ -153,12 +165,7 @@ const EditPage: React.FC = () => {
   const handleVoiceSelect = (voice: VoiceInfo) => {
     if (!configData) return;
 
-    console.log('处理音色选择:', {
-      voiceCode: voice.voiceCode,
-      voiceName: voice.voiceName,
-      voiceServer: voice.voiceServer,
-      settings: voice.settings,
-    });
+    console.log('处理音色选择:', voice);
 
     setSelectedVoice(voice);
     setSpeaker({
@@ -171,9 +178,20 @@ const EditPage: React.FC = () => {
       ...configData,
       content: {
         ...configData.content,
-        speakerID: voice.voiceName, 
+        speakerID: voice.voiceName,
         voiceService: voice.voiceServer,
-        voiceInfo: voice,
+        voiceInfo: {
+          voiceCode: voice.voiceCode,
+          voicer: voice.voicer,
+          voiceServer: voice.voiceServer,
+          voiceName: voice.voiceName,
+          avatar: voice.avatar,
+          speech: voice.speech,
+          isFav: voice.isFav,
+          supportVoiceParam: voice.supportVoiceParam,
+          emotion: voice.emotion,
+          settings: voice.settings
+        },
         voiceParams: {
           speed: voice.settings?.speed ?? 0,
           pitch: voice.settings?.pitch ?? 0,

@@ -3,9 +3,11 @@
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
- import VoiceSettingPanel from './VoiceSettingPanel';
+import VoiceSettingPanel from './VoiceSettingPanel';
 import VirtualizedVoiceGrid from './VirtualizedVoiceGrid';
+import VoiceFilterPanel from './VoiceFilterPanel';
 import { VoiceService, VoiceInfo, TopBarItem } from '../../api/VoiceService';
+import { getFilters, setFilters, hasActiveFilters } from '../../store/filterStore';
 import '../../styles/VoiceSelectModal.css';
 import { FilterIcon, CheckmarkIcon, CloseIcon } from '../icons/SvgIcons';
 import { toast } from '../../../components/Toast';
@@ -31,14 +33,16 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   // 状态管理
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(initialSelectedVoiceId || null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [voices, setVoices] = useState<VoiceInfo[]>([]);
   const [topBar, setTopBar] = useState<TopBarItem[]>([]);
-  const [currentTabId, setCurrentTabId] = useState<string>('all');  // 使用id作为tab的唯一标识
+  const [currentTabId, setCurrentTabId] = useState<string>('all');
   const [hasMore, setHasMore] = useState(true);
   const [pageIndex, setPageIndex] = useState(1);
+  
   const tabsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -47,16 +51,13 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   const loadingRef = useRef(false);
   const memoryCache = useRef<Record<string, VoiceInfo[]>>({});
   const isTopBarInitialized = useRef(false);
-  const lastSelectedTabRef = useRef<string | null>(null);  // 记录最后选中的tab
+  const lastSelectedTabRef = useRef<string | null>(null);
 
   // 获取选中的音色信息
   const selectedVoice = voices.find(v => v.voiceCode === selectedVoiceId) || null;
 
-  /**
-   * 加载音色数据
-   */
+  // 加载音色数据
   const loadVoiceData = useCallback(async (tabId: string, reset: boolean = false) => {
-    // 如果正在加载中且不是重置请求，则不重复请求
     if (loadingRef.current && !reset) {
       console.log('loadVoiceData 正在加载中且不是重置请求，则不重复请求', tabId, reset);
       return;
@@ -66,9 +67,12 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
     try {
       const currentPageIndex = reset ? 1 : pageIndex;
       const currentTab = topBar.find(t => t.id === tabId);
+
+      // 构建查询参数
       const params = {
         pageSize: 1000,
         pageIndex: currentPageIndex,
+        // 添加标签筛选
         ...(currentTab?.type !== 'all' && {
           ...(currentTab?.type === 'fav' ? { fav: true } : {}),
           ...(currentTab?.type === 'hot' ? { hot: true } : {}),
@@ -177,9 +181,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
     }
   }, [pageIndex, currentTabId]);
 
-  /**
-   * 处理Tab切换
-   */
+  // 处理Tab切换
   const handleTabChange = useCallback((tabId: string) => {
     if (currentTabId === tabId) return; // 如果是同一个tab，不重复加载
     console.log('handleTabChange 切换tab', tabId);
@@ -189,17 +191,13 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
     loadVoiceData(tabId, true);
   }, [currentTabId, loadVoiceData]);
 
-  /**
-   * 处理滚动加载更多
-   */
+  // 处理滚动加载更多
   const loadMoreItems = useCallback(() => {
     if (!hasMore || loadingRef.current) return Promise.resolve();
     return loadVoiceData(currentTabId);
   }, [hasMore, currentTabId, loadVoiceData]);
 
-  /**
-   * 判断某一项是否已加载
-   */
+  // 判断某一项是否已加载
   const isItemLoaded = useCallback((index: number) => {
     return !hasMore || index < voices.length;
   }, [hasMore, voices.length]);
@@ -240,6 +238,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       onClose();
       setIsClosing(false);
       setShowSettings(false);
+      setShowFilter(false);
     }, 300);
   }, [onClose]);
   
@@ -259,18 +258,15 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   
   // 处理音色点击
   const handleVoiceSelect = useCallback((id: string) => {
-    // 不再在这里处理选中状态，而是在 VoiceItem 中处理
     setSelectedVoiceId(id);
   }, []);
   
   // 处理收藏切换
   const handleFavoriteToggle = useCallback((id: string, isFavorite: boolean) => {
-    // 更新状态
     setVoices(prev => prev.map(v => 
       v.voiceCode === id ? { ...v, isFav: isFavorite } : v
     ));
     
-    // 保存到本地存储
     try {
       const favorites = JSON.parse(localStorage.getItem('voice_favorites') || '{}');
       favorites[id] = isFavorite;
@@ -283,9 +279,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   // 处理设置点击
   const handleSettingsClick = useCallback((id: string) => {
     console.log('handleSettingsClick 点击设置按钮', id);
-    // 如果点击了未选中Item的设置按钮，先选中该Item
     setSelectedVoiceId(id);
-    // 只有在当前已选中的情况下才显示设置面板
     if (id === selectedVoiceId) {
       setShowSettings(true);
     }
@@ -299,7 +293,6 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
     volume: number;
     emotion?: string;
   }) => {
-    // 更新音色列表中的设置
     setVoices(prev => prev.map(v => {
       if (v.voiceCode === voiceCode) {
         console.log('更新音色设置:', {
@@ -317,8 +310,34 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   
   // 处理筛选点击
   const handleFilterClick = useCallback(() => {
-    toast.info('筛选功能开发中...');
+    setShowFilter(true);
   }, []);
+
+  // 处理筛选确认
+  const handleFilterConfirm = useCallback((newFilters: { gender?: string; age?: string }) => {
+    console.log('应用筛选条件:', newFilters);
+    
+    // 1. 更新静态筛选参数
+    setFilters(newFilters);
+    
+    // 2. 关闭筛选面板
+    setShowFilter(false);
+
+    // 3. 清空所有内存缓存，因为筛选条件会影响所有标签页的数据
+    memoryCache.current = {};
+
+    // 4. 重置页码
+    setPageIndex(1);
+
+    // 5. 重置hasMore状态
+    setHasMore(true);
+
+    // 6. 清空当前列表数据
+    setVoices([]);
+
+    // 7. 重新加载当前tab的数据
+    loadVoiceData(currentTabId, true);
+  }, [currentTabId, loadVoiceData]);
   
   if (!show) {
     return null;
@@ -332,8 +351,12 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       >
         {/* 头部区域 */}
         <div className="voice-select-modal-header">
-          <div className="voice-select-modal-filter" onClick={handleFilterClick}>
+          <div 
+            className={`voice-select-modal-filter ${hasActiveFilters() ? 'active' : ''}`} 
+            onClick={handleFilterClick}
+          >
             <FilterIcon width={24} height={24} />
+            {hasActiveFilters() && <div className="voice-filter-badge" />}
           </div>
           
           <div className="voice-select-modal-tabs-container">
@@ -395,6 +418,14 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
             onSettingsChange={handleSettingsChange}
           />
         )}
+
+        {/* 筛选面板 */}
+        <VoiceFilterPanel
+          show={showFilter}
+          onClose={() => setShowFilter(false)}
+          onConfirm={handleFilterConfirm}
+          initialFilters={getFilters()}
+        />
       </div>
     </div>,
     document.body

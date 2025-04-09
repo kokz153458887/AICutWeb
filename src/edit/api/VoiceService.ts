@@ -5,6 +5,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
 import { ApiResponse } from '../../types/api';
+import { getFilters } from '../store/filterStore';
 
 /**
  * 创建axios实例
@@ -149,13 +150,19 @@ export class VoiceService {
    */
   static async queryVoices(params: VoiceQueryParams): Promise<VoiceQueryResponse> {
     try {
-      return await apiClient.get(API_PATHS.voice.query, {
-        params: {
-          pageSize: params.pageSize || 100,
-          pageIndex: params.pageIndex || 1,
-          ...params
-        }
-      });
+      // 合并筛选参数
+      const filters = getFilters();
+      const queryParams = {
+        pageSize: params.pageSize || 100,
+        pageIndex: params.pageIndex || 1,
+        ...params,
+        // 添加筛选参数（如果有）
+        ...(filters.gender && { gender: filters.gender }),
+        ...(filters.age && { age: filters.age })
+      };
+
+      console.log('查询音色列表，参数:', queryParams);
+      return await apiClient.get(API_PATHS.voice.query, { params: queryParams });
     } catch (error) {
       console.error('查询音色列表失败:', error);
       return {

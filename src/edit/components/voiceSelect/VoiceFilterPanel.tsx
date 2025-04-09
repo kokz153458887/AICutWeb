@@ -55,15 +55,17 @@ const VoiceFilterPanel: React.FC<VoiceFilterPanelProps> = ({
 
   // 处理确认
   const handleConfirm = useCallback(() => {
-    onConfirm({
+    const filters = {
       gender: selectedGender,
       age: selectedAge
-    });
-    handleClose();
-  }, [selectedGender, selectedAge, onConfirm, handleClose]);
+    };
+    console.log('确认筛选条件:', filters);
+    onConfirm(filters);
+  }, [selectedGender, selectedAge, onConfirm]);
 
   // 处理取消
   const handleCancel = useCallback(() => {
+    console.log('取消筛选');
     handleClose();
   }, [handleClose]);
 
@@ -80,9 +82,9 @@ const VoiceFilterPanel: React.FC<VoiceFilterPanelProps> = ({
         {/* 头部 */}
         <div className="voice-filter-header">
           <div className="voice-filter-title">筛选音色</div>
-          <button className="voice-filter-close" onClick={handleClose}>
+          <div className="voice-filter-close" onClick={handleClose}>
             <CloseIcon width={20} height={20} />
-          </button>
+          </div>
         </div>
 
         {/* 内容区 */}
@@ -122,12 +124,14 @@ const VoiceFilterPanel: React.FC<VoiceFilterPanelProps> = ({
 
         {/* 底部操作区 */}
         <div className="voice-filter-footer">
-          <button className="voice-filter-cancel" onClick={handleCancel}>
-            取消
-          </button>
-          <button className="voice-filter-confirm" onClick={handleConfirm}>
-            确定
-          </button>
+          <div className="voice-filter-footer-buttons">
+            <button className="voice-filter-cancel" onClick={handleCancel}>
+              取消
+            </button>
+            <button className="voice-filter-confirm" onClick={handleConfirm}>
+              确定
+            </button>
+          </div>
         </div>
       </div>
     </div>

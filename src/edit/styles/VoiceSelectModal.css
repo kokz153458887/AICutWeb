@@ -81,8 +81,21 @@
   color: var(--voice-modal-text);
 }
 
-/* 筛选按钮 */
+/* 筛选按钮上的标签 */
+.voice-filter-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--voice-modal-primary);
+  box-shadow: 0 0 4px rgba(255, 71, 87, 0.5);
+}
+
+/* 筛选按钮容器 */
 .voice-select-modal-filter {
+  position: relative;
   width: 30px;
   height: 30px;
   display: flex;
@@ -103,6 +116,11 @@
 .voice-select-modal-filter:active {
   background-color: rgba(255, 255, 255, 0.18);
   transform: scale(0.95);
+}
+
+.voice-select-modal-filter.active {
+  background-color: rgba(255, 71, 87, 0.15);
+  color: var(--voice-modal-primary);
 }
 
 /* 标签栏容器 */

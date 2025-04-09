@@ -387,6 +387,7 @@ const EditPage: React.FC = () => {
           onTextChange={handleTextChange}
           onVoiceSelect={handleVoiceSelect}
           selectedVoice={selectedVoice}
+          defaultVoice={configData?.content?.voiceInfo as VoiceInfo}
         />
 
         {/* 标题输入区域 */}

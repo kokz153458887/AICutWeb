@@ -19,6 +19,7 @@ interface VoiceSelectModalProps {
   onClose: () => void;
   onSelect?: (selectedVoice: VoiceInfo | null) => void;
   initialSelectedVoiceId?: string;
+  defaultVoice?: VoiceInfo;
 }
 
 /**
@@ -28,7 +29,8 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   show,
   onClose,
   onSelect,
-  initialSelectedVoiceId
+  initialSelectedVoiceId,
+  defaultVoice
 }) => {
   // 状态管理
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(initialSelectedVoiceId || null);
@@ -53,17 +55,66 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   const isTopBarInitialized = useRef(false);
   const lastSelectedTabRef = useRef<string | null>(null);
 
+  // 添加一个 ref 来存储默认音色
+  const defaultVoiceRef = useRef<VoiceInfo | undefined>(defaultVoice);
+
+  // 更新默认音色 ref
+  useEffect(() => {
+    defaultVoiceRef.current = defaultVoice;
+  }, [defaultVoice]);
+
   // 获取选中的音色信息
   const selectedVoice = voices.find(v => v.voiceCode === selectedVoiceId) || null;
+
+  /**
+   * 处理默认音色和去重
+   */
+  const handleDefaultVoice = useCallback((voiceList: VoiceInfo[]): VoiceInfo[] => {
+    if (!defaultVoiceRef.current) return voiceList;
+
+    // 从列表中移除与默认音色相同的音色
+    const filteredVoices = voiceList.filter(voice => 
+      voice.voiceCode !== defaultVoiceRef.current?.voiceCode
+    );
+
+    // 将默认音色添加到列表开头
+    return [defaultVoiceRef.current, ...filteredVoices];
+  }, []);
+
+  /**
+   * 处理音色列表更新
+   */
+  const updateVoiceList = useCallback((newVoices: VoiceInfo[], isReset: boolean, currentTab?: TopBarItem) => {
+    // 如果是 "全部" 标签页，处理默认音色
+    if (currentTab?.type === 'all') {
+      if (isReset) {
+        // 重置时，确保默认音色在第一位
+        setVoices(handleDefaultVoice(newVoices));
+      } else {
+        // 加载更多时，只需要去重，不需要将默认音色放在首位
+        setVoices(prev => {
+          const filteredNewVoices = newVoices.filter(voice => 
+            voice.voiceCode !== defaultVoiceRef.current?.voiceCode
+          );
+          return [...prev, ...filteredNewVoices];
+        });
+      }
+    } else {
+      // 非 "全部" 标签页，直接设置数据
+      if (isReset) {
+        setVoices(newVoices);
+      } else {
+        setVoices(prev => [...prev, ...newVoices]);
+      }
+    }
+  }, [handleDefaultVoice]);
 
   // 加载音色数据
   const loadVoiceData = useCallback(async (tabId: string, reset: boolean = false) => {
     if (loadingRef.current && !reset) {
-      console.log('loadVoiceData 正在加载中且不是重置请求，则不重复请求', tabId, reset);
       return;
     }
 
-    console.log('loadVoiceData 加载音色数据', tabId, reset);
     try {
       const currentPageIndex = reset ? 1 : pageIndex;
       const currentTab = topBar.find(t => t.id === tabId);
@@ -72,7 +123,6 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       const params = {
         pageSize: 1000,
         pageIndex: currentPageIndex,
-        // 添加标签筛选
         ...(currentTab?.type !== 'all' && {
           ...(currentTab?.type === 'fav' ? { fav: true } : {}),
           ...(currentTab?.type === 'hot' ? { hot: true } : {}),
@@ -82,29 +132,25 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
 
       // 如果是重置加载，检查内存缓存
       if (reset && memoryCache.current[tabId]) {
-        console.log('loadVoiceData 使用缓存数据；memoryCache.current[tabId]', memoryCache.current[tabId]);
-        setVoices(memoryCache.current[tabId]);
+        updateVoiceList(memoryCache.current[tabId], true, currentTab);
         setLoading(false);
         return;
       }
 
       // 生成缓存键
       const cacheKey = VoiceService.generateCacheKey(params);
-      console.log('loadVoiceData 生成缓存键', cacheKey);
 
       // 如果是重置加载，先尝试从磁盘缓存获取数据
       if (reset) {
         const cachedData = VoiceService.getFromCache(cacheKey);
-        console.log('loadVoiceData 从磁盘缓存获取数据', cachedData);
         if (cachedData) {
-          setVoices(cachedData.data.content);
+          updateVoiceList(cachedData.data.content, true, currentTab);
+          
           // 只在首次加载时更新topBar
           if (!isTopBarInitialized.current) {
-            console.log('loadVoiceData 更新topBar', cachedData.data.topbar);
             setTopBar(cachedData.data.topbar);
             isTopBarInitialized.current = true;
             
-            // 如果没有记录最后选中的tab，使用type为all的tab
             if (!lastSelectedTabRef.current) {
               const allTab = cachedData.data.topbar.find(t => t.type === 'all');
               if (allTab?.id) {
@@ -115,32 +161,35 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
           }
           setHasMore(cachedData.data.pages.hasMore);
           setLoading(false);
+          return;
         }
       }
 
-      // 无论是否有缓存，都请求新数据
+      // 请求新数据
       loadingRef.current = true;
       if (reset && !memoryCache.current[tabId]) {
         setLoading(true);
       }
-      console.log('loadVoiceData 请求新数据', params);
-      // 请求新数据
+
       const response: VoiceQueryResponse = await VoiceService.queryVoices(params);
-      console.log('loadVoiceData 请求新数据', response);
+      
       if (response.code === 0) {
-        // 成功响应时，清空错误状态
         setError(null);
         
         if (response.data?.content?.length > 0) {
           if (reset) {
-            setVoices(response.data.content);
+            const processedVoices = response.data.content;
+            updateVoiceList(processedVoices, true, currentTab);
+            
+            // 更新缓存
+            memoryCache.current[tabId] = processedVoices;
+            VoiceService.saveToCache(cacheKey, response);
+
             // 只在首次加载时更新topBar
             if (!isTopBarInitialized.current) {
-              console.log('loadVoiceData 更新topBar', response.data.topbar);
               setTopBar(response.data.topbar);
               isTopBarInitialized.current = true;
               
-              // 如果没有记录最后选中的tab，使用type为all的tab
               if (!lastSelectedTabRef.current) {
                 const allTab = response.data.topbar.find(t => t.type === 'all');
                 if (allTab?.id) {
@@ -149,13 +198,8 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
                 }
               }
             }
-            // 只有在有数据的情况下才进行缓存
-            memoryCache.current[tabId] = response.data.content;
-            // 只缓存第一页数据到磁盘
-            VoiceService.saveToCache(cacheKey, response);
-            console.log('loadVoiceData 缓存数据', response.data.content);
           } else {
-            setVoices(prev => [...prev, ...response.data.content]);
+            updateVoiceList(response.data.content, false, currentTab);
           }
           
           setHasMore(response.data.pages.hasMore);
@@ -163,12 +207,15 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
             setPageIndex(prev => prev + 1);
           }
         } else if (reset) {
-          // 如果是重置请求且没有数据，清空列表
-          setVoices([]);
+          // 如果是重置请求且没有数据
+          if (currentTab?.type === 'all' && defaultVoiceRef.current) {
+            setVoices([defaultVoiceRef.current]);
+          } else {
+            setVoices([]);
+          }
           setHasMore(false);
         }
       } else {
-        console.log("loadVoiceData response:", response);
         throw new Error(response.message || '加载音色数据失败');
       }
     } catch (err) {
@@ -179,7 +226,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       loadingRef.current = false;
       setLoading(false);
     }
-  }, [pageIndex, currentTabId]);
+  }, [pageIndex, currentTabId, updateVoiceList]);
 
   // 处理Tab切换
   const handleTabChange = useCallback((tabId: string) => {
@@ -210,9 +257,15 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       isTopBarInitialized.current = false;
       // 使用记录的tab或默认使用'all'
       const initialTabId = lastSelectedTabRef.current || 'all';
+      
+      // 如果有默认音色，设置为选中状态
+      if (defaultVoiceRef.current) {
+        setSelectedVoiceId(defaultVoiceRef.current.voiceCode);
+      }
+      
       loadVoiceData(initialTabId, true);
     }
-  }, [show]);
+  }, [show, loadVoiceData]);
 
   // 监听容器尺寸变化
   useEffect(() => {

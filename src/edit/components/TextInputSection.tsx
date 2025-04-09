@@ -17,6 +17,7 @@ interface TextInputSectionProps {
   placeholder?: string;
   onVoiceSelect?: (voice: VoiceInfo) => void;
   selectedVoice?: VoiceInfo | null;
+  defaultVoice?: VoiceInfo;
 }
 
 /**
@@ -28,7 +29,8 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   disabled = false,
   placeholder = '请输入需要配音的文字，精彩文案由你创作...',
   onVoiceSelect,
-  selectedVoice
+  selectedVoice,
+  defaultVoice
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
@@ -159,6 +161,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         onClose={handleVoiceModalClose}
         onSelect={handleVoiceSelect}
         initialSelectedVoiceId={selectedVoice?.voiceCode}
+        defaultVoice={defaultVoice}
       />
     </>
   );

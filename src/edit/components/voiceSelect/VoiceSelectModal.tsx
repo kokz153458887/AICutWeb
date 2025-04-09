@@ -54,6 +54,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   const memoryCache = useRef<Record<string, VoiceInfo[]>>({});
   const isTopBarInitialized = useRef(false);
   const lastSelectedTabRef = useRef<string | null>(null);
+  const initialLoadRef = useRef(false);  // 添加初始化跟踪ref
 
   // 添加一个 ref 来存储默认音色
   const defaultVoiceRef = useRef<VoiceInfo | undefined>(defaultVoice);
@@ -88,9 +89,19 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
     // 如果是 "全部" 标签页，处理默认音色
     if (currentTab?.type === 'all') {
       if (isReset) {
+        console.log('updateVoiceList 重置时，确保默认音色在第一位');
         // 重置时，确保默认音色在第一位
-        setVoices(handleDefaultVoice(newVoices));
+        if (defaultVoiceRef.current) {
+          const filteredVoices = newVoices.filter(voice => 
+            voice.voiceCode !== defaultVoiceRef.current?.voiceCode
+          );
+          setVoices([defaultVoiceRef.current, ...filteredVoices]);
+        } else {
+          console.log('updateVoiceList 重置时，没有默认音色，直接设置数据');
+          setVoices(newVoices);
+        }
       } else {
+        console.log('updateVoiceList 加载更多时，只需要去重，不需要将默认音色放在首位');
         // 加载更多时，只需要去重，不需要将默认音色放在首位
         setVoices(prev => {
           const filteredNewVoices = newVoices.filter(voice => 
@@ -100,6 +111,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
         });
       }
     } else {
+      console.log('updateVoiceList 非 "全部" 标签页，直接设置数据');
       // 非 "全部" 标签页，直接设置数据
       if (isReset) {
         setVoices(newVoices);
@@ -107,7 +119,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
         setVoices(prev => [...prev, ...newVoices]);
       }
     }
-  }, [handleDefaultVoice]);
+  }, []);
 
   // 加载音色数据
   const loadVoiceData = useCallback(async (tabId: string, reset: boolean = false) => {
@@ -117,7 +129,7 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
 
     try {
       const currentPageIndex = reset ? 1 : pageIndex;
-      const currentTab = topBar.find(t => t.id === tabId);
+      let currentTab = topBar.find(t => t.id === tabId);
 
       // 构建查询参数
       const params = {
@@ -144,6 +156,11 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
       if (reset) {
         const cachedData = VoiceService.getFromCache(cacheKey);
         if (cachedData) {
+          if (currentTab == undefined){   
+            currentTab = cachedData.data.topbar.find(t => t.type === 'all');
+          }
+
+          console.log('currentTab cachedData', currentTab);
           updateVoiceList(cachedData.data.content, true, currentTab);
           
           // 只在首次加载时更新topBar
@@ -161,7 +178,6 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
           }
           setHasMore(cachedData.data.pages.hasMore);
           setLoading(false);
-          return;
         }
       }
 
@@ -178,6 +194,10 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
         
         if (response.data?.content?.length > 0) {
           if (reset) {
+            console.log('currentTab httpData', currentTab);
+            if (currentTab == undefined){   
+              currentTab = response.data.topbar.find(t => t.type === 'all');
+            }
             const processedVoices = response.data.content;
             updateVoiceList(processedVoices, true, currentTab);
             
@@ -252,6 +272,12 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
   // 初始化加载
   useEffect(() => {
     if (show) {
+      // 检查是否已经进行过初始化加载
+      if (initialLoadRef.current) {
+        console.log('已经进行过初始化加载，跳过重复请求');
+        return;
+      }
+      
       console.log('useEffect 初始化加载');
       // 重置topBar初始化状态
       isTopBarInitialized.current = false;
@@ -263,7 +289,13 @@ const VoiceSelectModal: React.FC<VoiceSelectModalProps> = ({
         setSelectedVoiceId(defaultVoiceRef.current.voiceCode);
       }
       
+      // 标记已进行初始化加载
+      initialLoadRef.current = true;
+      
       loadVoiceData(initialTabId, true);
+    } else {
+      // 当模态框关闭时，重置初始化标记，以便下次打开时重新加载
+      initialLoadRef.current = false;
     }
   }, [show, loadVoiceData]);
 

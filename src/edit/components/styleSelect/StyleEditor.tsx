@@ -156,8 +156,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
   const handleFontStyleChange = (type: 'title' | 'voice', e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     // 处理特殊字段：布尔值和数字
-    const processedValue = name === 'auto_scale' ? value === 'true' : 
-                          !isNaN(Number(value)) ? Number(value) : value;
+    const processedValue = value;
     
     const fontStyleKey = type === 'title' ? 'title_font_style' : 'voice_font_style';
     

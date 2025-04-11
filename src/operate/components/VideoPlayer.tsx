@@ -102,6 +102,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }
         
         logDebug('尝试播放视频');
+        // 用户交互后可以取消静音
+        videoRef.current.muted = false;
         await videoRef.current.play();
         setIsPlaying(true);
         setShowCover(false);
@@ -249,8 +251,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // 自动处理视频预加载策略 - iOS上使用metadata以快速加载
   const preloadStrategy = isIOS ? 'metadata' : 'auto';
   
-  // 在iOS上直接使用静音以支持自动播放
-  const mutedVideo = isIOS ? true : false;
+  // 在所有设备上使用静音以支持自动播放，绕过浏览器自动播放限制
+  const mutedVideo = true;
 
   /**
    * 处理可以播放事件 - 特别优化iOS设备自动播放
@@ -261,10 +263,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     // 强制尝试自动播放，特别是在iOS设备上
     if (autoPlay && videoRef.current && !isPlaying) {
       try {
-        // 在iOS上静音播放
-        if (isIOS) {
-          videoRef.current.muted = true;
-        }
+        // 在所有设备上静音播放，绕过浏览器自动播放限制
+        videoRef.current.muted = true;
         
         videoRef.current.play()
           .then(() => {
@@ -280,7 +280,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         logDebug('播放尝试失败(canPlay)', err);
       }
     }
-  }, [autoPlay, isPlaying, isIOS, logDebug]);
+  }, [autoPlay, isPlaying, logDebug]);
 
   return (
     <div className="video-player-container" style={getContainerStyle()}>
@@ -303,6 +303,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onWaiting={handleWaiting}
         onEnded={handleEnded}
         onError={handleError}
+        onClick={handlePlay}
       />
       
       {/* 封面图 - 可点击播放 */}

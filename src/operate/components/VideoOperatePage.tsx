@@ -12,7 +12,7 @@ import LoadingView from '../../components/LoadingView';
 import ErrorView from '../../components/ErrorView';
 import Toast, { toast } from '../../components/Toast';
 import { VideoOperateData } from '../api/types';
-import { createFromVideoTask } from '../api/operateApi';
+import { createFromVideoTask, queryVideoTask } from '../api/operateApi';
 import '../styles/VideoOperatePage.css';
 
 interface VideoOperatePageProps {
@@ -33,24 +33,77 @@ const isValidRatio = (ratio?: string): boolean => {
 /**
  * 视频操作页主组件
  */
-const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialIndex = 0, videoData }) => {
+const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialIndex = 0, videoData: propsVideoData }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [error, setError] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [videoData, setVideoData] = useState<VideoOperateData | undefined>(propsVideoData);
 
   console.log('VideoOperatePage render:', { 
+    propsVideoData,
     videoData, 
+    videoId,
     currentIndex, 
     error,
     videolistLength: videoData?.videolist?.length 
   });
 
+  // 如果没有通过props传入videoData，则通过API获取
+  useEffect(() => {
+    const fetchVideoData = async () => {
+      if (!videoId) {
+        setError('视频ID不存在');
+        return;
+      }
+
+      if (propsVideoData) {
+        setVideoData(propsVideoData);
+        return; // 如果已经从props获取到数据，则不需要请求API
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        console.log('通过API获取视频数据, videoId:', videoId);
+        
+        const data = await queryVideoTask(videoId);
+        console.log('API数据获取成功:', data);
+        
+        // 检查数据是否有效
+        if (!data || !data.videolist || data.videolist.length === 0) {
+          if (data.status !== 'generating') {
+            setError('没有可用的视频');
+          }
+        } else if (!isValidRatio(data.ratio)) {
+          setError('视频格式错误');
+        } else {
+          setError(null);
+        }
+        
+        setVideoData(data);
+      } catch (err) {
+        console.error('获取视频数据失败:', err);
+        setError('获取视频数据失败，请重试');
+        toast.error('获取视频数据失败，请重试');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVideoData();
+  }, [videoId, propsVideoData]);
+
   // 在 useEffect 中进行数据验证
   useEffect(() => {
     console.log('VideoOperatePage useEffect - data validation');
     if (!videoData) {
+      if (isLoading) {
+        console.log('Data is loading, not setting error');
+        return;
+      }
       setError('视频数据不存在');
       return;
     }
@@ -72,7 +125,7 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
     }
 
     setError(null);
-  }, [videoData]);
+  }, [videoData, isLoading]);
 
   /**
    * 处理视频选择
@@ -254,6 +307,27 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
     }
   }, [videoData]);
 
+  // 加载状态
+  if (isLoading) {
+    console.log('Rendering loading state');
+    return (
+      <div className="video-operate-page">
+        <VideoTopBar 
+          onBackClick={handleBack}
+          onShareClick={handleShare}
+          onShareTemplateClick={handleShareTemplate}
+          title="视频操作"
+        />
+        <div className="video-main-content">
+          <div className="loading-container">
+            <LoadingView />
+            <div className="loading-text">加载中...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // 错误状态
   if (error || !videoData) {
     console.log('Rendering error state:', { error });
@@ -335,6 +409,7 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
           ratio={videoData.ratio}
           onVideoEnd={handleVideoEnd}
           onError={handleVideoError}
+          autoPlay={true}
         />
 
         {/* 视频文案区域 */}

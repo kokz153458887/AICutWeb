@@ -120,15 +120,34 @@
   color: var(--text-input-text);
 }
 
+.volume-slider-container {
+  position: fixed;
+  z-index: 1000;
+  background-color: rgba(20, 20, 20, 0.95);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  box-sizing: border-box;
+  touch-action: none;
+  pointer-events: auto;
+}
+
 /* 音量滑块 */
 .volume-slider {
   -webkit-appearance: none;
-  width: 70px;
+  flex: 1;
   height: 4px;
+  background: #3a3a3a;
   border-radius: 2px;
-  background: #e0e0e0;
   outline: none;
-  transition: background 0.2s;
+  cursor: pointer;
+  width: 100%;
+  touch-action: none;
+  pointer-events: auto;
 }
 
 .volume-slider::-webkit-slider-thumb {

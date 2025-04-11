@@ -44,7 +44,8 @@ const EditPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingData, setLoadingData] = useState<boolean>(true); // 数据加载状态
   const [error, setError] = useState<string>(''); // 错误信息
-  const [volume, setVolume] = useState<number>(5); // 默认音量为5 (100%)
+  const [volume, setVolume] = useState<number>(1); // 默认音量为1 (100%)
+  const [voiceVolume, setVoiceVolume] = useState<number>(1); // 默认音量为1 (100%)
   const [backupCount, setBackupCount] = useState<number>(1);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
@@ -80,17 +81,21 @@ const EditPage: React.FC = () => {
           setText(config.content.text || '');
           setTitle(config.title || '');
           
-          // 设置音色信息
-          if (config.content.voiceInfo) {
-            const voiceInfo = config.content.voiceInfo as VoiceInfo;
-            console.log('设置初始音色信息:', voiceInfo);
-            setSelectedVoice(voiceInfo);
-            setSpeaker({
-              name: voiceInfo.voicer,
-              tag: ''
-            });
+          // 语音音量处理 - API 字段为 0-5 范围
+          const voiceVol = config.content.volume !== undefined ? config.content.volume : 1;
+          console.log('设置语音音量:', voiceVol, '(0-5范围)');
+          setVoiceVolume(voiceVol);
+
+           // 设置音色信息
+           if (config.content.voiceInfo) {
+              const voiceInfo = config.content.voiceInfo as VoiceInfo;
+              console.log('设置初始音色信息:', voiceInfo);
+              setSelectedVoice(voiceInfo);
+              setSpeaker({
+                name: voiceInfo.voicer,
+                tag: ''
+              });
           }
-          
           // 背景音乐音量处理 - API 字段为 0-5 范围
           const musicVol = config.backgroundMusic.volume !== undefined ? config.backgroundMusic.volume : 1;
           console.log('设置背景音乐音量:', musicVol, '(0-5范围)');
@@ -140,6 +145,12 @@ const EditPage: React.FC = () => {
     setText(newText);
   };
 
+  /**
+   * 处理语音音量变化
+   */
+  const handleVoiceVolumeChange = (newVolume: number) => {
+    setVoiceVolume(newVolume);
+  };
 
   /**
    * 处理背景音乐音量变化
@@ -252,7 +263,8 @@ const EditPage: React.FC = () => {
         title: cleanedTitle,
         content: {
           ...configData.content,
-          text: cleanedText
+          text: cleanedText,
+          volume: voiceVolume
         },
         backgroundMusic: {
           ...configData.backgroundMusic,
@@ -261,7 +273,7 @@ const EditPage: React.FC = () => {
         backupVideoNum: backupCount
       };
       
-      console.log('准备提交数据，音量值:', volume, '(0-5范围)');
+      console.log('准备提交数据，音量值 voiceVolume:', voiceVolume, " volume:",volume, '(0-5范围)');
       console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
       console.log('URL参数:', urlParams);
       
@@ -384,10 +396,12 @@ const EditPage: React.FC = () => {
         {/* 文案输入区域 */}
         <TextInputSection 
           text={text} 
-          onTextChange={handleTextChange}
+          onTextChange={handleTextChange} 
           onVoiceSelect={handleVoiceSelect}
           selectedVoice={selectedVoice}
           defaultVoice={configData?.content?.voiceInfo as VoiceInfo}
+          onVoiceVolumeChange={handleVoiceVolumeChange}
+          voiceVolume={voiceVolume}
         />
 
         {/* 标题输入区域 */}

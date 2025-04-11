@@ -39,7 +39,7 @@ export const API_CONFIG = {
   version: 'v1',
   
   // 接口超时时间（毫秒）
-  timeout: 10000,
+  timeout: 60000,
   
   // 是否使用mock数据
   useMock: ENV_CONFIG.useMock,

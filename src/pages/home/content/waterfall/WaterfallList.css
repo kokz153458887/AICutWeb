@@ -10,13 +10,26 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 双列布局 */
   grid-gap: 6px; /* 间距 */
-  grid-auto-rows: min-content; /* 根据内容自适应高度 */
+  grid-auto-rows: auto; /* 改为auto代替min-content，更好地支持iOS Safari */
+  /* 添加明确的iOS Safari支持 */
+  -webkit-column-count: 2;
+  -moz-column-count: 2;
+  column-count: 2;
+  -webkit-column-gap: 6px;
+  -moz-column-gap: 6px;
+  column-gap: 6px;
+  width: 100%;
+  transform: translateZ(0); /* 强制硬件加速 */
 }
 
 /* Masonry网格项 */
 .masonry-item {
   break-inside: avoid; /* 避免内容被分割 */
   margin-bottom: 6px;
+  -webkit-column-break-inside: avoid; /* 为Safari添加额外的属性 */
+  page-break-inside: avoid;
+  display: inline-block; /* 确保Safari正确显示元素 */
+  width: 100%;
 }
 
 /* 空状态 */

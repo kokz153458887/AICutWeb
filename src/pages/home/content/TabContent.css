@@ -7,6 +7,21 @@
   -webkit-overflow-scrolling: touch;
   height: calc(100vh - 50px); /* 设置高度为视口高度减去顶部导航栏高度 */
   padding-bottom: 50px; /* 添加底部内边距，确保最后的内容可见 */
+  /* iOS Safari 修复 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* 解决iOS高度计算问题，使用固定高度后回退 */
+  min-height: 500px; /* 提供最小高度，确保在iOS上有内容显示 */
+}
+
+/* iOS专用修复 */
+@supports (-webkit-touch-callout: none) {
+  .tab-content {
+    /* 在iOS设备上使用固定高度和备选方案 */
+    height: calc(100vh - 60px);
+    /* 使用额外的后备值 */
+    min-height: 500px;
+  }
 }
 
 /* 空内容提示 */

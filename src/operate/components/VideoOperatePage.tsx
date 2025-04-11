@@ -166,9 +166,28 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
     }
 
     try {
-      // 在新窗口中打开下载链接
-      window.open(videoUrl, '_blank');
-      toast.success('正在打开下载窗口');
+      // 检测是否是iOS设备
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        // iOS处理方式：在Safari中打开视频链接，用户可以长按保存
+        toast.info('在iOS设备上，请在打开的页面中长按视频选择"下载视频"或"添加到相册"');
+        
+        // 创建一个临时链接，并设置download属性
+        const link = document.createElement('a');
+        link.href = videoUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('download', `${videoData.title || '视频'}.mp4`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // 非iOS设备：在新窗口中打开下载链接
+        window.open(videoUrl, '_blank');
+        toast.success('正在打开下载窗口');
+      }
     } catch (error) {
       console.error('下载失败:', error);
       toast.error('下载失败，请稍后重试');

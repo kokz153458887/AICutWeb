@@ -92,15 +92,48 @@ const VideoDetail: React.FC = () => {
     }, 100);
   };
 
+  // 检测iOS设备
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
   // 处理视频加载完成事件
   const handleVideoLoaded = () => {
     if (videoRef.current) {
-      videoRef.current.volume = 1.0;
+      // 在iOS上，必须将视频静音才能自动播放
+      if (isIOS) {
+        videoRef.current.muted = true;
+      }
+      
       videoRef.current.play().catch(error => {
         console.log('自动播放失败:', error);
         // 自动播放失败时保留封面
         setShowCover(true);
       });
+    }
+  };
+  
+  // 处理视频可以播放的事件 - 专为iOS优化
+  const handleCanPlay = () => {
+    if (videoRef.current && !isVideoPlaying) {
+      // 在iOS上，必须将视频静音才能自动播放
+      if (isIOS) {
+        videoRef.current.muted = true;
+      }
+      
+      videoRef.current.play()
+        .then(() => {
+          console.log('视频可以播放时自动播放成功');
+          setIsVideoPlaying(true);
+          // 视频开始播放后0.1秒移除封面
+          setTimeout(() => {
+            setShowCover(false);
+          }, 100);
+        })
+        .catch(error => {
+          console.log('视频可以播放时自动播放失败:', error);
+          // 自动播放失败时保留封面并尝试让用户手动点击封面播放
+          setShowCover(true);
+        });
     }
   };
 
@@ -192,12 +225,28 @@ const VideoDetail: React.FC = () => {
             src={data.content.videoUrl}
             onPlay={handleVideoPlay}
             onLoadedData={handleVideoLoaded}
+            onCanPlay={handleCanPlay}
             playsInline
+            webkit-playsinline="true"
+            x5-playsinline="true"
+            x5-video-player-type="h5"
+            autoPlay
+            muted={isIOS}
+            preload={isIOS ? "metadata" : "auto"}
           />
           
           {/* 视频封面 */}
           {showCover && (
-            <div className="video-cover">
+            <div className="video-cover" onClick={() => {
+              if (videoRef.current) {
+                videoRef.current.play()
+                  .then(() => {
+                    setIsVideoPlaying(true);
+                    setTimeout(() => setShowCover(false), 100);
+                  })
+                  .catch(err => console.error('封面点击播放失败:', err));
+              }
+            }}>
               <img src={getDisplayCover()} alt="视频封面" />
             </div>
           )}

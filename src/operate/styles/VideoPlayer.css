@@ -8,6 +8,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* iOS视频播放优化 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* 视频播放器 */
@@ -16,6 +21,16 @@
   height: 100%;
   object-fit: cover;
   background-color: #000;
+  /* 触摸优化 */
+  touch-action: manipulation;
+  /* 视频流播放渲染优化 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* 视频封面 */
@@ -28,6 +43,10 @@
   object-fit: cover;
   z-index: 2;
   background-color: #000;
+  cursor: pointer;
+  /* 触摸优化 */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* 播放图标容器 */
@@ -41,6 +60,9 @@
   -webkit-tap-highlight-color: transparent;
   opacity: 0.8;
   transition: opacity 0.2s ease;
+  /* 增大点击区域 */
+  padding: 20px;
+  margin: -20px;
 }
 
 /* 播放图标点击效果 */
@@ -135,4 +157,33 @@
 
 .video-controls-layer.visible {
   opacity: 1;
+}
+
+/* iOS专用样式 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS设备上的样式 */
+  .video-player-container {
+    height: 100% !important; /* 强制高度100% */
+  }
+  
+  .video-player {
+    /* iOS播放优化 */
+    position: absolute !important;
+    z-index: 1 !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* 确保iOS上播放按钮可点击 */
+  .play-icon-container {
+    padding: 30px !important;
+    margin: -30px !important;
+  }
+  
+  /* 修正iOS Safari中的视频控制隐藏 */
+  video::-webkit-media-controls {
+    display: none !important;
+  }
 } 

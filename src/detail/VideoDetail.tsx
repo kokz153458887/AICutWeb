@@ -99,11 +99,6 @@ const VideoDetail: React.FC = () => {
   // 处理视频加载完成事件
   const handleVideoLoaded = () => {
     if (videoRef.current) {
-      // 在iOS上，必须将视频静音才能自动播放
-      if (isIOS) {
-        videoRef.current.muted = true;
-      }
-      
       videoRef.current.play().catch(error => {
         console.log('自动播放失败:', error);
         // 自动播放失败时保留封面
@@ -115,11 +110,6 @@ const VideoDetail: React.FC = () => {
   // 处理视频可以播放的事件 - 专为iOS优化
   const handleCanPlay = () => {
     if (videoRef.current && !isVideoPlaying) {
-      // 在iOS上，必须将视频静音才能自动播放
-      if (isIOS) {
-        videoRef.current.muted = true;
-      }
-      
       videoRef.current.play()
         .then(() => {
           console.log('视频可以播放时自动播放成功');
@@ -231,7 +221,7 @@ const VideoDetail: React.FC = () => {
             x5-playsinline="true"
             x5-video-player-type="h5"
             autoPlay
-            muted={isIOS}
+            muted={false}
             preload={isIOS ? "metadata" : "auto"}
           />
           

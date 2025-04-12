@@ -145,11 +145,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (autoPlay && videoRef.current && !isPlaying) {
       logDebug('尝试自动播放视频');
       
-      // 在iOS上，必须将视频静音才能自动播放
-      if (isIOS) {
-        videoRef.current.muted = true;
-      }
-      
       videoRef.current.play()
         .then(() => {
           logDebug('自动播放成功');
@@ -158,12 +153,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         })
         .catch(err => {
           logDebug('自动播放失败', err);
-          // 在iOS上，自动播放通常会失败，需要用户交互
+          // 自动播放失败，可能需要用户交互
           setShowPlayIcon(true);
           setIsLoading(false);
         });
     }
-  }, [autoPlay, isPlaying, isIOS, delayedHideCover, logDebug]);
+  }, [autoPlay, isPlaying, delayedHideCover, logDebug]);
 
   /**
    * 处理视频等待数据
@@ -251,8 +246,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // 自动处理视频预加载策略 - iOS上使用metadata以快速加载
   const preloadStrategy = isIOS ? 'metadata' : 'auto';
   
-  // 在所有设备上使用静音以支持自动播放，绕过浏览器自动播放限制
-  const mutedVideo = true;
+  // 默认不静音，尝试直接播放带声音的视频
+  const mutedVideo = false;
 
   /**
    * 处理可以播放事件 - 特别优化iOS设备自动播放
@@ -263,9 +258,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     // 强制尝试自动播放，特别是在iOS设备上
     if (autoPlay && videoRef.current && !isPlaying) {
       try {
-        // 在所有设备上静音播放，绕过浏览器自动播放限制
-        videoRef.current.muted = true;
-        
+        // 尝试直接自动播放，不强制静音
         videoRef.current.play()
           .then(() => {
             logDebug('自动播放成功(canPlay)');

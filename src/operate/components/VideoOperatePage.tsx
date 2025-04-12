@@ -133,7 +133,12 @@ const VideoOperatePage: React.FC<VideoOperatePageProps> = ({ videoId, initialInd
   const handleVideoSelect = useCallback((index: number) => {
     if (!videoData || index >= videoData.videolist.length) return;
     setCurrentIndex(index);
-  }, [videoData]);
+    
+    // 更新URL中的initialIndex参数
+    const newSearch = new URLSearchParams(location.search);
+    newSearch.set('initialIndex', index.toString());
+    navigate(`${location.pathname}?${newSearch.toString()}`, { replace: true });
+  }, [videoData, location.search, location.pathname, navigate]);
 
   /**
    * 处理视频结束

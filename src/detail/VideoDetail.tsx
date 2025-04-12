@@ -10,10 +10,28 @@ import VideoTopBar from '../components/VideoTopBar/VideoTopBar';
 import VideoBottomBar from './VideoBottomBar/VideoBottomBar';
 import { BackIcon, ShareIcon } from '../components/icons';
 
+// 播放图标样式
+const playIconContainerStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 3,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '88px',
+  height: '88px',
+  opacity: 0.8,
+  transition: 'opacity 0.2s ease'
+};
+
 const VideoDetail: React.FC = () => {
   // 状态管理
   const [data, setData] = useState<VideoDetailData | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [showCover, setShowCover] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,10 +104,37 @@ const VideoDetail: React.FC = () => {
   // 处理视频播放事件
   const handleVideoPlay = () => {
     setIsVideoPlaying(true);
+    setIsVideoPaused(false);
     // 视频开始播放后0.1秒移除封面
     setTimeout(() => {
       setShowCover(false);
     }, 100);
+  };
+
+  // 添加视频暂停事件处理
+  const handleVideoPause = () => {
+    setIsVideoPlaying(false);
+    setIsVideoPaused(true);
+  };
+
+  // 处理视频点击切换播放/暂停状态
+  const handleVideoClick = () => {
+    if (!videoRef.current) return;
+    
+    if (videoRef.current.paused) {
+      // 视频暂停中，开始播放
+      videoRef.current.play()
+        .then(() => {
+          setIsVideoPlaying(true);
+          setIsVideoPaused(false);
+        })
+        .catch(err => console.error('点击播放失败:', err));
+    } else {
+      // 视频播放中，暂停播放
+      videoRef.current.pause();
+      setIsVideoPlaying(false);
+      setIsVideoPaused(true);
+    }
   };
 
   // 检测iOS设备
@@ -214,8 +259,10 @@ const VideoDetail: React.FC = () => {
             className="video-player"
             src={data.content.videoUrl}
             onPlay={handleVideoPlay}
+            onPause={handleVideoPause}
             onLoadedData={handleVideoLoaded}
             onCanPlay={handleCanPlay}
+            onClick={handleVideoClick}
             playsInline
             webkit-playsinline="true"
             x5-playsinline="true"
@@ -232,12 +279,23 @@ const VideoDetail: React.FC = () => {
                 videoRef.current.play()
                   .then(() => {
                     setIsVideoPlaying(true);
+                    setIsVideoPaused(false);
                     setTimeout(() => setShowCover(false), 100);
                   })
                   .catch(err => console.error('封面点击播放失败:', err));
               }
             }}>
               <img src={getDisplayCover()} alt="视频封面" />
+            </div>
+          )}
+          
+          {/* 视频暂停时显示播放图标 */}
+          {!showCover && isVideoPaused && (
+            <div style={playIconContainerStyle} onClick={handleVideoClick}>
+              <svg width="60" height="60" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="24" fill="rgba(0, 0, 0, 0.5)"/>
+                <path d="M32 24L20 32V16L32 24Z" fill="white"/>
+              </svg>
             </div>
           )}
         </div>

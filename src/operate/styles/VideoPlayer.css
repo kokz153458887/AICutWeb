@@ -60,9 +60,14 @@
   -webkit-tap-highlight-color: transparent;
   opacity: 0.8;
   transition: opacity 0.2s ease;
-  /* 增大点击区域 */
-  padding: 20px;
-  margin: -20px;
+  /* 更好的居中效果和更大的点击区域 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px !important;
+  height: 88px !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* 播放图标点击效果 */
@@ -178,8 +183,13 @@
   
   /* 确保iOS上播放按钮可点击 */
   .play-icon-container {
-    padding: 30px !important;
-    margin: -30px !important;
+    width: 88px !important;
+    height: 88px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
   /* 修正iOS Safari中的视频控制隐藏 */

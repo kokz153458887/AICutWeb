@@ -20,7 +20,7 @@ interface VideoPlayerProps {
  * 播放图标组件
  */
 const PlayIcon: React.FC = () => (
-  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="60" height="60" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="24" cy="24" r="24" fill="rgba(0, 0, 0, 0.5)"/>
     <path d="M32 24L20 32V16L32 24Z" fill="white"/>
   </svg>

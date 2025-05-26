@@ -250,20 +250,13 @@ const EditPage: React.FC = () => {
       setLoading(true);
       setIsSubmitting(true);
       
-      // 清洗标题和内容文本，去除特殊字符
-      const cleanedTitle = cleanTitle(title);
-      const cleanedText = cleanContent(text);
-      
-      console.log('文本清洗前:', { title, text: text.substring(0, 50) + '...' });
-      console.log('文本清洗后:', { cleanedTitle, cleanedText: cleanedText.substring(0, 50) + '...' });
-      
       // 准备提交数据
       const submitData: VideoEditConfig = {
         ...configData,
-        title: cleanedTitle,
+        title: title,
         content: {
           ...configData.content,
-          text: cleanedText,
+          text: text,
           volume: voiceVolume
         },
         backgroundMusic: {
@@ -274,7 +267,7 @@ const EditPage: React.FC = () => {
       };
       
       console.log('准备提交数据，音量值 voiceVolume:', voiceVolume, " volume:",volume, '(0-5范围)');
-      console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
+      console.log('提交数据:', JSON.stringify(submitData));
       console.log('URL参数:', urlParams);
       
       // 根据 apimodel 参数选择不同的接口

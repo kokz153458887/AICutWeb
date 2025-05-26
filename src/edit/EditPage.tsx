@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './EditPage.css';
 import TextInputSection from './components/TextInputSection';
 import TitleInputSection from './components/TitleInputSection';
+import AutoGenerateSection from './components/AutoGenerateSection';
 import VideoStyleSection from './components/VideoStyleSection';
 import BackgroundMusicSection from './components/BackgroundMusicSection';
 import BackgroundImageSection from './components/BackgroundImageSection';
@@ -17,7 +18,7 @@ import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
 import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
-import { MusicLibItem, StyleModel } from './api/types';
+import { MusicLibItem, StyleModel, SplitModel } from './api/types';
 import { VoiceInfo } from './api/VoiceService';
 import { cleanTitle, cleanContent } from '../utils/textUtils';
 
@@ -53,6 +54,11 @@ const EditPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // 防止重复提交
   const [showMusicModal, setShowMusicModal] = useState<boolean>(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceInfo | null>(null);
+  const [defaultTextType, setDefaultTextType] = useState<string>('');
+  const [splitModel, setSplitModel] = useState<SplitModel>({
+    splitType: 'strict',
+    splitParams: { min_length: 20, max_length: 30 }
+  });
   
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
@@ -77,9 +83,19 @@ const EditPage: React.FC = () => {
           // 更新状态
           setConfigData(config);
           
+          // 设置默认文案类型
+          if (config.preferences?.auto_select_text_type) {
+            setDefaultTextType(config.preferences.auto_select_text_type);
+          }
+          
           // 更新UI状态
           setText(config.content.text || '');
           setTitle(config.title || '');
+          
+          // 设置分句模式
+          if (config.content.splitModel) {
+            setSplitModel(config.content.splitModel);
+          }
           
           // 语音音量处理 - API 字段为 0-5 范围
           const voiceVol = config.content.volume !== undefined ? config.content.volume : 1;
@@ -143,6 +159,46 @@ const EditPage: React.FC = () => {
    */
   const handleTextChange = (newText: string) => {
     setText(newText);
+  };
+
+  /**
+   * 处理清空文本
+   */
+  const handleClearText = () => {
+    setText('');
+    setTitle('');
+    toast.success('文本已清空');
+  };
+
+  /**
+   * 处理分句模式变化
+   */
+  const handleSplitModelChange = (newSplitModel: SplitModel) => {
+    setSplitModel(newSplitModel);
+    if (configData) {
+      setConfigData({
+        ...configData,
+        content: {
+          ...configData.content,
+          splitModel: newSplitModel
+        }
+      });
+    }
+  };
+
+  /**
+   * 处理文案类型变化
+   */
+  const handleTextTypeChange = (textType: string) => {
+    if (configData) {
+      setConfigData({
+        ...configData,
+        preferences: {
+          ...configData.preferences,
+          auto_select_text_type: textType
+        }
+      });
+    }
   };
 
   /**
@@ -257,12 +313,14 @@ const EditPage: React.FC = () => {
         content: {
           ...configData.content,
           text: text,
-          volume: voiceVolume
+          volume: voiceVolume,
+          splitModel: splitModel
         },
         backgroundMusic: {
           ...configData.backgroundMusic,
           volume: volume
         },
+        preferences: configData.preferences || { auto_select_text_type: defaultTextType },
         backupVideoNum: backupCount
       };
       
@@ -395,6 +453,16 @@ const EditPage: React.FC = () => {
           defaultVoice={configData?.content?.voiceInfo as VoiceInfo}
           onVoiceVolumeChange={handleVoiceVolumeChange}
           voiceVolume={voiceVolume}
+          splitModel={splitModel}
+          onSplitModelChange={handleSplitModelChange}
+          onClearText={handleClearText}
+        />
+
+        {/* 自动生成文案区域 */}
+        <AutoGenerateSection 
+          onTextGenerated={handleTextChange}
+          defaultTextType={defaultTextType}
+          onTextTypeChange={handleTextTypeChange}
         />
 
         {/* 标题输入区域 */}

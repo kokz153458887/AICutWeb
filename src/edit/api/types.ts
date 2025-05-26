@@ -3,10 +3,23 @@
  * 定义视频编辑页所需的数据结构
  */
 
+// 分句模式参数
+export interface SplitParams {
+  min_length: number;
+  max_length: number;
+}
+
+// 分句模式模型
+export interface SplitModel {
+  splitType: string; // "strict" 标点断句, "smart" 智能断句
+  splitParams: SplitParams;
+}
+
 // 文本内容模型
 export interface ContentModel {
   text: string;
   splitType: string;
+  splitModel: SplitModel;
   volume: number;
   speakerID?: string;
   voiceService?: string;
@@ -117,6 +130,11 @@ export interface MaterialModel {
   url?: string; // 素材URL
 }
 
+// 用户偏好设置
+export interface PreferencesModel {
+  auto_select_text_type?: string;
+}
+
 // 视频编辑配置模型
 export interface VideoEditConfig {
   title: string;
@@ -125,6 +143,7 @@ export interface VideoEditConfig {
   backgroundImage: BackgroundImageModel;
   style: StyleModel;
   material: MaterialModel;
+  preferences: PreferencesModel;
   backupVideoNum?: number; // 备用视频数量
 }
 
@@ -207,4 +226,55 @@ export interface ImageLibItem {
   resolutionHeight: number;
   ratio: string;
   size: number;
+}
+
+/**
+ * 自动生成文本请求参数
+ */
+export interface AutoGenerateTextRequest {
+  type: string;
+  generate_size: number;
+  hacks_type: string;
+  allow_used: boolean;
+}
+
+/**
+ * 自动生成文本响应数据项
+ */
+export interface AutoGenerateTextItem {
+  text_id: string;
+  text_content: string;
+}
+
+/**
+ * 自动生成文本响应数据
+ */
+export interface AutoGenerateTextData {
+  type: string;
+  text: AutoGenerateTextItem[];
+}
+
+/**
+ * 自动生成文本响应
+ */
+export interface AutoGenerateTextResponse {
+  code: number;
+  message: string;
+  data: AutoGenerateTextData;
+}
+
+/**
+ * 不喜欢文案请求参数
+ */
+export interface UnlikeTextRequest {
+  type: string;
+  text_id: string;
+}
+
+/**
+ * 不喜欢文案响应
+ */
+export interface UnlikeTextResponse {
+  code: number;
+  message: string;
 } 

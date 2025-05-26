@@ -9,4 +9,4 @@ export const MOCK_SERVER = {
 /**
  * 获取 Mock Server 的完整 URL
  */
-export const getMockServerUrl = () => `http://${MOCK_SERVER.HOST}:${MOCK_SERVER.PORT}`; 
+export const getMockServerUrl = () => `http://${MOCK_SERVER.HOST}:${MOCK_SERVER.PORT}`;

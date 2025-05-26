@@ -248,22 +248,85 @@ export const ParamsIcon: React.FC<{
  * 加载中图标组件
  */
 export const LoadingIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => (
-  <svg 
-    width={width} 
-    height={height} 
-    viewBox="0 0 24 24" 
-    className="loading-icon"
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
   >
-    <circle 
-      cx="12" 
-      cy="12" 
-      r="8" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2.5"
+    <path
+      d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93"
+      stroke="currentColor"
+      strokeWidth={2}
       strokeLinecap="round"
-      strokeDasharray="40, 40"
-      strokeDashoffset="0"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+/**
+ * 不喜欢图标组件 - 简洁的X符号
+ */
+export const DislikeIcon: React.FC<IconProps> = ({ width = 14, height = 14, ...props }) => (
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M18 6L6 18M6 6L18 18"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+/**
+ * 下拉箭头图标组件
+ */
+export const DropdownArrowIcon: React.FC<IconProps> = ({ width = 12, height = 12, ...props }) => (
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M6 9L12 15L18 9"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+/**
+ * 清空文本图标组件 - X符号
+ */
+export const ClearTextIcon: React.FC<IconProps> = ({ width = 16, height = 16, ...props }) => (
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M18 6L6 18M6 6L18 18"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 ); 

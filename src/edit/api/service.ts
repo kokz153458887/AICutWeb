@@ -3,7 +3,7 @@
  * 负责处理视频编辑页面的API请求
  */
 import axios from 'axios';
-import { ApiResponse, EditConfigResponse, VideoEditConfig, VideoGenerateResponse } from './types';
+import { ApiResponse, EditConfigResponse, VideoEditConfig, VideoGenerateResponse, AutoGenerateTextRequest, AutoGenerateTextResponse, UnlikeTextRequest, UnlikeTextResponse } from './types';
 import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
 
 /**
@@ -108,5 +108,23 @@ export class EditService {
     };
     
     return apiClient.post(API_PATHS.edit.generate, formattedData);
+  }
+
+  /**
+   * 自动生成生活小妙招文本
+   * @param params 生成参数
+   * @returns 生成的文本内容
+   */
+  static async autoGenerateText(params: AutoGenerateTextRequest): Promise<AutoGenerateTextResponse> {
+    return apiClient.post(API_PATHS.edit.autoGenerateText, params);
+  }
+
+  /**
+   * 标记文案为不喜欢
+   * @param params 不喜欢参数
+   * @returns 操作结果
+   */
+  static async unlikeText(params: UnlikeTextRequest): Promise<UnlikeTextResponse> {
+    return apiClient.post(API_PATHS.edit.unlikeText, params);
   }
 } 

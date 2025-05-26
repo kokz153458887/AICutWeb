@@ -72,7 +72,9 @@ export const API_PATHS = {
     getConfig: '/edit/config',
     createConfig: '/edit/create',
     generate: '/ai/generate',
-    updateConfig: '/edit/update'
+    updateConfig: '/edit/update',
+    autoGenerateText: '/ai/auto_generate_text',
+    unlikeText: '/ai/unlike_auto_generate_text'
   },
   
   // 视频详情相关

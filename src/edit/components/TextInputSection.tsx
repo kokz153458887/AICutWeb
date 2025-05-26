@@ -4,7 +4,7 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/TextInputSection.css';
-import { SpeakerIcon, LoadingIcon } from './icons/SvgIcons';
+import { SpeakerIcon, LoadingIcon, ClearTextIcon, DropdownArrowIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
 import { toast } from '../../components/Toast';
 import { VoiceInfo } from '../api/VoiceService';
@@ -13,6 +13,8 @@ import VoiceSelectModal from './voiceSelect/VoiceSelectModal';
 import AudioPlayer from '../utils/AudioPlayer';
 import AudioCacheManager from '../utils/AudioCacheManager';
 import { getApiBaseUrl } from '../../config/api';
+import { EditService } from '../api/service';
+import { AutoGenerateTextRequest, SplitModel } from '../api/types';
 
 interface TextInputSectionProps {
   text: string;
@@ -24,11 +26,20 @@ interface TextInputSectionProps {
   onVoiceSelect?: (voice: VoiceInfo) => void;
   selectedVoice?: VoiceInfo | null;
   defaultVoice?: VoiceInfo;
+  splitModel?: SplitModel;
+  onSplitModelChange?: (splitModel: SplitModel) => void;
+  onClearText?: () => void;
 }
 
 /**
  * 文本输入区域组件
  */
+// 分句模式选项
+const SPLIT_MODE_OPTIONS = [
+  { value: 'strict', label: '标点' },
+  { value: 'smart', label: '智能' }
+];
+
 const TextInputSection: React.FC<TextInputSectionProps> = ({
   text,
   onTextChange,
@@ -38,7 +49,10 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   onVoiceVolumeChange,
   onVoiceSelect,
   selectedVoice,
-  defaultVoice
+  defaultVoice,
+  splitModel = { splitType: 'strict', splitParams: { min_length: 20, max_length: 30 } },
+  onSplitModelChange,
+  onClearText
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
@@ -49,6 +63,8 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const currentPlayingUrl = useRef<string | null>(null);
+  const [showSplitDropdown, setShowSplitDropdown] = useState(false);
+  const splitDropdownRef = useRef<HTMLDivElement>(null);
   
   // 从配置文件获取最大行数
   const maxRows = titleConfig.textareaMaxRows || 12;
@@ -63,6 +79,37 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
    */
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onTextChange(e.target.value);
+  };
+
+  /**
+   * 处理清空文本按钮点击事件
+   */
+  const handleClearText = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClearText) {
+      onClearText();
+    }
+  };
+
+  /**
+   * 处理分句模式选择
+   */
+  const handleSplitModeSelect = (splitType: string) => {
+    if (onSplitModelChange) {
+      onSplitModelChange({
+        ...splitModel,
+        splitType
+      });
+    }
+    setShowSplitDropdown(false);
+  };
+
+  /**
+   * 获取当前分句模式标签
+   */
+  const getCurrentSplitModeLabel = () => {
+    const option = SPLIT_MODE_OPTIONS.find(opt => opt.value === splitModel.splitType);
+    return option ? option.label : '分句';
   };
 
   /**
@@ -273,12 +320,15 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   };
 
   /**
-   * 点击外部时隐藏音量控制条
+   * 点击外部时隐藏音量控制条和分句下拉框
    */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sliderRef.current && !sliderRef.current.contains(event.target as Node)) {
         setShowVolumeSlider(false);
+      }
+      if (splitDropdownRef.current && !splitDropdownRef.current.contains(event.target as Node)) {
+        setShowSplitDropdown(false);
       }
     };
 
@@ -381,19 +431,63 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         />
         
         <div className="input-controls">
-          {/* 音量文字按钮 - 显示当前音量值 */}
-          <div className="volume-text" onClick={handleVolumeTextClick}>
-            音量 <span className="volume-badge">{getDisplayVolume()}%</span>
+          {/* 左侧控制按钮组 */}
+          <div className="left-controls">
+            {/* 清空文本按钮 */}
+            <div className="clear-text-btn" onClick={handleClearText} title="清空文本">
+              <ClearTextIcon width={14} height={14} />
+            </div>
+
+            {/* 分句模式按钮 */}
+            <div className="split-mode-container" ref={splitDropdownRef}>
+              <div 
+                className="split-mode-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowSplitDropdown(!showSplitDropdown);
+                }}
+                title="选择分句模式"
+              >
+                <span className="split-mode-text">{getCurrentSplitModeLabel()}</span>
+                <DropdownArrowIcon width={10} height={10} />
+              </div>
+              
+              {/* 分句模式下拉菜单 */}
+              {showSplitDropdown && (
+                <div className="split-mode-dropdown">
+                  {SPLIT_MODE_OPTIONS.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`split-mode-item ${splitModel.splitType === option.value ? 'selected' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSplitModeSelect(option.value);
+                      }}
+                    >
+                      {option.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 说话人按钮 */}
-          <div className="speaker-button" onClick={handleSpeakerButtonClick}>
-            <span className="speaker-name">{selectedVoice ? selectedVoice.voicer : '选择音色'}</span>
-          </div>
-          
-          {/* 喇叭图标 */}
-          <div className={`speaker-icon ${isGenerating ? 'loading' : ''}`} onClick={handleSpeakerClick}>
-            {isGenerating ? <LoadingIcon /> : <SpeakerIcon />}
+          {/* 右侧控制按钮组 */}
+          <div className="right-controls">
+            {/* 音量文字按钮 - 显示当前音量值 */}
+            <div className="volume-text" onClick={handleVolumeTextClick}>
+              音量 <span className="volume-badge">{getDisplayVolume()}%</span>
+            </div>
+
+            {/* 说话人按钮 */}
+            <div className="speaker-button" onClick={handleSpeakerButtonClick}>
+              <span className="speaker-name">{selectedVoice ? selectedVoice.voicer : '选择音色'}</span>
+            </div>
+            
+            {/* 喇叭图标 */}
+            <div className={`speaker-icon ${isGenerating ? 'loading' : ''}`} onClick={handleSpeakerClick}>
+              {isGenerating ? <LoadingIcon /> : <SpeakerIcon />}
+            </div>
           </div>
 
           {/* 音量滑动控制条 */}

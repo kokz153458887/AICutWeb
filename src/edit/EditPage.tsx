@@ -148,6 +148,7 @@ const EditPage: React.FC = () => {
 
   // 当文案变化时，自动生成标题
   useEffect(() => {
+    console.log('autoGenerateTitle:', autoGenerateTitle, ' text:', text);
     if (autoGenerateTitle && text) {
       const newTitle = generateTitle(text);
       setTitle(newTitle);
@@ -158,6 +159,7 @@ const EditPage: React.FC = () => {
    * 处理文案变化
    */
   const handleTextChange = (newText: string) => {
+    setAutoGenerateTitle(true);
     setText(newText);
   };
 

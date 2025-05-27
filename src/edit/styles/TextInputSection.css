@@ -66,14 +66,14 @@
 .left-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* 右侧控制按钮组 */
 .right-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* 禁用所有可点击元素的默认触摸高亮效果 */
@@ -92,17 +92,19 @@
 .speaker-button {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 14px;
+  gap: 3px;
+  font-size: 12px;
   color: #a0a0a0;
   background-color: rgba(20, 20, 20, 0.85);
-  padding: 6px 10px;
-  border-radius: 16px;
+  padding: 4px 8px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 5;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  max-width: 120px;
+  overflow: hidden;
 }
 
 /* 说话人按钮按下效果 */
@@ -112,28 +114,32 @@
 }
 
 .speaker-name {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 0px 3px;
+  padding: 0px 2px;
   color: #00e676;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
 }
 
 /* 音量文字按钮样式 */
 .volume-text {
-  font-size: 14px;
+  font-size: 12px;
   color: #a0a0a0;
   background-color: rgba(20, 20, 20, 0.85);
-  padding: 4px 8px;
-  border-radius: 16px;
+  padding: 3px 6px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 5;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  min-height: 26px;
+  min-height: 24px;
 }
 
 /* 音量文字按钮按下效果 */
@@ -144,15 +150,15 @@
 
 /* 音量数字徽章 */
 .volume-badge {
-  font-size: 12px;
+  font-size: 11px;
   color: #00e676;
   font-weight: 600;
 }
 
 /* 喇叭图标样式 */
 .speaker-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,6 +170,7 @@
   z-index: 5;
   backdrop-filter: blur(3px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 /* 喇叭图标悬停效果 */
@@ -269,8 +276,8 @@
 
 /* 清空文本按钮样式 */
 .clear-text-btn {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -284,6 +291,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .clear-text-btn:hover {
@@ -306,12 +314,12 @@
 .split-mode-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
+  gap: 3px;
+  font-size: 12px;
   color: #a0a0a0;
   background-color: rgba(20, 20, 20, 0.85);
-  padding: 4px 8px;
-  border-radius: 16px;
+  padding: 3px 6px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 5;
@@ -319,7 +327,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  min-height: 26px;
+  min-height: 24px;
+  flex-shrink: 0;
 }
 
 .split-mode-btn:hover {
@@ -332,7 +341,7 @@
 }
 
 .split-mode-text {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
 }
 
@@ -374,4 +383,111 @@
 .split-mode-item.selected {
   background-color: rgba(255, 255, 255, 0.12);
   color: #ffffff;
+}
+
+/* 小屏幕适配 */
+@media (max-width: 480px) {
+  .left-controls {
+    gap: 4px;
+  }
+  
+  .right-controls {
+    gap: 4px;
+  }
+  
+  .speaker-button {
+    font-size: 11px;
+    padding: 3px 6px;
+    gap: 2px;
+    max-width: 100px;
+  }
+  
+  .speaker-name {
+    font-size: 11px;
+    max-width: 70px;
+  }
+  
+  .volume-text {
+    font-size: 11px;
+    padding: 2px 5px;
+    gap: 2px;
+    min-height: 22px;
+  }
+  
+  .volume-badge {
+    font-size: 10px;
+  }
+  
+  .speaker-icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .clear-text-btn {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .split-mode-btn {
+    font-size: 11px;
+    padding: 2px 5px;
+    gap: 2px;
+    min-height: 22px;
+  }
+  
+  .split-mode-text {
+    font-size: 10px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 360px) {
+  .left-controls {
+    gap: 3px;
+  }
+  
+  .right-controls {
+    gap: 3px;
+  }
+  
+  .speaker-button {
+    font-size: 10px;
+    padding: 2px 4px;
+    max-width: 80px;
+  }
+  
+  .speaker-name {
+    font-size: 10px;
+    max-width: 60px;
+  }
+  
+  .volume-text {
+    font-size: 10px;
+    padding: 2px 4px;
+    min-height: 20px;
+  }
+  
+  .volume-badge {
+    font-size: 9px;
+  }
+  
+  .speaker-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .clear-text-btn {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .split-mode-btn {
+    font-size: 10px;
+    padding: 2px 4px;
+    min-height: 20px;
+  }
+  
+  .split-mode-text {
+    font-size: 9px;
+  }
 } 

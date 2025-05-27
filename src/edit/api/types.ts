@@ -233,8 +233,8 @@ export interface ImageLibItem {
  */
 export interface AutoGenerateTextRequest {
   type: string;
+  subType?: string;
   generate_size: number;
-  hacks_type: string;
   allow_used: boolean;
 }
 
@@ -268,6 +268,7 @@ export interface AutoGenerateTextResponse {
  */
 export interface UnlikeTextRequest {
   type: string;
+  subType?: string;
   text_id: string;
 }
 

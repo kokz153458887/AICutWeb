@@ -20,7 +20,7 @@ import Toast, { toast } from '../components/Toast';
 import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
 import { MusicLibItem, StyleModel, SplitModel } from './api/types';
 import { VoiceInfo } from './api/VoiceService';
-import { cleanTitle, cleanContent } from '../utils/textUtils';
+
 
 /**
  * 编辑页主组件

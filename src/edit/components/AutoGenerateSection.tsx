@@ -8,7 +8,7 @@ import { toast } from '../../components/Toast';
 import { EditService } from '../api/service';
 import { AutoGenerateTextRequest, UnlikeTextRequest } from '../api/types';
 import { DropdownArrowIcon } from './icons/SvgIcons';
-import { TEXT_TYPE_CONFIG } from '../config/textTypeConfig';
+import { TEXT_TYPE_CONFIG, getTypeAndSubType } from '../config/textTypeConfig';
 
 interface AutoGenerateSectionProps {
   onTextGenerated: (text: string) => void;
@@ -89,10 +89,13 @@ const AutoGenerateSection: React.FC<AutoGenerateSectionProps> = ({
     try {
       setIsGenerating(true);
       
+      // 根据选择的类型获取type和subType
+      const { type, subType } = getTypeAndSubType(selectedType);
+      
       const params: AutoGenerateTextRequest = {
-        type: selectedType,
+        type: type,
+        subType: subType,
         generate_size: 1,
-        hacks_type: "root",
         allow_used: false
       };
 
@@ -128,8 +131,12 @@ const AutoGenerateSection: React.FC<AutoGenerateSectionProps> = ({
     }
 
     try {
+      // 根据选择的类型获取type和subType
+      const { type, subType } = getTypeAndSubType(selectedType);
+      
       const params: UnlikeTextRequest = {
-        type: selectedType,
+        type: type,
+        subType: subType,
         text_id: lastGeneratedTextId
       };
 
@@ -151,15 +158,7 @@ const AutoGenerateSection: React.FC<AutoGenerateSectionProps> = ({
   return (
     <div className="auto-generate-section">
       <div className="auto-generate-container">
-        {/* 不喜欢按钮 - 始终显示，但在没有文案时禁用 */}
-        <button 
-          className={`dislike-btn ${!lastGeneratedTextId ? 'disabled' : ''}`}
-          onClick={handleDislikeClick}
-          disabled={!lastGeneratedTextId}
-          title={lastGeneratedTextId ? "不喜欢这个文案" : "暂无可标记的文案"}
-        >
-          不喜欢
-        </button>
+       
 
         {/* 类型选择和生成按钮 */}
         <button 

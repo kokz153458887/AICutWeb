@@ -1,0 +1,79 @@
+/* 筛选标签容器 */
+.filter-tabs {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 0px;
+}
+
+/* 筛选标签内容容器 */
+.filter-tabs-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding: 4px 5px; /* 防止阴影被截断 */
+}
+
+.filter-tabs-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* 单个筛选标签 */
+.filter-tab {
+  flex-shrink: 0;
+  min-width: fit-content;
+  padding: 5px 8px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filter-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.filter-tab:active {
+  transform: scale(0.98);
+}
+
+/* 激活状态的筛选标签 */
+.filter-tab.active {
+    background: linear-gradient(135deg, #00b8ab, #009688);
+    border-color: #00d6c9;
+  color: #fff;
+}
+
+.filter-tab.active:hover {
+  background: linear-gradient(135deg, #00b8ab, #009688);
+  border-color: #00b8ab;
+}
+
+/* 筛选标签文本 */
+.filter-label {
+  font-weight: 600;
+}
+
+/* 筛选标签计数 */
+.filter-count {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.filter-tab.active .filter-count {
+  opacity: 1;
+}

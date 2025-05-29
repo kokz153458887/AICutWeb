@@ -1,0 +1,113 @@
+/* 视频切片页面容器 */
+.video-slice-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f0f0f 0%, #141414 100%);
+  overflow: hidden;
+  position: relative;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* 顶部导航栏 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 返回按钮 */
+.back-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
+/* 页面标题 */
+.page-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* 列表容器 */
+.list-container {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  min-height: 0;
+  background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%);
+}
+
+/* 滚动条样式优化 */
+.list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 214, 201, 0.3);
+  border-radius: 2px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 214, 201, 0.5);
+}
+
+/* iOS Safari 兼容性修复 */
+@supports (-webkit-touch-callout: none) {
+  .video-slice-page {
+    height: -webkit-fill-available;
+  }
+  
+  .list-container {
+    height: -webkit-fill-available;
+  }
+}
+
+/* 添加页面加载动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

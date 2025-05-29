@@ -1,0 +1,156 @@
+/* 我的页面容器 */
+.mine-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #141414;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 页面头部 */
+.mine-header {
+  padding: 20px 16px 16px;
+  background-color: #141414;
+  border-bottom: 1px solid #333;
+}
+
+.mine-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  text-align: center;
+}
+
+/* 页面内容区 */
+.mine-content {
+  flex: 1;
+  padding: 20px 16px;
+  background-color: #141414;
+  min-height: calc(100vh - 120px);
+}
+
+/* 功能网格容器 */
+.function-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* 网格项 */
+.grid-item {
+  background-color: #222;
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #333;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid-item:hover {
+  background-color: #2a2a2a;
+  border-color: #444;
+  transform: translateY(-2px);
+}
+
+.grid-item:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 网格项图标 */
+.item-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+/* 网格项标题 */
+.item-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+/* 网格项描述 */
+.item-description {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.3;
+}
+
+/* 特殊项目样式 - 视频切片 */
+.grid-item[data-id="video-slice"] {
+  background: linear-gradient(135deg, #00d6c9, #00b8ab);
+  border-color: #00d6c9;
+}
+
+.grid-item[data-id="video-slice"]:hover {
+  background: linear-gradient(135deg, #00b8ab, #009688);
+  border-color: #00b8ab;
+}
+
+.grid-item[data-id="video-slice"] .item-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.grid-item[data-id="video-slice"] .item-description {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 480px) {
+  .mine-header {
+    padding: 16px 12px 12px;
+  }
+  
+  .mine-title {
+    font-size: 20px;
+  }
+  
+  .mine-content {
+    padding: 16px 12px;
+  }
+  
+  .function-grid {
+    gap: 12px;
+    max-width: none;
+  }
+  
+  .grid-item {
+    padding: 16px 12px;
+    min-height: 100px;
+  }
+  
+  .item-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  
+  .item-title {
+    font-size: 14px;
+  }
+  
+  .item-description {
+    font-size: 11px;
+  }
+}
+
+/* iOS Safari 兼容性修复 */
+@supports (-webkit-touch-callout: none) {
+  .mine-page {
+    height: -webkit-fill-available;
+  }
+} 

@@ -1,0 +1,234 @@
+/* 视频切片列表容器 */
+.video-slice-list {
+  padding: 16px;
+  background: transparent;
+}
+
+/* 瀑布流网格布局 */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* 瀑布流项目 */
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 0;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 空状态容器 */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 40px 20px;
+}
+
+.empty-content {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.empty-icon {
+  font-size: 56px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.empty-text {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.empty-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 加载更多容器 */
+.load-more-container {
+  grid-column: 1 / -1; /* 占据整行 */
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+/* 加载中状态 */
+.loading-more {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid #00d6c9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 加载更多按钮 */
+.load-more-button {
+  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.load-more-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.load-more-button:active {
+  transform: scale(0.98);
+}
+
+/* 加载错误状态 */
+.load-more-error {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  background: rgba(255, 71, 87, 0.1);
+  padding: 12px 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+}
+
+.load-more-error button {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ff4757, #ff3838);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+}
+
+.load-more-error button:hover {
+  background: linear-gradient(135deg, #ff3838, #e63946);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+}
+
+/* 没有更多数据 */
+.no-more-data {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 20px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 480px) {
+  .video-slice-list {
+    padding: 12px;
+  }
+  
+  .masonry-grid {
+    gap: 12px;
+  }
+  
+  .empty-state {
+    min-height: 300px;
+    padding: 30px 15px;
+  }
+  
+  .empty-content {
+    padding: 30px 20px;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  
+  .empty-text {
+    font-size: 16px;
+  }
+  
+  .empty-subtitle {
+    font-size: 13px;
+  }
+  
+  .load-more-container {
+    padding: 20px 0;
+  }
+  
+  .load-more-button {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+  
+  .loading-more {
+    gap: 10px;
+    padding: 10px 16px;
+  }
+  
+  .loading-spinner {
+    width: 18px;
+    height: 18px;
+  }
+} 

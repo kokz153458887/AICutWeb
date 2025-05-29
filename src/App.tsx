@@ -10,6 +10,7 @@ import { VideoDetail } from './detail'
 import EditPage from './edit'
 import VideoListPage from './videolist'
 import VideoOperatePage from './operate/components/VideoOperatePage'
+import VideoSlicePage from './cutvideo/pages/VideoSlicePage'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 import Toast from './components/Toast'
@@ -72,6 +73,8 @@ const AppContainer: React.FC = () => {
         <Route path="/video/:id" element={<VideoDetail />} />
         {/* 视频编辑页路由 */}
         <Route path="/edit" element={<EditPage />} />
+        {/* 视频切片页路由 */}
+        <Route path="/video-slice" element={<VideoSlicePage />} />
         {/* 将 /videolist 路由移除，统一使用 tab 参数 */}
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}

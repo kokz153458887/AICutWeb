@@ -1,0 +1,185 @@
+/* 视频切片卡片容器 */
+.video-slice-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.video-slice-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-slice-card:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+/* 图片容器 */
+.card-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  border-radius: 12px 12px 0 0;
+}
+
+/* 图片占位符 */
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 图片加载错误状态 */
+.image-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #333, #222);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  border-radius: 12px 12px 0 0;
+}
+
+.error-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.error-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* 实际图片 */
+.card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.card-image.loaded {
+  opacity: 1;
+}
+
+/* 状态标签 */
+.status-label {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 不同状态的标签颜色 */
+.status-parsing {
+  background: linear-gradient(135deg, #00d6c9, #00b8ab);
+  border-color: #00d6c9;
+}
+
+.status-failed {
+  background: linear-gradient(135deg, #ff4757, #ff3838);
+  border-color: #ff4757;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #ffa502, #ff8f00);
+  border-color: #ffa502;
+}
+
+.status-recorded {
+  background: linear-gradient(135deg, #2ed573, #26d960);
+  border-color: #2ed573;
+}
+
+.status-abandoned {
+  background: linear-gradient(135deg, #747d8c, #5a6c7d);
+  border-color: #747d8c;
+}
+
+.status-default {
+  background: linear-gradient(135deg, #a4b0be, #9ca5b4);
+  border-color: #a4b0be;
+}
+
+/* 卡片内容区 */
+.card-content {
+  padding: 5px 5px 5px 5px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 文本内容 */
+.content-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 65px;
+  max-height: 65px;
+  flex: 1;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  word-wrap: break-word;
+  word-break: break-all;
+}

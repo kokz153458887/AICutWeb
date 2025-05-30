@@ -60,13 +60,13 @@
   right: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px; /* 增加间距避免误触 */
 }
 
 /* 功能按钮基础样式 */
 .action-button {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: none;
   border-radius: 8px;
   background-color: none;
@@ -99,11 +99,16 @@
 
 /* 清除按钮特殊样式 */
 .clear-button {
-  background-color: none;
+  width: 24px; /* 缩小清除按钮 */
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .clear-button:hover {
-  background-color: rgba(255, 71, 87, 0.25);
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px) scale(1.05);
 }
 
 /* 解析按钮 */

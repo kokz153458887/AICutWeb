@@ -108,7 +108,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onParse }) => {
             onClick={handleClearInput}
             title="清除内容"
           >
-            <ClearIcon size={16} color="#ff4757" />
+            <ClearIcon size={14} color="#999" />
           </div>
           
           {/* 解析按钮 */}

@@ -93,6 +93,53 @@
   color: rgba(255, 255, 255, 0.3);
 }
 
+/* 状态图片通用样式 */
+.status-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px 12px 0 0;
+}
+
+/* 解析中状态 */
+.parsing-image {
+  background: linear-gradient(135deg, #1a2332, #2a3441);
+}
+
+/* 解析失败状态 */
+.failed-image {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+}
+
+/* 默认兜底图片 */
+.default-image {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+}
+
+.default-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+/* 状态文本 */
+.status-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
+  padding: 0 8px;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
 /* 实际图片 */
 .card-image {
   position: absolute;
@@ -159,7 +206,7 @@
 
 /* 卡片内容区 */
 .card-content {
-  padding: 5px 5px 5px 5px;
+  padding: 5px 5px 5px 8px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -182,4 +229,49 @@
   letter-spacing: 0.3px;
   word-wrap: break-word;
   word-break: break-all;
+}
+
+/* 分辨率信息 */
+.resolution-info {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 重试按钮 */
+.retry-button {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #ff6b35, #ff4757);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.retry-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 75, 87, 0.4);
+}
+
+.retry-button:active {
+  transform: scale(0.95);
 }

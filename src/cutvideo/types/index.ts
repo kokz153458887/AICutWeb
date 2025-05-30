@@ -41,6 +41,17 @@ export const VideoSliceFilterLabels: Record<VideoSliceFilter, string> = {
 };
 
 /**
+ * 视频信息接口
+ */
+export interface VideoInfo {
+  resolution: string;
+  file_size_bytes: number;
+  file_duration: number;
+  language: string;
+  platform: string;
+}
+
+/**
  * 视频切片数据项接口
  */
 export interface VideoSliceItem {
@@ -50,6 +61,10 @@ export interface VideoSliceItem {
   status: VideoSliceStatus; // 状态
   createTime: string;   // 创建时间
   updateTime: string;   // 更新时间
+  // 扩展字段，用于存储解析相关的额外信息
+  videoUrl?: string;    // 视频文件URL
+  parseUrl?: string;    // 原始解析URL
+  videoInfo?: VideoInfo; // 视频信息
 }
 
 /**

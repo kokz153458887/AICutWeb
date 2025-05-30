@@ -9,6 +9,7 @@ import './styles.css';
 interface FilterTabsProps {
   activeFilter: VideoSliceFilter;
   onFilterChange: (filter: VideoSliceFilter) => void;
+  onRefresh?: () => void; // 新增：刷新回调
   counts?: Partial<Record<VideoSliceFilter, number>>; // 可选的计数显示
 }
 
@@ -19,6 +20,7 @@ interface FilterTabsProps {
 const FilterTabs: React.FC<FilterTabsProps> = ({ 
   activeFilter, 
   onFilterChange,
+  onRefresh,
   counts = {}
 }) => {
   // 筛选选项顺序
@@ -30,10 +32,16 @@ const FilterTabs: React.FC<FilterTabsProps> = ({
   ];
 
   /**
-   * 处理筛选选项点击
+   * 处理筛选器点击
    */
   const handleFilterClick = (filter: VideoSliceFilter) => {
-    if (filter !== activeFilter) {
+    if (activeFilter === filter) {
+      // 点击相同tab时触发刷新
+      if (onRefresh) {
+        onRefresh();
+      }
+    } else {
+      // 切换到不同tab，先切换然后触发刷新
       onFilterChange(filter);
     }
   };

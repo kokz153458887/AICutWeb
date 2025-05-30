@@ -20,6 +20,7 @@ interface VideoSliceListProps {
   onLoadMore?: () => void;
   onRetry?: () => void;
   onItemClick?: (item: VideoSliceItem) => void;
+  onItemRetry?: (item: VideoSliceItem) => void;
 }
 
 /**
@@ -83,7 +84,8 @@ const VideoSliceList: React.FC<VideoSliceListProps> = ({
   loadMoreError = false,
   onLoadMore,
   onRetry,
-  onItemClick
+  onItemClick,
+  onItemRetry
 }) => {
   /**
    * 处理加载更多点击
@@ -152,9 +154,7 @@ const VideoSliceList: React.FC<VideoSliceListProps> = ({
     return (
       <div className="empty-state">
         <div className="empty-content">
-          <div className="empty-icon">📹</div>
           <div className="empty-text">暂无视频切片</div>
-          <div className="empty-subtitle">请添加视频进行解析</div>
         </div>
       </div>
     );
@@ -168,6 +168,7 @@ const VideoSliceList: React.FC<VideoSliceListProps> = ({
             <VideoSliceCard 
               item={item} 
               onClick={handleItemClick}
+              onRetry={onItemRetry}
             />
           </div>
         ))}

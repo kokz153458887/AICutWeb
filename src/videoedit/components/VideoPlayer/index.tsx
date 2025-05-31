@@ -13,6 +13,7 @@ interface VideoPlayerProps {
   onSeekStart?: () => void;
   onSeekEnd?: (time: number) => void;
   onDragging?: (time: number) => void; // 拖拽过程中的回调
+  onPlayStateChange?: (isPlaying: boolean) => void; // 播放状态变化回调
   seekToTime?: number;
   showProgressBar?: boolean;
   isLocationMode?: boolean; // 是否处于定位模式
@@ -20,6 +21,7 @@ interface VideoPlayerProps {
 
 export interface VideoPlayerRef {
   pauseVideo: () => void;
+  playVideo: () => void;
 }
 
 /**
@@ -33,6 +35,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   onSeekStart,
   onSeekEnd,
   onDragging,
+  onPlayStateChange,
   seekToTime,
   showProgressBar = true,
   isLocationMode = false
@@ -54,21 +57,28 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       if (videoRef.current && !videoRef.current.paused) {
         videoRef.current.pause();
       }
+    },
+    playVideo: () => {
+      if (videoRef.current && videoRef.current.paused) {
+        videoRef.current.play();
+      }
     }
   }), []);
 
   /**
-   * 处理视频播放状态变化 - 简化，无需useCallback
+   * 处理视频播放 - 无依赖，无需useCallback
    */
   const handlePlay = () => {
     setIsPlaying(true);
-    setShowCover(false);
-    setShowPauseButton(false);
+    onPlayStateChange?.(true);
   };
 
+  /**
+   * 处理视频暂停 - 无依赖，无需useCallback
+   */
   const handlePause = () => {
     setIsPlaying(false);
-    setShowPauseButton(true);
+    onPlayStateChange?.(false);
   };
 
   /**
@@ -80,9 +90,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       setCurrentTime(current);
       
       // 在定位模式下，仅在非拖拽状态下通知时间更新，避免冲突
-      if (isLocationMode) {
+      // if (isLocationMode) {
         onTimeUpdate?.(current, 'video-native');
-      }
+      // }
     }
   }, [isDragging, isLocationMode, onTimeUpdate]);
 
@@ -92,6 +102,12 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
+      // 播放器完成初始化后，移除封面图
+      setShowCover(false);
+      // seek到第一帧并暂停
+      videoRef.current.currentTime = 0;
+      setCurrentTime(0);
+      setShowPauseButton(true);
     }
   };
 
@@ -253,20 +269,15 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
    */
   useEffect(() => {
     if (seekToTime !== undefined && videoRef.current) {
-      // 防抖处理，避免频繁更新
-      const timer = setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = seekToTime;
-          setCurrentTime(seekToTime);
-          
-          // 在定位模式下通知时间更新，标记来源为外部输入
-          if (isLocationMode) {
-            onTimeUpdate?.(seekToTime, 'external-input');
-          }
+      if (videoRef.current) {
+        videoRef.current.currentTime = seekToTime;
+        setCurrentTime(seekToTime);
+        
+        // 在定位模式下通知时间更新，标记来源为外部输入
+        if (isLocationMode) {
+          onTimeUpdate?.(seekToTime, 'external-input');
         }
-      }, 16); // 约60fps
-      
-      return () => clearTimeout(timer);
+      }
     }
   }, [seekToTime, isLocationMode]); // 合并逻辑，移除onTimeUpdate依赖
 
@@ -311,12 +322,12 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
           ref={videoRef}
           className="video-element"
           src={videoUrl}
+          onTimeUpdate={handleTimeUpdate}
           onPlay={handlePlay}
           onPause={handlePause}
-          onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onClick={handleVideoClick}
-          playsInline
+          playsInline={true}
           webkit-playsinline="true"
         />
         
@@ -334,7 +345,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
         )}
         
         {/* 暂停时的播放按钮 */}
-        {!showCover && showPauseButton && (
+        {!showCover && showPauseButton && !isPlaying && (
           <div className="pause-overlay" onClick={handlePauseButtonClick}>
             <div className="pause-play-button">
               <svg width="80" height="80" viewBox="0 0 48 48" fill="none">

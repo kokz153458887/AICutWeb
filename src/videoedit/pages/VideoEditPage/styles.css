@@ -92,17 +92,6 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.clips-header h3 {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
 /* 切片头部右侧区域 */
 .clips-header-right {
   display: flex;
@@ -173,7 +162,7 @@
 .clips-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 /* 加载和错误状态 */
@@ -263,4 +252,41 @@
     width: 12px;
     height: 12px;
   }
+}
+
+.material-select-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  background: rgba(0, 122, 255, 0.1);
+  border: 1px solid rgba(0, 122, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 200px;
+}
+
+.material-select-entry:hover {
+  background: rgba(0, 122, 255, 0.2);
+  border-color: rgba(0, 122, 255, 0.5);
+}
+
+.material-select-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFFFFF;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.material-select-arrow {
+  color: rgba(0, 122, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 } 

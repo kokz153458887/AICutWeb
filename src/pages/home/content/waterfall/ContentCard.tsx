@@ -51,7 +51,6 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
   
   // 处理图片加载完成
   const handleImageLoad = () => {
-    console.log(`[ContentCard] 图片加载完成: ${item.styleId}`);
     setImageLoaded(true);
   };
   

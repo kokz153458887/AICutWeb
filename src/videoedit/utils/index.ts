@@ -63,7 +63,7 @@ export const parseTime = (timeString: string): number => {
 /**
  * 构建全文本到词语映射的索引
  * @param segments 语音识别的片段数据
- * @returns 字符索引到词语的映射数组
+ * @returns 纯字符索引到词语的映射数组
  */
 export const buildTextToWordsIndex = (segments: SegmentInfo[]) => {
   const indexMap: Array<{
@@ -78,7 +78,7 @@ export const buildTextToWordsIndex = (segments: SegmentInfo[]) => {
   
   segments.forEach((segment, segmentIndex) => {
     segment.words.forEach((word, wordIndex) => {
-      // 为每个字符建立索引
+      // 为每个字符建立索引 - 基于纯字符，与segments.words保持一致
       for (let i = 0; i < word.word.length; i++) {
         indexMap.push({
           char: word.word[i],
@@ -97,9 +97,9 @@ export const buildTextToWordsIndex = (segments: SegmentInfo[]) => {
 
 /**
  * 精确根据文本和光标位置，从segments中找到对应的时间范围
- * @param fullText 完整的原始文本
- * @param clipText 要切片的文本内容
- * @param clipStartInFullText 切片文本在完整文本中的起始位置
+ * @param fullText 完整的原始文本（带空格符号）
+ * @param clipText 要切片的文本内容（带空格符号）
+ * @param clipStartInFullText 切片文本在完整文本中的起始位置（带空格符号的位置）
  * @param segments 语音识别的片段数据
  * @returns 时间范围 { startTime, endTime }
  */
@@ -109,12 +109,17 @@ export const findPreciseTimeRangeByText = (
   clipStartInFullText: number,
   segments: SegmentInfo[]
 ): { startTime: number; endTime: number } => {
-  // 构建字符到词语的精确映射
+  // 构建字符到词语的精确映射（基于纯字符）
   const indexMap = buildTextToWordsIndex(segments);
+
+  // 将带空格的文本和位置转换为纯字符版本
+  const pureFullText = removePunctuationAndSpaces(fullText);
+  const pureClipText = removePunctuationAndSpaces(clipText);
+  const pureClipStartInFullText = convertSpacedPositionToPurePosition(fullText, clipStartInFullText);
   
-  // 计算切片在全文中的范围
-  const clipStartIndex = clipStartInFullText;
-  const clipEndIndex = clipStartInFullText + clipText.length - 1;
+  // 计算切片在纯字符全文中的范围
+  const clipStartIndex = pureClipStartInFullText;
+  const clipEndIndex = pureClipStartInFullText + pureClipText.length - 1;
   
   // 找到对应的起始和结束词语
   let startWord: WordInfo | null = null;
@@ -135,7 +140,9 @@ export const findPreciseTimeRangeByText = (
       break;
     }
   }
-  
+
+  console.log('startWord:', startWord, ' endWord:', endWord)
+
   // 如果找不到精确匹配，使用范围查找
   if (!startWord) {
     for (const item of indexMap) {
@@ -156,7 +163,7 @@ export const findPreciseTimeRangeByText = (
       }
     }
   }
-  
+
   // 返回时间范围
   const startTime = startWord ? startWord.start : 0;
   const endTime = endWord ? endWord.end : (segments[segments.length - 1]?.words[segments[segments.length - 1]?.words.length - 1]?.end || 0);
@@ -224,4 +231,55 @@ export const loadVideoEditState = (taskId: string): VideoEditState | null => {
     console.error('加载视频编辑状态失败:', error);
     return null;
   }
+};
+
+/**
+ * 将带空格符号的文本位置转换为纯字符位置
+ * @param textWithSpaces 带空格符号的文本
+ * @param positionWithSpaces 在带空格文本中的位置
+ * @returns 对应的纯字符位置
+ */
+export const convertSpacedPositionToPurePosition = (textWithSpaces: string, positionWithSpaces: number): number => {
+  let purePosition = 0;
+  
+  for (let i = 0; i < Math.min(positionWithSpaces, textWithSpaces.length); i++) {
+    const char = textWithSpaces[i];
+    // 只计算非空格、非符号的字符
+    if (char !== ' ' && char !== '，' && char !== '。' && char !== '！' && char !== '？' && char !== '；' && char !== '：') {
+      purePosition++;
+    }
+  }
+  
+  return purePosition;
+};
+
+/**
+ * 将纯字符文本位置转换为带空格符号的文本位置
+ * @param textWithSpaces 带空格符号的文本
+ * @param purePosition 纯字符位置
+ * @returns 对应的带空格文本位置
+ */
+export const convertPurePositionToSpacedPosition = (textWithSpaces: string, purePosition: number): number => {
+  let currentPurePosition = 0;
+  
+  for (let i = 0; i < textWithSpaces.length; i++) {
+    const char = textWithSpaces[i];
+    if (char !== ' ' && char !== '，' && char !== '。' && char !== '！' && char !== '？' && char !== '；' && char !== '：') {
+      if (currentPurePosition === purePosition) {
+        return i;
+      }
+      currentPurePosition++;
+    }
+  }
+  
+  return textWithSpaces.length;
+};
+
+/**
+ * 移除文本中的所有空格和符号，只保留纯字符
+ * @param text 原始文本
+ * @returns 纯字符文本
+ */
+export const removePunctuationAndSpaces = (text: string): string => {
+  return text.replace(/[\s，。！？；：]/g, '');
 }; 

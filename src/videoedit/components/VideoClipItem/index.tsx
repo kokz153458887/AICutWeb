@@ -2,16 +2,22 @@
  * 视频切片项组件
  * 支持文本编辑、时间调整和视频定位功能
  */
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { VideoClipItem } from '../../types';
 import { formatTime, parseTime } from '../../utils';
 import './styles.css';
+
+export interface VideoClipItemRef {
+  focusTextarea: () => void;
+  scrollToBottom: () => void;
+}
 
 interface VideoClipItemProps {
   clip: VideoClipItem;
   index: number;
   isLocationActive: boolean;
   activeLocationField: 'start' | 'end' | null;
+  isPlaying?: boolean; // 是否正在播放此切片
   onTitleChange: (id: string, title: string) => void;
   onTextChange: (id: string, text: string) => void;
   onTimeChange: (id: string, field: 'start' | 'end', value: string) => void;
@@ -20,17 +26,20 @@ interface VideoClipItemProps {
   onLocationClick: (id: string, field: 'start' | 'end') => void;
   onTimeFocus: (time: number) => void;
   onEnterClip: (id: string, textarea: HTMLTextAreaElement) => void;
+  onPlayClip: (id: string, startTime: number, endTime: number) => void;
+  onDeleteClip: (id: string) => void;
 }
 
 /**
  * 视频切片项组件
  * 提供单个切片的完整编辑功能
  */
-const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
+const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(({
   clip,
   index,
   isLocationActive,
   activeLocationField,
+  isPlaying,
   onTitleChange,
   onTextChange,
   onTimeChange,
@@ -38,8 +47,10 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
   onTimeAdjust,
   onLocationClick,
   onTimeFocus,
-  onEnterClip
-}) => {
+  onEnterClip,
+  onPlayClip,
+  onDeleteClip
+}, ref) => {
   // 时间输入框的本地状态
   const [startTimeInput, setStartTimeInput] = useState(formatTime(clip.startTime));
   const [endTimeInput, setEndTimeInput] = useState(formatTime(clip.endTime));
@@ -48,6 +59,7 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
   
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 当clip的时间发生变化时，更新本地输入状态（仅在非编辑状态下）- 防抖优化
   useEffect(() => {
@@ -225,22 +237,71 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
     onLocationClick(clip.id, 'end');
   }, [clip.id, onLocationClick]);
 
+  /**
+   * 处理播放按钮点击
+   */
+  const handlePlayClick = useCallback(() => {
+    onPlayClip(clip.id, clip.startTime, clip.endTime);
+  }, [clip.id, clip.startTime, clip.endTime, onPlayClip]);
+
+  /**
+   * 处理删除按钮点击
+   */
+  const handleDeleteClick = useCallback(() => {
+    onDeleteClip(clip.id);
+  }, [clip.id, onDeleteClip]);
+
+  useImperativeHandle(ref, () => ({
+    focusTextarea: () => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        // 将光标移到文本末尾
+        const length = textareaRef.current.value.length;
+        textareaRef.current.setSelectionRange(length, length);
+      }
+    },
+    scrollToBottom: () => {
+      if (textareaRef.current) {
+        textareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  }));
+
   return (
     <div className={`video-clip-item ${clip.isDefault ? 'default-clip' : ''}`}>
       {/* 标题输入区域 */}
       <div className="clip-title">
-        <input
-          type="text"
-          value={clip.title || ''}
-          onChange={handleTitleChange}
-          placeholder={clip.isDefault ? "默认切片" : `切片 ${index + 1}`}
-          className="title-input"
-        />
+        <div className="title-row">
+          <div className="play-clip-btn" onClick={handlePlayClick}>
+            {isPlaying ? (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z" fill="currentColor"/>
+              </svg>
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
+              </svg>
+            )}
+          </div>
+          <input
+            type="text"
+            value={clip.title || ''}
+            onChange={handleTitleChange}
+            placeholder={clip.isDefault ? "默认切片" : `切片 ${index + 1}`}
+            className="title-input"
+          />
+          <div className="delete-clip-btn" onClick={handleDeleteClick}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* 文本编辑区域 */}
       <div className="clip-text">
         <textarea
+          ref={textareaRef}
           value={clip.text}
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
@@ -258,6 +319,7 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
               <div 
                 className="time-adjust-btn"
                 onClick={handleStartTimeAdjustBack}
+                onMouseDown={(e) => e.preventDefault()}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                   <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2"/>
@@ -275,6 +337,7 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
               <div 
                 className="time-adjust-btn"
                 onClick={handleStartTimeAdjustForward}
+                onMouseDown={(e) => e.preventDefault()}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                   <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2"/>
@@ -301,6 +364,7 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
               <div 
                 className="time-adjust-btn"
                 onClick={handleEndTimeAdjustBack}
+                onMouseDown={(e) => e.preventDefault()}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                   <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2"/>
@@ -318,6 +382,7 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
               <div 
                 className="time-adjust-btn"
                 onClick={handleEndTimeAdjustForward}
+                onMouseDown={(e) => e.preventDefault()}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                   <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2"/>
@@ -338,6 +403,6 @@ const VideoClipItemComponent: React.FC<VideoClipItemProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default VideoClipItemComponent; 

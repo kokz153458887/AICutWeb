@@ -6,10 +6,12 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { BackIcon } from '../../../components/icons';
 import VideoPlayer, { VideoPlayerRef } from '../../components/VideoPlayer';
-import VideoClipItemComponent from '../../components/VideoClipItem';
+import VideoClipItemComponent, { VideoClipItemRef } from '../../components/VideoClipItem';
+import MaterialSelectModal from '../../../edit/components/select/MaterialSelectModal';
 import { getParseTaskDetail } from '../../api';
 import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo } from '../../types';
-import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, buildTextToWordsIndex } from '../../utils';
+import { MaterialLibItem, MaterialModel } from '../../../edit/api/types';
+import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, convertSpacedPositionToPurePosition, removePunctuationAndSpaces } from '../../utils';
 import { toast } from '../../../components/Toast';
 import './styles.css';
 
@@ -24,6 +26,9 @@ const VideoEditPage: React.FC = () => {
   // VideoPlayer的引用
   const videoPlayerRef = useRef<VideoPlayerRef>(null);
   
+  // 切片组件的引用
+  const clipRefs = useRef<Map<string, VideoClipItemRef>>(new Map());
+  
   // 基础数据状态
   const [taskData, setTaskData] = useState<ParseTaskDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,6 +41,13 @@ const VideoEditPage: React.FC = () => {
   // 视频控制状态
   const [videoSeekTime, setVideoSeekTime] = useState<number | undefined>(undefined);
   const [showProgressBar, setShowProgressBar] = useState(true);
+  const [currentVideoTime, setCurrentVideoTime] = useState<number>(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(false);
+  const [currentPlayingClipId, setCurrentPlayingClipId] = useState<string | null>(null);
+  
+  // 素材库状态
+  const [showMaterialModal, setShowMaterialModal] = useState<boolean>(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialLibItem | null>(null);
   
   // 定位状态
   const [locationActiveClipId, setLocationActiveClipId] = useState<string | null>(null);
@@ -175,7 +187,7 @@ const VideoEditPage: React.FC = () => {
     
     if (!textBeforeCursor.trim()) return; // 防止创建空切片
     
-    // 计算切片在完整文本中的位置
+    // 计算切片在完整文本中的位置（基于带空格的原始文本）
     const clipStartInFullText = calculateClipPositionInFullText(clipId, clips);
     const fullOriginalText = getFullOriginalText();
     
@@ -226,9 +238,20 @@ const VideoEditPage: React.FC = () => {
     });
     
     // 跳转到新切片的开始位置
-    setVideoSeekTime(timeRange.startTime);
+    setVideoSeekTime(remainingStartTime);
     
-    toast.success('切片创建成功');
+    // 延迟执行焦点和滚动操作，确保DOM更新完成
+    setTimeout(() => {
+      // 找到默认切片（剩余的切片）
+      const defaultClipId = currentClip.id; // 当前切片会被更新为剩余文本
+      const defaultClipRef = clipRefs.current.get(defaultClipId);
+      if (defaultClipRef) {
+        defaultClipRef.focusTextarea();
+        defaultClipRef.scrollToBottom();
+      }
+    }, 100);
+    
+    console.log('切片创建成功 seek:', remainingStartTime);
   };
 
   /**
@@ -380,6 +403,8 @@ const VideoEditPage: React.FC = () => {
    * 处理视频时间更新 - 在定位模式下同步到输入框，增加防循环机制
    */
   const handleVideoTimeUpdate = useCallback((currentTime: number, source: string = 'video-native') => {
+    setCurrentVideoTime(currentTime);
+    
     if (locationActiveClipId && locationActiveField) {
       // 只有当时间更新来源不是外部输入时才同步，避免循环调用
       if (source !== 'external-input') {
@@ -457,13 +482,140 @@ const VideoEditPage: React.FC = () => {
    * 处理时间输入框聚焦
    */
   const handleTimeFocus = useCallback((time: number) => {
-    if (!locationActiveClipId) {
+    // if (!locationActiveClipId) {
       setVideoSeekTime(time);
-    }
+    // }
   }, [locationActiveClipId]);
+
+  /**
+   * 处理删除切片
+   */
+  const handleDeleteClip = useCallback((clipId: string) => {
+    // 防止删除最后一个切片
+    if (clips.length <= 1) {
+      toast.error('至少需要保留一个切片');
+      return;
+    }
+    
+    setClips(prevClips => prevClips.filter(clip => clip.id !== clipId));
+    
+    // 如果删除的是正在播放的切片，停止播放
+    if (currentPlayingClipId === clipId) {
+      setCurrentPlayingClipId(null);
+      if (videoPlayerRef.current) {
+        videoPlayerRef.current.pauseVideo();
+      }
+    }
+    
+    toast.success('切片已删除');
+  }, [clips.length, currentPlayingClipId]);
+
+  /**
+   * 处理播放切片
+   */
+  const handlePlayClip = useCallback((clipId: string, startTime: number, endTime: number) => {
+    // 如果当前正在播放，直接暂停
+    if (isVideoPlaying) {
+      if (videoPlayerRef.current) {
+        videoPlayerRef.current.pauseVideo();
+      }
+      setCurrentPlayingClipId(null);
+      return;
+    }
+    
+    // 检查当前时间是否在切片范围内
+    const isInRange = currentVideoTime >= startTime && currentVideoTime < endTime;
+    
+    let playFromTime = startTime;
+    
+    if (isInRange) {
+      // 在范围内，从当前时间继续播放
+      playFromTime = currentVideoTime;
+    } else {
+      // 超出范围，从开始时间播放
+      playFromTime = startTime;
+      setVideoSeekTime(startTime);
+    }
+    
+    // 设置当前播放的切片
+    setCurrentPlayingClipId(clipId);
+    
+    // 延迟一点时间确保视频跳转完成（如果有跳转的话）
+    const delay = isInRange ? 0 : 200;
+    setTimeout(() => {
+      if (videoPlayerRef.current) {
+        videoPlayerRef.current.playVideo();
+      }
+      
+      // 设置定时器在结束时间暂停
+      const remainingDuration = (endTime - playFromTime) * 1000; // 转换为毫秒
+      if (remainingDuration > 0) {
+        setTimeout(() => {
+          if (videoPlayerRef.current) {
+            videoPlayerRef.current.pauseVideo();
+          }
+          setVideoSeekTime(endTime);
+          setCurrentPlayingClipId(null);
+        }, remainingDuration);
+      }
+    }, delay);
+  }, [isVideoPlaying, currentVideoTime]);
+
+  /**
+   * 处理视频播放状态变化
+   */
+  const handleVideoPlayStateChange = useCallback((isPlaying: boolean) => {
+    setIsVideoPlaying(isPlaying);
+  }, []);
 
   // 判断是否有激活的定位状态
   const isLocationMode = locationActiveClipId !== null;
+
+  /**
+   * 重置seekToTime以支持重复触发
+   */
+  useEffect(() => {
+    if (videoSeekTime !== undefined) {
+      const timer = setTimeout(() => {
+        setVideoSeekTime(undefined);
+      }, 500); // 500ms后重置
+      return () => clearTimeout(timer);
+    }
+  }, [videoSeekTime]);
+
+  /**
+   * 处理素材库选择按钮点击
+   */
+  const handleMaterialSelectClick = useCallback(() => {
+    setShowMaterialModal(true);
+  }, []);
+
+  /**
+   * 处理素材库选择
+   */
+  const handleMaterialSelect = useCallback((material: MaterialModel) => {
+    // 根据material中的materialID找到对应的MaterialLibItem
+    // 这里需要从本地缓存或API获取完整的MaterialLibItem信息
+    const materialLibItem: MaterialLibItem = {
+      _id: material.materialID,
+      name: material.name,
+      coverUrl: material.previewUrl || '',
+      url: material.url || '',
+      type: 'only', // 默认类型
+      nums: 0 // 默认数量
+    };
+    
+    setSelectedMaterial(materialLibItem);
+    setShowMaterialModal(false);
+    toast.success(`已选择素材：${material.name}`);
+  }, []);
+
+  /**
+   * 处理素材库弹窗关闭
+   */
+  const handleMaterialModalClose = useCallback(() => {
+    setShowMaterialModal(false);
+  }, []);
 
   if (loading) {
     return (
@@ -517,6 +669,7 @@ const VideoEditPage: React.FC = () => {
               setVideoSeekTime(undefined);
             }
           }}
+          onPlayStateChange={handleVideoPlayStateChange}
           ref={videoPlayerRef}
         />
       </div>
@@ -524,14 +677,16 @@ const VideoEditPage: React.FC = () => {
       {/* 视频切片列表 - 可滚动区域 */}
       <div className="clips-section">
         <div className="clips-header">
-          <h3>
-            视频切片
-            {isLocationMode && locationActiveIndex >= 0 && (
-              <span className="location-status">
-                （定位切片{locationActiveIndex + 1}的{locationActiveField === 'start' ? '开始' : '结束'}时间中）
-              </span>
-            )}
-          </h3>
+          <div className="material-select-entry" onClick={handleMaterialSelectClick}>
+            <div className="material-select-title">
+              {selectedMaterial ? selectedMaterial.name : '选择素材库'}
+            </div>
+            <div className="material-select-arrow">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </div>
+          </div>
           <div className="clips-header-right">
             <span className="clips-count">{clips.length} 个切片</span>
             <div className="reset-button" onClick={handleResetClick}>
@@ -548,10 +703,18 @@ const VideoEditPage: React.FC = () => {
           {clips.map((clip, index) => (
             <VideoClipItemComponent
               key={clip.id}
+              ref={(ref) => {
+                if (ref) {
+                  clipRefs.current.set(clip.id, ref);
+                } else {
+                  clipRefs.current.delete(clip.id);
+                }
+              }}
               clip={clip}
               index={index}
               isLocationActive={locationActiveClipId === clip.id}
               activeLocationField={locationActiveClipId === clip.id ? locationActiveField : null}
+              isPlaying={currentPlayingClipId === clip.id}
               onTitleChange={handleTitleChange}
               onTextChange={handleTextChange}
               onTimeChange={handleTimeChange}
@@ -560,10 +723,21 @@ const VideoEditPage: React.FC = () => {
               onLocationClick={handleLocationClick}
               onTimeFocus={handleTimeFocus}
               onEnterClip={handleEnterClip}
+              onPlayClip={handlePlayClip}
+              onDeleteClip={handleDeleteClip}
             />
           ))}
         </div>
       </div>
+      
+      {/* 素材库选择弹窗 */}
+      {showMaterialModal && (
+        <MaterialSelectModal
+          onClose={handleMaterialModalClose}
+          onSelect={handleMaterialSelect}
+          currentMaterialId={selectedMaterial?._id}
+        />
+      )}
     </div>
   );
 };

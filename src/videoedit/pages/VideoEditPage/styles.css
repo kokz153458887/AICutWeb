@@ -1,0 +1,266 @@
+/* 视频剪辑页面样式 */
+.video-edit-page {
+  height: 100vh;
+  background: linear-gradient(180deg, #0F0F23 0%, #1A1A2E 100%);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 页面头部 - 固定顶部 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.back-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+.submit-button {
+  padding: 6px 12px;
+  background: #007AFF;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  background: #0056CC;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+/* 视频区域 - 固定高度，不跟随滚动 */
+.video-section {
+  flex-shrink: 0;
+  padding: 12px 16px 0;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+/* 切片列表区域 - 可滚动 */
+.clips-section {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.01);
+  padding: 12px 16px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+.clips-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.clips-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+/* 切片头部右侧区域 */
+.clips-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 定位状态指示 */
+.location-status {
+  font-size: 11px;
+  color: rgba(0, 122, 255, 0.8);
+  font-weight: 400;
+  background: rgba(0, 122, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  animation: locationStatusPulse 2s infinite;
+}
+
+@keyframes locationStatusPulse {
+  0%, 100% {
+    background: rgba(0, 122, 255, 0.1);
+    border-color: rgba(0, 122, 255, 0.2);
+  }
+  50% {
+    background: rgba(0, 122, 255, 0.2);
+    border-color: rgba(0, 122, 255, 0.4);
+  }
+}
+
+.clips-count {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* 重置按钮样式 */
+.reset-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: 4px;
+  color: rgba(255, 59, 48, 0.8);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.reset-button:hover {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.4);
+  color: rgba(255, 59, 48, 1);
+  transform: scale(1.02);
+}
+
+.reset-button svg {
+  flex-shrink: 0;
+}
+
+.clips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 加载和错误状态 */
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.loading-text,
+.error-text {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.retry-button {
+  padding: 10px 20px;
+  background: #007AFF;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background: #0056CC;
+}
+
+/* 滚动条优化 */
+.clips-section::-webkit-scrollbar {
+  width: 4px;
+}
+
+.clips-section::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.clips-section::-webkit-scrollbar-thumb {
+  background: rgba(0, 214, 201, 0.3);
+  border-radius: 2px;
+}
+
+.clips-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 214, 201, 0.5);
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 480px) {
+  .page-header {
+    padding: 6px 12px;
+  }
+  
+  .page-title {
+    font-size: 14px;
+  }
+  
+  .video-section {
+    padding: 8px 12px 0;
+  }
+  
+  .clips-section {
+    padding: 8px 12px 12px;
+  }
+
+  .clips-header-right {
+    gap: 8px;
+  }
+
+  .location-status {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+
+  .reset-button {
+    padding: 3px 6px;
+    font-size: 10px;
+    gap: 2px;
+  }
+
+  .reset-button svg {
+    width: 12px;
+    height: 12px;
+  }
+} 

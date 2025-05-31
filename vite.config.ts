@@ -7,6 +7,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
     minify: 'esbuild',
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -16,12 +17,19 @@ export default defineConfig({
     }
   },
   server: {
+    sourcemapIgnoreList: false,
     proxy: {
       '/api': {
         target: getMockServerUrl(),
         changeOrigin: true,
       }
     }
+  },
+  css: {
+    devSourcemap: true
+  },
+  esbuild: {
+    sourcemap: true
   },
   optimizeDeps: {
     include: ['react', 'react-dom']

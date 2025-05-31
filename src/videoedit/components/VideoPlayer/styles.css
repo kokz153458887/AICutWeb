@@ -1,0 +1,301 @@
+/* 视频播放器样式 */
+.video-player-container {
+  width: 100%;
+  height: 300px;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.video-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* 视频封面 */
+.video-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.video-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.play-button:hover {
+  opacity: 1;
+}
+
+/* 暂停时的播放按钮 */
+.pause-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.pause-play-button {
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+
+.pause-play-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 定位模式指示器 */
+.location-mode-indicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+}
+
+.location-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 122, 255, 0.8);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  animation: locationPulse 2s infinite;
+}
+
+@keyframes locationPulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(0, 122, 255, 0.5);
+  }
+}
+
+/* 拖拽时间显示 */
+.drag-time-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.drag-time-display {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* 进度控制条 */
+.progress-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+  gap: 12px;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.progress-controls.location-mode {
+  background: linear-gradient(0deg, rgba(0, 122, 255, 0.2) 0%, transparent 100%);
+  border-top: 1px solid rgba(0, 122, 255, 0.3);
+}
+
+.current-time,
+.total-time {
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 55px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: color 0.3s ease;
+}
+
+.progress-controls.location-mode .current-time,
+.progress-controls.location-mode .total-time {
+  color: rgba(0, 122, 255, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  /* 移动端触摸优化 */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  position: relative;
+  transition: all 0.3s ease;
+  /* 移动端触摸优化 */
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.progress-controls.location-mode .progress-track {
+  background: rgba(0, 122, 255, 0.2);
+  height: 5px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #007AFF;
+  border-radius: 2px;
+  transition: width 0.1s ease;
+  /* 移动端触摸优化 */
+  pointer-events: none;
+}
+
+.progress-controls.location-mode .progress-fill {
+  background: rgba(0, 122, 255, 0.8);
+}
+
+.progress-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: #007AFF;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: left 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  /* 移动端触摸优化 */
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.progress-controls.location-mode .progress-thumb {
+  background: rgba(0, 122, 255, 1);
+  border-color: white;
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
+}
+
+.progress-thumb:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 480px) {
+  .video-player-container {
+    border-radius: 6px;
+  }
+  
+  .progress-controls {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .progress-bar {
+    height: 24px;
+    padding: 6px 0;
+  }
+  
+  .progress-track {
+    height: 5px;
+  }
+  
+  .progress-thumb {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .current-time,
+  .total-time {
+    font-size: 11px;
+    min-width: 50px;
+  }
+  
+  .drag-time-display {
+    font-size: 20px;
+    padding: 8px 12px;
+  }
+
+  .pause-play-button svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .location-mode-indicator {
+    top: 8px;
+    right: 8px;
+  }
+
+  .location-indicator {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+} 

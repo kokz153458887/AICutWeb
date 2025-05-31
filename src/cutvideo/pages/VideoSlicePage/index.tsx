@@ -280,8 +280,9 @@ const VideoSlicePage: React.FC = () => {
    */
   const handleItemClick = useCallback((item: VideoSliceItem) => {
     console.log('点击视频切片:', item);
-    // 移除刷新逻辑，只记录点击
-  }, []);
+    // 跳转到视频剪辑页面
+    navigate(`/video-edit/${item.id}`);
+  }, [navigate]);
 
   /**
    * 处理单个项目重试

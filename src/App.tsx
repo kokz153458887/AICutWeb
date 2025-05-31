@@ -11,6 +11,7 @@ import EditPage from './edit'
 import VideoListPage from './videolist'
 import VideoOperatePage from './operate/components/VideoOperatePage'
 import VideoSlicePage from './cutvideo/pages/VideoSlicePage'
+import VideoEditPage from './videoedit/pages/VideoEditPage'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 import Toast from './components/Toast'
@@ -54,12 +55,26 @@ const AppContainer: React.FC = () => {
     // 初始化设备信息收集
     initDeviceInfo();
 
+    // 调试信息输出 - 方便测试断点
+    console.log('App 组件已挂载，开始调试测试');
+    
     // 打印环境配置信息
-    console.log('当前环境配置：', {
+    const envConfig = {
       NODE_ENV: import.meta.env.VITE_NODE_ENV,
       API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
       API_MOCK: import.meta.env.VITE_API_MOCK
-    });
+    };
+    
+    console.log('当前环境配置：', envConfig);
+    
+    // 添加调试断点测试点
+    // debugger; // 这里会触发断点，方便测试调试功能
+    
+    // 测试调试日志
+    console.group('🔍 调试信息');
+    console.log('当前路由信息：', location);
+    console.log('当前时间戳：', new Date().toISOString());
+    console.groupEnd();
   }, []);
 
   return (
@@ -75,6 +90,8 @@ const AppContainer: React.FC = () => {
         <Route path="/edit" element={<EditPage />} />
         {/* 视频切片页路由 */}
         <Route path="/video-slice" element={<VideoSlicePage />} />
+        {/* 视频剪辑页路由 */}
+        <Route path="/video-edit/:id" element={<VideoEditPage />} />
         {/* 将 /videolist 路由移除，统一使用 tab 参数 */}
       </Routes>
       {debugConfig.showDebugConsole && <DebugConsole />}

@@ -5,6 +5,7 @@ export enum VideoSliceStatus {
   PARSING = 'parsing',     // 解析中
   PARSE_FAILED = 'parse_failed', // 解析失败
   PENDING = 'pending',     // 待录入
+  PROCESSING = 'processing', // 处理中
   RECORDED = 'recorded',   // 已录入
   ABANDONED = 'abandoned'  // 已废弃
 }
@@ -16,6 +17,7 @@ export const VideoSliceStatusLabels: Record<VideoSliceStatus, string> = {
   [VideoSliceStatus.PARSING]: '解析中',
   [VideoSliceStatus.PARSE_FAILED]: '解析失败',
   [VideoSliceStatus.PENDING]: '待录入',
+  [VideoSliceStatus.PROCESSING]: '处理中',
   [VideoSliceStatus.RECORDED]: '已录入',
   [VideoSliceStatus.ABANDONED]: '已废弃'
 };

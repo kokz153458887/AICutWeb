@@ -3,7 +3,7 @@
  * 支持文本编辑、时间调整和视频定位功能
  */
 import React, { useCallback, useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { VideoClipItem } from '../../types';
+import { VideoClipItem, MaterialFileStore } from '../../types';
 import { formatTime, parseTime } from '../../utils';
 import './styles.css';
 
@@ -18,9 +18,11 @@ interface VideoClipItemProps {
   isLocationActive: boolean;
   activeLocationField: 'start' | 'end' | null;
   isPlaying?: boolean; // 是否正在播放此切片
+  hasMaterial: boolean; // 是否已选择素材
+  materialFileStore: MaterialFileStore; // 素材库文件信息
   onTitleChange: (id: string, title: string) => void;
   onTextChange: (id: string, text: string) => void;
-  onTimeChange: (id: string, field: 'start' | 'end', value: string) => void;
+  onFolderChange: (id: string, folder: string) => void;
   onTimeInputCommit: (id: string, field: 'start' | 'end', value: string) => void;
   onTimeAdjust: (id: string, field: 'start' | 'end', delta: number) => void;
   onLocationClick: (id: string, field: 'start' | 'end') => void;
@@ -40,9 +42,11 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
   isLocationActive,
   activeLocationField,
   isPlaying,
+  hasMaterial,
+  materialFileStore,
   onTitleChange,
   onTextChange,
-  onTimeChange,
+  onFolderChange,
   onTimeInputCommit,
   onTimeAdjust,
   onLocationClick,
@@ -57,9 +61,95 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
   const [isEditingStart, setIsEditingStart] = useState(false);
   const [isEditingEnd, setIsEditingEnd] = useState(false);
   
+  // 文件夹和标题自动提示的状态
+  const [showFolderSuggestions, setShowFolderSuggestions] = useState(false);
+  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
+  const [folderInput, setFolderInput] = useState(clip.folder || '');
+  const [filteredFolders, setFilteredFolders] = useState<string[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<string[]>([]);
+  
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const folderSuggestionsRef = useRef<HTMLDivElement>(null);
+  const titleSuggestionsRef = useRef<HTMLDivElement>(null);
+  const isSelectingFolderRef = useRef<boolean>(false); // 标记是否正在选择文件夹
+
+  // 工具函数：去掉文件后缀
+  const removeFileExtension = (fileName: string) => {
+    const lastDotIndex = fileName.lastIndexOf('.');
+    return lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
+  };
+
+  // 工具函数：格式化播放时间
+  const formatDuration = (seconds: number) => {
+    if (seconds < 60) {
+      return `${Math.round(seconds)}s`;
+    } else {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.round(seconds % 60);
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+  };
+
+  // 工具函数：提取子文件夹名称
+  const extractSubdirectories = () => {
+    const subdirs = new Set<string>();
+    materialFileStore.directories.forEach(dir => {
+      // 分割路径，只取最后一级文件夹名
+      const parts = dir.split('/').filter(part => part.trim());
+      if (parts.length > 0) {
+        const subdir = parts[parts.length - 1];
+        if (subdir !== dir) { // 确保不是根文件夹
+          subdirs.add(subdir);
+        }
+      }
+    });
+    return Array.from(subdirs);
+  };
+
+  // 工具函数：模糊匹配和排序
+  const fuzzyMatchAndSort = (query: string, items: string[]) => {
+    if (!query.trim()) return items;
+    
+    const queryLower = query.toLowerCase();
+    const results: Array<{item: string, score: number}> = [];
+    
+    items.forEach(item => {
+      const itemLower = item.toLowerCase();
+      let score = 0;
+      
+      // startsWith 匹配，给更高分数
+      if (itemLower.startsWith(queryLower)) {
+        score = 100;
+      }
+      // 模糊匹配（包含所有字符）
+      else if (itemLower.includes(queryLower)) {
+        score = 50;
+      }
+      // 更复杂的模糊匹配
+      else {
+        let queryIndex = 0;
+        for (let i = 0; i < itemLower.length && queryIndex < queryLower.length; i++) {
+          if (itemLower[i] === queryLower[queryIndex]) {
+            queryIndex++;
+          }
+        }
+        if (queryIndex === queryLower.length) {
+          score = 25;
+        }
+      }
+      
+      if (score > 0) {
+        results.push({item, score});
+      }
+    });
+    
+    // 按分数排序，分数高的在前
+    return results.sort((a, b) => b.score - a.score).map(r => r.item);
+  };
 
   // 当clip的时间发生变化时，更新本地输入状态（仅在非编辑状态下）- 防抖优化
   useEffect(() => {
@@ -81,11 +171,145 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
   }, [clip.endTime, isEditingEnd]);
 
   /**
-   * 处理标题变化 - 优化，减少不必要的重新创建
+   * 处理文件夹输入变化
    */
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onTitleChange(clip.id, e.target.value);
-  }, [clip.id, onTitleChange]);
+  const handleFolderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFolderInput(value);
+    
+    // 获取子文件夹名称
+    const subdirectories = extractSubdirectories();
+    
+    // 过滤文件夹列表
+    if (value.trim()) {
+      const filtered = fuzzyMatchAndSort(value, subdirectories);
+      setFilteredFolders(filtered);
+    } else {
+      setFilteredFolders(subdirectories);
+    }
+    
+    // 只有在有子文件夹的情况下才显示提示
+    setShowFolderSuggestions(subdirectories.length > 0);
+  };
+
+  /**
+   * 处理文件夹输入聚焦
+   */
+  const handleFolderInputFocus = () => {
+    const subdirectories = extractSubdirectories();
+    setFilteredFolders(subdirectories);
+    // 只有在有子文件夹的情况下才显示提示
+    setShowFolderSuggestions(subdirectories.length > 0);
+  };
+
+  /**
+   * 处理文件夹输入失焦
+   */
+  const handleFolderInputBlur = () => {
+    // 延迟隐藏，以便处理点击选择
+    setTimeout(() => {
+      setShowFolderSuggestions(false);
+      // 只有在不是点击选择的情况下才触发onChange
+      if (!isSelectingFolderRef.current) {
+        console.log('handleFolderInputBlur', folderInput, " 不是点击选择 current", isSelectingFolderRef.current);
+
+        onFolderChange(clip.id, folderInput);
+      }
+    }, 200);
+  };
+
+  /**
+   * 处理文件夹选择
+   */
+  const handleFolderSelect = (folder: string) => {
+    isSelectingFolderRef.current = true; // 标记正在选择
+    setFolderInput(folder);
+    setShowFolderSuggestions(false);
+    onFolderChange(clip.id, folder);
+    console.log('handleFolderSelect', folder, " 点击选择");
+    
+    // 重置标记
+    setTimeout(() => {
+      isSelectingFolderRef.current = false;
+    }, 200);
+  };
+
+  /**
+   * 处理标题输入变化（增加自动提示）
+   */
+  const handleTitleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    onTitleChange(clip.id, value);
+    
+    // 获取所有文件名（去掉后缀）
+    const fileNames = Object.keys(materialFileStore.files);
+    
+    // 过滤文件列表，使用模糊匹配
+    if (value.trim()) {
+      const filtered = fuzzyMatchAndSort(value, fileNames);
+      setFilteredFiles(filtered);
+      setShowTitleSuggestions(filtered.length > 0);
+    } else {
+      setFilteredFiles(fileNames);
+      setShowTitleSuggestions(fileNames.length > 0);
+    }
+  }, [clip.id, onTitleChange, materialFileStore.files]);
+
+  /**
+   * 处理标题输入聚焦
+   */
+  const handleTitleInputFocus = () => {
+    const fileNames = Object.keys(materialFileStore.files);
+    if (fileNames.length > 0) {
+      setFilteredFiles(fileNames);
+      setShowTitleSuggestions(true);
+    }
+  };
+
+  /**
+   * 处理标题输入失焦
+   */
+  const handleTitleInputBlur = () => {
+    // 延迟隐藏，以便处理点击选择
+    setTimeout(() => {
+      setShowTitleSuggestions(false);
+    }, 200);
+  };
+
+  /**
+   * 处理标题文件选择
+   */
+  const handleTitleFileSelect = (fileName: string) => {
+    // 选择时去掉后缀
+    const nameWithoutExtension = removeFileExtension(fileName);
+    onTitleChange(clip.id, nameWithoutExtension);
+    setShowTitleSuggestions(false);
+  };
+
+  // 更新文件夹输入框的值
+  useEffect(() => {
+    setFolderInput(clip.folder || '');
+  }, [clip.folder]);
+
+  // 点击外部隐藏下拉框
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (folderSuggestionsRef.current && !folderSuggestionsRef.current.contains(event.target as Node) &&
+          folderInputRef.current && !folderInputRef.current.contains(event.target as Node)) {
+        setShowFolderSuggestions(false);
+      }
+      
+      if (titleSuggestionsRef.current && !titleSuggestionsRef.current.contains(event.target as Node) &&
+          titleInputRef.current && !titleInputRef.current.contains(event.target as Node)) {
+        setShowTitleSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   /**
    * 处理文本变化 - 优化，减少不必要的重新创建
@@ -157,7 +381,7 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
     
     try {
       // 尝试解析时间
-      const parsedTime = parseTime(inputValue);
+      parseTime(inputValue);
       // 如果解析成功，使用专门的提交方法来处理定位模式下的同步
       onTimeInputCommit(clip.id, field, inputValue);
     } catch (error) {
@@ -283,13 +507,74 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
               </svg>
             )}
           </div>
-          <input
-            type="text"
-            value={clip.title || ''}
-            onChange={handleTitleChange}
-            placeholder={clip.isDefault ? "默认切片" : `切片 ${index + 1}`}
-            className="title-input"
-          />
+          <div className="title-input-container">
+            <input
+              ref={titleInputRef}
+              type="text"
+              value={clip.title || ''}
+              onChange={handleTitleInputChange}
+              placeholder={clip.isDefault 
+                ? "默认切片" 
+                : (clip.text.length > 20 ? clip.text.substring(0, 20) + '...' : clip.text) || `切片 ${index + 1}`
+              }
+              className="title-input"
+              onFocus={handleTitleInputFocus}
+              onBlur={handleTitleInputBlur}
+            />
+            {/* 标题自动提示下拉框 */}
+            {showTitleSuggestions && filteredFiles.length > 0 && (
+              <div ref={titleSuggestionsRef} className="suggestions-dropdown">
+                {filteredFiles.slice(0, 10).map((fileName, idx) => (
+                  <div
+                    key={idx}
+                    className="suggestion-item"
+                    onClick={() => handleTitleFileSelect(fileName)}
+                  >
+                    <span className="file-name">{removeFileExtension(fileName)}</span>
+                    {materialFileStore.files[fileName] && materialFileStore.files[fileName].duration && (
+                      <span className="file-info">
+                        {formatDuration(materialFileStore.files[fileName].duration!)}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* 文件夹输入框 */}
+          {hasMaterial && (
+            <div className="folder-input-container">
+              <input
+                ref={folderInputRef}
+                type="text"
+                value={folderInput}
+                onChange={handleFolderInputChange}
+                onFocus={handleFolderInputFocus}
+                onBlur={handleFolderInputBlur}
+                placeholder="选择文件夹"
+                className="folder-input"
+              />
+              {/* 文件夹自动提示下拉框 */}
+              {showFolderSuggestions && (
+                <div ref={folderSuggestionsRef} className="suggestions-dropdown">
+                  {filteredFolders.slice(0, 10).map((folder, idx) => (
+                    <div
+                      key={idx}
+                      className="suggestion-item"
+                      onClick={() => handleFolderSelect(folder)}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="folder-icon">
+                        <path d="M10 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V8C22 6.9 21.1 6 20 6H12L10 4Z" fill="currentColor"/>
+                      </svg>
+                      <span>{folder}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
           <div className="delete-clip-btn" onClick={handleDeleteClick}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
               <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>

@@ -7,9 +7,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BackIcon } from '../../../components/icons';
 import VideoPlayer, { VideoPlayerRef } from '../../components/VideoPlayer';
 import VideoClipItemComponent, { VideoClipItemRef } from '../../components/VideoClipItem';
-import MaterialSelectModal from '../../../edit/components/select/MaterialSelectModal';
-import { getParseTaskDetail } from '../../api';
-import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo } from '../../types';
+import MaterialSelectModal from '../../../edit/components/meterialSelect/MaterialSelectModal';
+import ConfirmDialog from '../../../components/ConfirmDialog';
+import { getParseTaskDetail, addMaterialVideo } from '../../api';
+import { deleteTask } from '../../../cutvideo/api';
+import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFileItem, MaterialFileStore } from '../../types';
 import { MaterialLibItem, MaterialModel } from '../../../edit/api/types';
 import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, convertSpacedPositionToPurePosition, removePunctuationAndSpaces } from '../../utils';
 import { toast } from '../../../components/Toast';
@@ -49,10 +51,28 @@ const VideoEditPage: React.FC = () => {
   const [showMaterialModal, setShowMaterialModal] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialLibItem | null>(null);
   
+  // 素材库文件信息状态
+  const [materialFileStore, setMaterialFileStore] = useState<MaterialFileStore>({
+    files: {},
+    directories: []
+  });
+  
   // 定位状态
   const [locationActiveClipId, setLocationActiveClipId] = useState<string | null>(null);
   const [locationActiveField, setLocationActiveField] = useState<'start' | 'end' | null>(null);
   const [locationActiveIndex, setLocationActiveIndex] = useState<number>(-1);
+
+  // 去字幕选项状态
+  const [needRemoveSubtitle, setNeedRemoveSubtitle] = useState<boolean>(false);
+  
+  // 提交状态
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // 删除确认弹窗状态
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+
+  // 素材库记忆键
+  const getMaterialStorageKey = (taskId: string) => `selected_material_${taskId}`;
 
   /**
    * 创建默认切片 - 使用useMemo优化，只有taskData变化时才重新计算
@@ -62,9 +82,12 @@ const VideoEditPage: React.FC = () => {
     
     const text = taskData.text || '';
     if (text && taskData.video_info) {
+      // 设置默认标题为text内容的前20个字符
+      const defaultTitle = text.length > 20 ? text.substring(0, 20) + '...' : text;
+      
       return {
         id: generateId(),
-        title: '默认切片',
+        title: defaultTitle,
         text: text,
         startTime: 0,
         endTime: taskData.video_info.file_duration,
@@ -104,9 +127,12 @@ const VideoEditPage: React.FC = () => {
           // 初始化默认状态 - 直接使用获取的data创建默认切片
           const text = data.text || '';
           if (text && data.video_info) {
+            // 设置默认标题为text内容的前20个字符
+            const defaultTitle = text.length > 20 ? text.substring(0, 20) + '...' : text;
+            
             const defaultClip: VideoClipItem = {
               id: generateId(),
-              title: '默认切片',
+              title: defaultTitle,
               text: text,
               startTime: 0,
               endTime: data.video_info.file_duration,
@@ -115,6 +141,9 @@ const VideoEditPage: React.FC = () => {
             setClips([defaultClip]);
           }
         }
+        
+        // 恢复素材库选择
+        await loadMaterialSelection();
         
         setError(null);
       } catch (err) {
@@ -169,6 +198,52 @@ const VideoEditPage: React.FC = () => {
   };
 
   /**
+   * 清理切片名称中的非法字符
+   */
+  const cleanClipName = (name: string): string => {
+    return name.replace(/[\r\n\s\t\u00A0\u2000-\u200B\u2028\u2029]+/g, '').trim();
+  };
+
+  /**
+   * 检查切片名称是否有冲突
+   */
+  const checkClipNameConflicts = useCallback((clips: VideoClipItem[]): string[] => {
+    const conflicts: string[] = [];
+    const usedNames = new Set<string>();
+    
+    // 获取素材库中的文件名（去掉扩展名）
+    const materialFileNames = new Set<string>();
+    Object.keys(materialFileStore.files).forEach(fileName => {
+      const nameWithoutExt = fileName.replace(/\.[^/.]+$/, ''); // 去掉扩展名
+      const cleanedName = cleanClipName(nameWithoutExt);
+      if (cleanedName) {
+        materialFileNames.add(cleanedName);
+      }
+    });
+    
+    clips.forEach(clip => {
+      const originalName = clip.title || '';
+      const cleanedName = cleanClipName(originalName);
+      
+      if (cleanedName) {
+        // 检查与素材库文件名的冲突
+        if (materialFileNames.has(cleanedName)) {
+          conflicts.push(`"${originalName}" 与素材库文件冲突`);
+        }
+        
+        // 检查与已使用的切片名称的冲突
+        if (usedNames.has(cleanedName)) {
+          conflicts.push(`"${originalName}" 与其他切片重复`);
+        } else {
+          usedNames.add(cleanedName);
+        }
+      }
+    });
+    
+    return conflicts;
+  }, [materialFileStore.files]);
+
+  /**
    * 处理文本切片 - 在指定切片上进行切片操作
    */
   const handleTextClip = (clipId: string, position: number) => {
@@ -202,7 +277,7 @@ const VideoEditPage: React.FC = () => {
     // 创建新切片
     const newClip: VideoClipItem = {
       id: generateId(),
-      title: '',
+      title: textBeforeCursor.length > 20 ? textBeforeCursor.substring(0, 20) + '...' : textBeforeCursor,
       text: textBeforeCursor,
       startTime: timeRange.startTime,
       endTime: timeRange.endTime
@@ -216,15 +291,21 @@ const VideoEditPage: React.FC = () => {
       taskData.segments
     ).startTime;
     
+    // 为剩余文本设置新的标题
+    const remainingTitle = textAfterCursor.length > 20 
+      ? textAfterCursor.substring(0, 20) 
+      : textAfterCursor;
+    
     // 更新切片列表
     setClips(prevClips => {
       const newClips = [...prevClips];
       const currentIndex = newClips.findIndex(clip => clip.id === clipId);
       
       if (currentIndex !== -1) {
-        // 更新当前切片为剩余文本
+        // 更新当前切片为剩余文本，重新设置标题
         const updatedCurrentClip: VideoClipItem = {
           ...currentClip,
+          title: remainingTitle,
           text: textAfterCursor,
           startTime: remainingStartTime
         };
@@ -272,8 +353,55 @@ const VideoEditPage: React.FC = () => {
   /**
    * 处理提交按钮点击 - 无依赖，不需要useCallback
    */
-  const handleSubmitClick = () => {
-    toast.info('功能待开发');
+  const handleSubmitClick = async () => {
+    if (!taskData || !selectedMaterial) {
+      toast.error('请先选择素材库');
+      return;
+    }
+    
+    if (clips.length === 0) {
+      toast.error('请至少添加一个切片');
+      return;
+    }
+    
+    // 检查是否有空的切片标题
+    const hasEmptyTitle = clips.some(clip => !clip.title || !clip.title.trim());
+    if (hasEmptyTitle) {
+      toast.error('请为所有切片设置名称');
+      return;
+    }
+    
+    // 检查切片名称是否有冲突
+    const conflicts = checkClipNameConflicts(clips);
+    if (conflicts.length > 0) {
+      toast.error(conflicts.join('\n'));
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const result = await addMaterialVideo({
+        taskData,
+        clips,
+        selectedMaterial,
+        needRemoveSubtitle
+      });
+      
+      toast.success('提交成功！' + (result.message || ''));
+      
+      // 成功后回到上一页
+      navigate(-1);
+      
+      // 通知上一页刷新数据（通过广播事件）
+      window.dispatchEvent(new CustomEvent('refreshVideoSliceList'));
+      
+    } catch (error: any) {
+      console.error('提交失败:', error);
+      toast.error(error.message || '提交失败，请重试');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   /**
@@ -308,9 +436,12 @@ const VideoEditPage: React.FC = () => {
    * 处理标题变化 - 保留useCallback，因为会传递给子组件
    */
   const handleTitleChange = useCallback((clipId: string, title: string) => {
+    // 清理标题中的非法字符
+    const cleanedTitle = cleanClipName(title);
+    
     setClips(prevClips => 
       prevClips.map(clip => 
-        clip.id === clipId ? { ...clip, title } : clip
+        clip.id === clipId ? { ...clip, title: cleanedTitle } : clip
       )
     );
   }, []);
@@ -352,36 +483,31 @@ const VideoEditPage: React.FC = () => {
   }, [locationActiveClipId]);
 
   /**
-   * 处理切片手动输入时间完成 - 专门用于处理定位模式下的手动输入时间提交
+   * 处理切片时间输入提交（专门用于处理定位模式）
    */
   const handleTimeInputCommit = useCallback((clipId: string, field: 'start' | 'end', value: string) => {
     try {
-      const time = parseTime(value);
+      const newTime = parseTime(value);
       
-      // 更新切片时间
       setClips(prevClips => 
         prevClips.map(clip => 
           clip.id === clipId 
-            ? { ...clip, [field === 'start' ? 'startTime' : 'endTime']: time }
+            ? { ...clip, [field === 'start' ? 'startTime' : 'endTime']: newTime }
             : clip
         )
       );
       
-      // 如果是当前定位中的切片和字段，同步更新播放器时间
+      // 如果处于定位模式，并且是当前激活的切片，则跳转到视频对应时间
       if (locationActiveClipId === clipId && locationActiveField === field) {
-        setVideoSeekTime(time);
-      } else if (!locationActiveClipId) {
-        // 非定位模式下直接跳转
-        setVideoSeekTime(time);
+        setVideoSeekTime(newTime);
       }
-      
     } catch (error) {
-      console.warn('时间格式无效:', value);
+      console.error('时间解析失败:', error);
     }
   }, [locationActiveClipId, locationActiveField]);
 
   /**
-   * 处理时间微调 - 保留useCallback，因为会传递给子组件
+   * 处理时间微调
    */
   const handleTimeAdjust = useCallback((clipId: string, field: 'start' | 'end', delta: number) => {
     setClips(prevClips => 
@@ -390,7 +516,10 @@ const VideoEditPage: React.FC = () => {
           const currentTime = field === 'start' ? clip.startTime : clip.endTime;
           const newTime = Math.max(0, currentTime + delta);
           
-          setVideoSeekTime(newTime);
+          // 如果处于定位模式，并且是当前激活的切片，则跳转到视频对应时间
+          if (locationActiveClipId === clipId && locationActiveField === field) {
+            setVideoSeekTime(newTime);
+          }
           
           return { ...clip, [field === 'start' ? 'startTime' : 'endTime']: newTime };
         }
@@ -591,9 +720,65 @@ const VideoEditPage: React.FC = () => {
   }, []);
 
   /**
+   * 从素材库JSON文件中递归提取文件和文件夹信息
+   */
+  const extractFileInfo = (item: MaterialFileItem, parentPath: string = ''): void => {
+    if (item.type === 'file') {
+      // 存储文件信息
+      setMaterialFileStore(prev => ({
+        ...prev,
+        files: {
+          ...prev.files,
+          [item.name]: item
+        }
+      }));
+    } else if (item.type === 'directory') {
+      // 存储文件夹信息
+      const dirPath = parentPath ? `${parentPath}/${item.name}` : item.name;
+      setMaterialFileStore(prev => ({
+        ...prev,
+        directories: prev.directories.includes(dirPath) ? prev.directories : [...prev.directories, dirPath]
+      }));
+      
+      // 递归处理子项
+      if (item.children) {
+        item.children.forEach(child => extractFileInfo(child, dirPath));
+      }
+    }
+  };
+
+  /**
+   * 读取素材库文件信息
+   */
+  const loadMaterialFiles = async (materialUrl: string) => {
+    try {
+      const response = await fetch(materialUrl);
+      if (!response.ok) {
+        throw new Error('无法获取素材库文件信息');
+      }
+      
+      const materialData: MaterialFileItem = await response.json();
+      
+      // 重置文件存储
+      setMaterialFileStore({
+        files: {},
+        directories: []
+      });
+      
+      // 递归提取文件和文件夹信息
+      extractFileInfo(materialData);
+      
+      console.log('素材库文件信息加载完成:', materialData);
+    } catch (error) {
+      console.error('加载素材库文件信息失败:', error);
+      toast.error('加载素材库文件信息失败');
+    }
+  };
+
+  /**
    * 处理素材库选择
    */
-  const handleMaterialSelect = useCallback((material: MaterialModel) => {
+  const handleMaterialSelect = useCallback(async (material: MaterialModel) => {
     // 根据material中的materialID找到对应的MaterialLibItem
     // 这里需要从本地缓存或API获取完整的MaterialLibItem信息
     const materialLibItem: MaterialLibItem = {
@@ -601,13 +786,23 @@ const VideoEditPage: React.FC = () => {
       name: material.name,
       coverUrl: material.previewUrl || '',
       url: material.url || '',
-      type: 'only', // 默认类型
-      nums: 0 // 默认数量
+      type: material.type,
+      nums: material.nums || 0,
+      contentType: material.contentType,
+      contentSubtype: material.contentSubtype
     };
     
     setSelectedMaterial(materialLibItem);
     setShowMaterialModal(false);
     toast.success(`已选择素材：${material.name}`);
+    
+    // 保存素材库选择
+    saveMaterialSelection(materialLibItem);
+    
+    // 读取素材库文件信息
+    if (materialLibItem.url) {
+      await loadMaterialFiles(materialLibItem.url);
+    }
   }, []);
 
   /**
@@ -616,6 +811,108 @@ const VideoEditPage: React.FC = () => {
   const handleMaterialModalClose = useCallback(() => {
     setShowMaterialModal(false);
   }, []);
+
+  /**
+   * 处理切片文件夹变化
+   */
+  const handleFolderChange = useCallback((id: string, folder: string) => {
+    setClips(prevClips => {
+      const newClips = prevClips.map(clip => 
+        clip.id === id ? { ...clip, folder } : clip
+      );
+      // 立即保存状态，确保文件夹变化不会被覆盖
+      if (taskData?.id) {
+        const state: VideoEditState = {
+          text: '',
+          clips: newClips,
+          mode,
+          cursorPosition: 0
+        };
+        saveVideoEditState(taskData.id, state);
+      }
+      return newClips;
+    });
+  }, [taskData?.id, mode]);
+
+  /**
+   * 保存选中的素材库到本地存储
+   */
+  const saveMaterialSelection = (material: MaterialLibItem) => {
+    if (id) {
+      localStorage.setItem(getMaterialStorageKey(id), JSON.stringify(material));
+    }
+  };
+
+  /**
+   * 从本地存储恢复素材库选择
+   */
+  const loadMaterialSelection = async () => {
+    if (!id) return;
+    
+    try {
+      const savedMaterial = localStorage.getItem(getMaterialStorageKey(id));
+      if (savedMaterial) {
+        const material: MaterialLibItem = JSON.parse(savedMaterial);
+        setSelectedMaterial(material);
+        
+        // 重新加载文件信息
+        if (material.url) {
+          await loadMaterialFiles(material.url);
+        }
+      }
+    } catch (error) {
+      console.error('恢复素材库选择失败:', error);
+    }
+  };
+
+  /**
+   * 处理删除按钮点击
+   */
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  /**
+   * 确认删除任务
+   */
+  const handleConfirmDelete = async () => {
+    if (!taskData) return;
+    
+    setShowDeleteConfirm(false);
+    
+    try {
+      await deleteTask(taskData.id);
+      toast.success('删除成功');
+      
+      // 清理本地存储
+      if (id) {
+        try {
+          const key = `video_edit_state_${id}`;
+          localStorage.removeItem(key);
+          localStorage.removeItem(getMaterialStorageKey(id));
+        } catch (error) {
+          console.error('清理本地存储失败:', error);
+        }
+      }
+      
+      // 回到上一页
+      navigate(-1);
+      
+      // 通知上一页刷新数据
+      window.dispatchEvent(new CustomEvent('refreshVideoSliceList'));
+      
+    } catch (error: any) {
+      console.error('删除失败:', error);
+      toast.error(error.message || '删除失败，请重试');
+    }
+  };
+
+  /**
+   * 取消删除
+   */
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
 
   if (loading) {
     return (
@@ -648,8 +945,16 @@ const VideoEditPage: React.FC = () => {
           <BackIcon />
         </div>
         <span className="page-title">视频剪辑</span>
-        <div className="submit-button" onClick={handleSubmitClick}>
-          提交
+        <div className="header-actions">
+          <div className="delete-button" onClick={handleDeleteClick}>
+            删除
+          </div>
+          <div 
+            className={`submit-button ${isSubmitting ? 'submitting' : ''}`} 
+            onClick={isSubmitting ? undefined : handleSubmitClick}
+          >
+            {isSubmitting ? '提交中...' : '提交'}
+          </div>
         </div>
       </div>
       
@@ -687,6 +992,19 @@ const VideoEditPage: React.FC = () => {
               </svg>
             </div>
           </div>
+          
+          {/* 是否去字幕选项 */}
+          <div className="subtitle-remove-option">
+            <label className="subtitle-checkbox">
+              <input
+                type="checkbox"
+                checked={needRemoveSubtitle}
+                onChange={(e) => setNeedRemoveSubtitle(e.target.checked)}
+              />
+              <span className="checkbox-label">去字幕</span>
+            </label>
+          </div>
+          
           <div className="clips-header-right">
             <span className="clips-count">{clips.length} 个切片</span>
             <div className="reset-button" onClick={handleResetClick}>
@@ -715,9 +1033,11 @@ const VideoEditPage: React.FC = () => {
               isLocationActive={locationActiveClipId === clip.id}
               activeLocationField={locationActiveClipId === clip.id ? locationActiveField : null}
               isPlaying={currentPlayingClipId === clip.id}
+              hasMaterial={!!selectedMaterial}
+              materialFileStore={materialFileStore}
               onTitleChange={handleTitleChange}
               onTextChange={handleTextChange}
-              onTimeChange={handleTimeChange}
+              onFolderChange={handleFolderChange}
               onTimeInputCommit={handleTimeInputCommit}
               onTimeAdjust={handleTimeAdjust}
               onLocationClick={handleLocationClick}
@@ -738,6 +1058,18 @@ const VideoEditPage: React.FC = () => {
           currentMaterialId={selectedMaterial?._id}
         />
       )}
+
+      {/* 删除确认弹窗 */}
+      <ConfirmDialog
+        visible={showDeleteConfirm}
+        title="确认删除"
+        message="确定要删除这个任务吗？删除后无法恢复，请谨慎操作。"
+        confirmText="删除"
+        cancelText="取消"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };

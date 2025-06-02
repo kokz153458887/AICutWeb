@@ -66,6 +66,16 @@ const VideoSlicePage: React.FC = () => {
         allItems = response.result;
         totalCount = response.total;
         totalPages = response.totalPages;
+      } else if (activeFilter === VideoSliceFilter.PENDING) {
+        // "待录入"tab使用statuses参数查询多个状态
+        const response = await getParseList({
+          statuses: ['processing', 'parsing', 'pending'],
+          page_size: PAGE_SIZE,
+          page_num: page
+        });
+        allItems = response.result;
+        totalCount = response.total;
+        totalPages = response.totalPages;
       } else {
         // 其他tab按原逻辑处理
         const status = filterToStatus(activeFilter);
@@ -74,23 +84,7 @@ const VideoSlicePage: React.FC = () => {
           page_size: PAGE_SIZE,
           page_num: page
         });
-
-        // 对于"待录入"tab，同时获取解析中的任务
         allItems = response.result;
-        if (activeFilter === VideoSliceFilter.PENDING) {
-          try {
-            const parsingResponse = await getParseList({
-              status: 'parsing',
-              page_size: PAGE_SIZE,
-              page_num: page
-            });
-            // 将解析中的任务排在最前面
-            allItems = [...parsingResponse.result, ...response.result];
-          } catch (err) {
-            console.error('获取解析中任务失败:', err);
-          }
-        }
-        
         totalCount = response.total;
         totalPages = response.totalPages;
       }
@@ -148,6 +142,16 @@ const VideoSlicePage: React.FC = () => {
         allItems = response.result;
         totalCount = response.total;
         totalPages = response.totalPages;
+      } else if (activeFilter === VideoSliceFilter.PENDING) {
+        // "待录入"tab使用statuses参数查询多个状态
+        const response = await getParseList({
+          statuses: ['parsing', 'processing', 'pending'],
+          page_size: PAGE_SIZE,
+          page_num: 1
+        });
+        allItems = response.result;
+        totalCount = response.total;
+        totalPages = response.totalPages;
       } else {
         // 其他tab按原逻辑处理
         const status = filterToStatus(activeFilter);
@@ -156,23 +160,7 @@ const VideoSlicePage: React.FC = () => {
           page_size: PAGE_SIZE,
           page_num: 1
         });
-
-        // 对于"待录入"tab，同时获取解析中的任务
         allItems = response.result;
-        if (activeFilter === VideoSliceFilter.PENDING) {
-          try {
-            const parsingResponse = await getParseList({
-              status: 'parsing',
-              page_size: PAGE_SIZE,
-              page_num: 1
-            });
-            // 将解析中的任务排在最前面
-            allItems = [...parsingResponse.result, ...response.result];
-          } catch (err) {
-            console.error('获取解析中任务失败:', err);
-          }
-        }
-        
         totalCount = response.total;
         totalPages = response.totalPages;
       }
@@ -195,6 +183,25 @@ const VideoSlicePage: React.FC = () => {
     // 每次切换tab都重新加载数据
     loadData(1, false);
   }, [activeFilter, loadData]);
+
+  // 监听来自编辑页的刷新事件
+  useEffect(() => {
+    const handleRefreshEvent = () => {
+      // 切换到"待录入"tab（如果不在的话）
+      if (activeFilter !== VideoSliceFilter.PENDING) {
+        setActiveFilter(VideoSliceFilter.PENDING);
+      } else {
+        // 如果已经在"待录入"tab，直接刷新
+        refreshCurrentTab();
+      }
+    };
+
+    window.addEventListener('refreshVideoSliceList', handleRefreshEvent);
+    
+    return () => {
+      window.removeEventListener('refreshVideoSliceList', handleRefreshEvent);
+    };
+  }, [activeFilter, refreshCurrentTab]);
 
   /**
    * 处理返回按钮点击

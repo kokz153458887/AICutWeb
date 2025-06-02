@@ -48,6 +48,32 @@
   letter-spacing: 0.5px;
 }
 
+/* 头部按钮区域 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delete-button {
+  padding: 6px 12px;
+  background: rgba(255, 59, 48, 0.1);
+  color: rgba(255, 59, 48, 0.9);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-button:hover {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.4);
+  color: rgba(255, 59, 48, 1);
+  transform: translateY(-1px);
+}
+
 .submit-button {
   padding: 6px 12px;
   background: #007AFF;
@@ -64,6 +90,13 @@
   background: #0056CC;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+.submit-button.submitting {
+  background: rgba(0, 122, 255, 0.5);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* 视频区域 - 固定高度，不跟随滚动 */
@@ -90,6 +123,8 @@
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* 切片头部右侧区域 */
@@ -220,17 +255,32 @@
   .page-header {
     padding: 6px 12px;
   }
-  
+
   .page-title {
     font-size: 14px;
   }
-  
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .delete-button,
+  .submit-button {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
   .video-section {
     padding: 8px 12px 0;
   }
-  
+
   .clips-section {
     padding: 8px 12px 12px;
+  }
+
+  .clips-header {
+    margin-bottom: 8px;
+    gap: 8px;
   }
 
   .clips-header-right {
@@ -238,17 +288,24 @@
   }
 
   .location-status {
-    font-size: 10px;
-    padding: 1px 4px;
+    display: none; /* 移动端隐藏定位状态 */
   }
 
   .reset-button {
     padding: 3px 6px;
     font-size: 10px;
-    gap: 2px;
   }
 
   .reset-button svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .subtitle-checkbox {
+    font-size: 11px;
+  }
+
+  .subtitle-checkbox input[type="checkbox"] {
     width: 12px;
     height: 12px;
   }
@@ -265,7 +322,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   flex: 1;
-  max-width: 200px;
+  max-width: 150px;
 }
 
 .material-select-entry:hover {
@@ -289,4 +346,58 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+/* 去字幕选项样式 */
+.subtitle-remove-option {
+  display: flex;
+  align-items: center;
+}
+
+.subtitle-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.2s ease;
+}
+
+.subtitle-checkbox:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.subtitle-checkbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  margin: 0;
+  appearance: none;
+  transition: all 0.2s ease;
+}
+
+.subtitle-checkbox input[type="checkbox"]:checked {
+  background: #007AFF;
+  border-color: #007AFF;
+}
+
+.subtitle-checkbox input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.checkbox-label {
+  font-weight: 500;
+  user-select: none;
 } 

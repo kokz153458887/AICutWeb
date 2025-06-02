@@ -60,6 +60,8 @@ const VideoSliceCard: React.FC<VideoSliceCardProps> = ({ item, onClick, onRetry 
     switch (item.status) {
       case 'parsing':
         return 'status-parsing';
+      case 'processing':
+        return 'status-processing';
       case 'parse_failed':
         return 'status-failed';
       case 'pending':
@@ -82,26 +84,8 @@ const VideoSliceCard: React.FC<VideoSliceCardProps> = ({ item, onClick, onRetry 
    * 渲染图片内容
    */
   const renderImageContent = () => {
-    // 解析中状态
-    if (item.status === 'parsing') {
-      return (
-        <div className="status-image parsing-image">
-          <div className="status-text">解析中，稍后刷新查看解析结果</div>
-        </div>
-      );
-    }
-
-    // 解析失败状态
-    if (item.status === 'parse_failed') {
-      return (
-        <div className="status-image failed-image">
-          <div className="status-text">解析失败</div>
-        </div>
-      );
-    }
-
     // 有封面图且未加载错误
-    if (shouldShowImage) {
+    if (item.cover) {
       return (
         <>
           {/* 图片加载前的占位图 */}
@@ -121,6 +105,32 @@ const VideoSliceCard: React.FC<VideoSliceCardProps> = ({ item, onClick, onRetry 
       );
     }
 
+    // 解析中状态
+    if (item.status === 'parsing') {
+      return (
+        <div className="status-image parsing-image">
+          <div className="status-text">解析中，稍后刷新查看解析结果</div>
+        </div>
+      );
+    }
+
+    // 处理中状态
+    if (item.status === 'processing') {
+      return (
+        <div className="status-image processing-image">
+          <div className="status-text">处理中，稍后刷新查看处理结果</div>
+        </div>
+      );
+    }
+
+    // 解析失败状态
+    if (item.status === 'parse_failed') {
+      return (
+        <div className="status-image failed-image">
+          <div className="status-text">解析失败</div>
+        </div>
+      );
+    }
     // 默认兜底图片
     return (
       <div className="status-image default-image">

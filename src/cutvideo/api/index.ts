@@ -19,6 +19,8 @@ export enum ParseTaskStatus {
   PARSING = 'parsing',
   PARSE_FAILED = 'parse_failed', 
   PENDING = 'pending',
+  PROCESSING = 'processing',
+  PROCESS_FAILED = 'process_failed',
   RECORDED = 'recorded',
   ABANDONED = 'abandoned'
 }
@@ -61,6 +63,7 @@ export interface ParseRequest {
 // 列表查询参数
 export interface ListQueryParams {
   status?: string;
+  statuses?: string[];
   page_size?: number;
   page_num?: number;
 }
@@ -103,6 +106,9 @@ export const getParseList = async (params: ListQueryParams): Promise<ParseListRe
     
     if (params.status) {
       queryParams.status = params.status;
+    }
+    if (params.statuses && params.statuses.length > 0) {
+      queryParams.statuses = params.statuses.join(',');
     }
     if (params.page_size) {
       queryParams.page_size = params.page_size.toString();

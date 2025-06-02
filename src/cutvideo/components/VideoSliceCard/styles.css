@@ -112,6 +112,11 @@
   background: linear-gradient(135deg, #1a2332, #2a3441);
 }
 
+/* 处理中状态 */
+.processing-image {
+  background: linear-gradient(135deg, #2d1b69, #3e2378);
+}
+
 /* 解析失败状态 */
 .failed-image {
   background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
@@ -177,6 +182,11 @@
 .status-parsing {
   background: linear-gradient(135deg, #00d6c9, #00b8ab);
   border-color: #00d6c9;
+}
+
+.status-processing {
+  background: linear-gradient(135deg, #8e44ad, #9b59b6);
+  border-color: #8e44ad;
 }
 
 .status-failed {

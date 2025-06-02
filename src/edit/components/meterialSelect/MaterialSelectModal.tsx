@@ -118,7 +118,11 @@ const MaterialSelectModal: React.FC<MaterialSelectModalProps> = ({
         name: selectedMaterial.name,
         materialID: selectedMaterial._id,
         previewUrl: selectedMaterial.previewUrl || '',
-        url: selectedMaterial.url || ''
+        url: selectedMaterial.url || '',
+        type: selectedMaterial.type || '',
+        contentSubtype: selectedMaterial.contentSubtype || '',
+        contentType: selectedMaterial.contentType || '',
+        nums: selectedMaterial.nums || 0
       });
     }
   };

@@ -127,7 +127,11 @@ export interface MaterialModel {
   materialID: string;
   previewUrl: string; // 视频预览URL
   previewImage?: string; // 保留旧属性以保持兼容性
+  nums?: number;
   url?: string; // 素材URL
+  type?: string;
+  contentSubtype?: string;
+  contentType?: string;
 }
 
 // 用户偏好设置
@@ -199,6 +203,8 @@ export interface MaterialLibItem {
   diskSize?: number;
   diskSizeMB?: number;
   updateTime?: string;
+  contentSubtype?: string;
+  contentType?: string;
   createdAt?: string;
   updatedAt?: string;
 }

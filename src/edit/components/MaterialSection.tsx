@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import ConfigItem from './ConfigItem';
-import MaterialSelectModal from './select/MaterialSelectModal';
+import MaterialSelectModal from './meterialSelect/MaterialSelectModal';
 import { MaterialModel } from '../api/types';
 
 interface MaterialSectionProps {

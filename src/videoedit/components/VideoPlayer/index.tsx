@@ -108,6 +108,32 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       videoRef.current.currentTime = 0;
       setCurrentTime(0);
       setShowPauseButton(true);
+
+       // Safari兼容性：强制渲染第一帧
+       const userAgent = navigator.userAgent;
+       const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+       
+       if (isSafari && videoRef.current.currentTime === 0) {
+         // 短暂播放然后暂停，强制Safari渲染第一帧
+         const forceRender = async () => {
+           try {
+             if (videoRef.current) {
+               videoRef.current.currentTime = 0.1;
+               await videoRef.current.play();
+               setTimeout(() => {
+                 if (videoRef.current) {
+                   videoRef.current.pause();
+                   videoRef.current.currentTime = 0;
+                 }
+               }, 50);
+             }
+           } catch (error) {
+             console.warn('Safari first frame render failed:', error);
+           }
+         };
+         
+         forceRender();
+       }
     }
   };
 

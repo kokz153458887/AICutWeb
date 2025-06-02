@@ -40,11 +40,12 @@ export interface SegmentInfo {
  */
 export interface VideoClipItem {
   id: string;
-  title?: string; // 切片标题
+  title: string;
   text: string;
   startTime: number;
   endTime: number;
   isDefault?: boolean; // 是否为默认切片
+  folder?: string; // 文件夹名称
 }
 
 /**
@@ -70,4 +71,32 @@ export interface VideoEditState {
   clips: VideoClipItem[]; // 切片内容
   mode: 'clip' | 'edit'; // 切片/编辑模式
   cursorPosition: number; // 光标位置
+}
+
+/**
+ * 素材库文件项信息
+ */
+export interface MaterialFileItem {
+  name: string;
+  type: 'file' | 'directory';
+  size?: number;
+  size_formatted?: string;
+  duration?: number;
+  duration_formatted?: string;
+  width?: number;
+  height?: number;
+  codec?: string;
+  absolute_path?: string;
+  relative_path?: string;
+  preview_image?: string;
+  create_time?: string;
+  children?: MaterialFileItem[];
+}
+
+/**
+ * 素材库文件信息存储
+ */
+export interface MaterialFileStore {
+  files: Record<string, MaterialFileItem>; // 所有文件的字典，key为文件名
+  directories: string[]; // 所有文件夹名称
 } 

@@ -18,28 +18,6 @@ export const extractUrlsFromText = (text: string): string[] => {
 };
 
 /**
- * 将ParseTaskStatus转换为VideoSliceStatus
- * @param status 解析任务状态
- * @returns 视频切片状态
- */
-const convertStatus = (status: ParseTaskStatus): VideoSliceStatus => {
-  switch (status) {
-    case ParseTaskStatus.PARSING:
-      return VideoSliceStatus.PARSING;
-    case ParseTaskStatus.PARSE_FAILED:
-      return VideoSliceStatus.PARSE_FAILED;
-    case ParseTaskStatus.PENDING:
-      return VideoSliceStatus.PENDING;
-    case ParseTaskStatus.RECORDED:
-      return VideoSliceStatus.RECORDED;
-    case ParseTaskStatus.ABANDONED:
-      return VideoSliceStatus.ABANDONED;
-    default:
-      return VideoSliceStatus.PENDING;
-  }
-};
-
-/**
  * 将ParseTask转换为VideoSliceItem
  * @param task 解析任务数据
  * @returns 视频切片项数据
@@ -47,17 +25,46 @@ const convertStatus = (status: ParseTaskStatus): VideoSliceStatus => {
 export const transformTaskToSliceItem = (task: ParseTask): VideoSliceItem => {
   // 根据状态决定显示的文本
   let displayText = '';
-  if (task.status === ParseTaskStatus.PENDING && task.text) {
+  if (task.text) {
     displayText = task.text;
   } else {
     displayText = task.parse_url;
+  }
+
+  // 直接使用 ParseTaskStatus，不再转换
+  let status: VideoSliceStatus;
+  switch (task.status) {
+    case ParseTaskStatus.PARSING:
+      status = VideoSliceStatus.PARSING;
+      break;
+    case ParseTaskStatus.PARSE_FAILED:
+      status = VideoSliceStatus.PARSE_FAILED;
+      break;
+    case ParseTaskStatus.PENDING:
+      status = VideoSliceStatus.PENDING;
+      break;
+    case ParseTaskStatus.PROCESSING:
+      status = VideoSliceStatus.PROCESSING; // 处理中状态
+      break;
+    case ParseTaskStatus.PROCESS_FAILED:
+      status = VideoSliceStatus.PARSE_FAILED; // 处理失败视为解析失败状态
+      break;
+    case ParseTaskStatus.RECORDED:
+      status = VideoSliceStatus.RECORDED;
+      break;
+    case ParseTaskStatus.ABANDONED:
+      status = VideoSliceStatus.ABANDONED;
+      break;
+    default:
+      status = VideoSliceStatus.PENDING;
+      break;
   }
 
   return {
     id: task.id,
     cover: task.preview_image || '', // 如果没有预览图，使用空字符串
     text: displayText,
-    status: convertStatus(task.status),
+    status: status,
     createTime: task.createTime,
     updateTime: task.updateAt,
     // 扩展字段，用于存储额外信息

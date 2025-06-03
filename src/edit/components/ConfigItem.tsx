@@ -12,7 +12,7 @@ interface ConfigItemProps {
   value: string;
   subValue?: string;
   tag?: string;
-  onClick: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   // 自定义渲染函数
   renderCustomValue?: () => React.ReactNode;
   // 音量控制相关属性
@@ -33,6 +33,7 @@ interface ConfigItemProps {
   hasVideoPreview?: boolean;
   previewVideoUrl?: string;
   onVideoPreviewClick?: () => void;
+  onVolumeClick?: () => void;
 }
 
 /**
@@ -67,6 +68,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   const sliderRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const videoPreviewRef = useRef<HTMLDivElement>(null);
+  const configItemRef = useRef<HTMLDivElement>(null);
   const [volumeBtnPosition, setVolumeBtnPosition] = useState({ top: 0, left: 0, width: 0 });
 
   /**
@@ -85,7 +87,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
     // 获取按钮位置信息
     if (e.currentTarget) {
       const rect = e.currentTarget.getBoundingClientRect();
-      const configItem = (e.currentTarget as HTMLElement).closest('.config-item');
+      const configItem = configItemRef.current;
       let sliderWidth = configItem ? configItem.getBoundingClientRect().width : 320;
       
       setVolumeBtnPosition({
@@ -191,6 +193,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
    */
   const handleVolumeSliderClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 阻止事件冒泡，避免触发整个配置项的点击
+    e.preventDefault(); // 阻止默认行为
   };
 
   /**
@@ -198,6 +201,14 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
    */
   const handleTouchMove = (e: React.TouchEvent) => {
     e.preventDefault(); // 阻止默认的触摸行为（页面滚动）
+    e.stopPropagation();
+  };
+
+  /**
+   * 处理滑块触摸开始事件
+   */
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
     e.stopPropagation();
   };
 
@@ -245,7 +256,7 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
   }, []);
 
   return (
-    <div className="config-item" onClick={onClick}>
+    <div className="config-item" onClick={(e: React.MouseEvent) => onClick?.(e)} ref={configItemRef}>
       <div className="config-title" style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none', userSelect: 'none' }}>{title}</div>
       <div className="config-value-container" style={{ position: 'relative' }}>
         <div className="config-value-wrapper">
@@ -289,11 +300,13 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
                 ref={sliderRef}
                 onClick={handleVolumeSliderClick}
                 onTouchMove={handleTouchMove}
+                onTouchStart={handleTouchStart}
                 style={{
+                  position: 'fixed',
                   top: `${volumeBtnPosition.top}px`,
                   left: `${volumeBtnPosition.left}px`,
-                  position: 'fixed',
-                  width: `${volumeBtnPosition.width}px`
+                  width: `${volumeBtnPosition.width}px`,
+                  zIndex: 1000
                 }}
               >
                 <input
@@ -306,8 +319,12 @@ const ConfigItem: React.FC<ConfigItemProps> = ({
                   onMouseUp={handleVolumeMouseUp}
                   onTouchEnd={handleVolumeMouseUp}
                   onTouchMove={handleTouchMove}
+                  onTouchStart={handleTouchStart}
                   className="volume-slider"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
                   style={{ flex: 1 }}
                 />
               </div>

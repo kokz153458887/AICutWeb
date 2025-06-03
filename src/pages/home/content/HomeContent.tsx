@@ -112,7 +112,11 @@ class HomeContentClass extends React.Component<HomeContentProps, HomeContentStat
               width: '100%',
               height: '100%',
               flex: 1,
-              overflow: 'hidden'
+              overflow: 'hidden',
+              // iOS Safari 兼容性修复
+              WebkitTransform: 'translateZ(0)',
+              transform: 'translateZ(0)',
+              position: 'relative'
             }}
           >
             {tabComponent}
@@ -122,7 +126,18 @@ class HomeContentClass extends React.Component<HomeContentProps, HomeContentStat
     });
     
     return (
-      <div className="home-content" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 50px)' }}>
+      <div className="home-content" style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: 'calc(100vh - 50px)',
+        // iOS Safari 兼容性修复
+        WebkitOverflowScrolling: 'touch',
+        WebkitTransform: 'translateZ(0)',
+        transform: 'translateZ(0)',
+        willChange: 'transform',
+        position: 'relative',
+        minHeight: '500px' // 确保在iOS上有最小高度
+      }}>
         {tabContents}
       </div>
     );

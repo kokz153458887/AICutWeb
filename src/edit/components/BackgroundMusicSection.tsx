@@ -168,7 +168,7 @@ const BackgroundMusicSection: React.FC<BackgroundMusicSectionProps> = ({
       onPlayClick={handlePlayClick}
       isPlaying={isPlaying}
       maxVolume={5}
-      volumeStep={0.1}
+      volumeStep={0.01}
     />
   );
 };

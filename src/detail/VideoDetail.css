@@ -1,30 +1,30 @@
 /* 视频播放页样式 */
 .video-detail-container {
   width: 100%;
-  min-height: 100vh;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: #000;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
   z-index: 1000;
 }
 
 /* 顶部操作区样式 */
 .video-top-bar {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  height: 56px;
   padding: 15px;
   display: flex;
   justify-content: space-between;
   z-index: 20;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
 }
 
 /* 返回按钮样式 */
@@ -47,11 +47,28 @@
   cursor: pointer;
 }
 
+/* 主要内容区域包装器 */
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 60px; /* 为底部栏留出空间 */
+}
+
+/* 隐藏滚动条但保持滚动功能 */
+.content-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.content-wrapper {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /* 视频容器样式 */
 .video-container {
   width: 100%;
   position: relative;
-  overflow: hidden;
   background-color: #000;
 }
 
@@ -61,6 +78,14 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  z-index: 1;
+  /* iOS Safari兼容性修复 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* 视频封面样式 */
@@ -70,8 +95,15 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: #000;
+  z-index: 2;
+  cursor: pointer; /* 增加点击反馈 */
+  /* 触摸优化 */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .video-cover img {
@@ -96,19 +128,7 @@
 
 /* 视频内容区域 */
 .video-content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   background-color: #000;
-  /* 隐藏滚动条 */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  /* 为底部操作栏预留空间 */
-  padding-bottom: calc(60px + env(safe-area-inset-bottom));
-}
-
-.video-content::-webkit-scrollbar {
-  display: none;
 }
 
 /* 用户信息区域样式 */
@@ -195,6 +215,9 @@
 
 /* 底部操作栏样式 */
 .video-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 60px;
   display: flex;
@@ -202,10 +225,7 @@
   align-items: center;
   padding: 0 16px;
   background: linear-gradient(to top, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0.8) 100%);
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 10;
+  z-index: 20;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -258,11 +278,29 @@
 
 /* 适配iPhone底部安全区域 */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .video-content {
+  .content-wrapper {
     padding-bottom: calc(60px + env(safe-area-inset-bottom));
   }
   
   .video-bottom-bar {
     height: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+
+/* iOS专用样式 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS设备上的样式 */
+  .video-player {
+    position: absolute !important;
+    z-index: 1 !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* 禁用iOS原生视频控制按钮 */
+  video::-webkit-media-controls {
+    display: none !important;
   }
 } 

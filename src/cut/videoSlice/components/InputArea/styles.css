@@ -1,0 +1,147 @@
+/* 输入区域容器 */
+.input-area {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 10px;
+  padding-bottom: 0px;
+  background-color: #141414;
+}
+
+/* 输入容器 */
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* 输入框 */
+.input-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 16px 16px 60px 16px; /* 底部留出空间给按钮 */
+  border: 2px solid #333;
+  border-radius: 12px;
+  background-color: #1a1a1a;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.input-textarea:focus {
+  border-color: #00d6c9;
+  box-shadow: 0 0 0 3px rgba(0, 214, 201, 0.1);
+}
+
+.input-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 左下角按钮容器 */
+.input-actions-left {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+/* 右下角按钮容器 */
+.input-actions-right {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px; /* 增加间距避免误触 */
+}
+
+/* 功能按钮基础样式 */
+.action-button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background-color: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.action-button:active {
+  transform: scale(0.95);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 剪切板按钮特殊样式 */
+.clipboard-button {
+  background-color: rgba(0, 214, 201, 0.15);
+}
+
+.clipboard-button:hover {
+  background-color: rgba(0, 214, 201, 0.25);
+}
+
+/* 清除按钮特殊样式 */
+.clear-button {
+  width: 24px; /* 缩小清除按钮 */
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.clear-button:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px) scale(1.05);
+}
+
+/* 解析按钮 */
+.parse-button {
+  height: 32px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #00d6c9, #00b8ab);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.parse-button:hover {
+  background: linear-gradient(135deg, #00b8ab, #009688);
+  transform: translateY(-1px);
+}
+
+.parse-button:active {
+  transform: scale(0.98);
+}
+
+.parse-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+.parse-button:disabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: none;
+}

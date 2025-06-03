@@ -2,20 +2,25 @@
  * 视频生成配置编辑页组件
  * 负责整合各个配置项，提供用户编辑视频生成参数的界面
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './EditPage.css';
 import TextInputSection from './components/TextInputSection';
 import TitleInputSection from './components/TitleInputSection';
+import AutoGenerateSection from './components/AutoGenerateSection';
 import VideoStyleSection from './components/VideoStyleSection';
 import BackgroundMusicSection from './components/BackgroundMusicSection';
 import BackgroundImageSection from './components/BackgroundImageSection';
 import MaterialSection from './components/MaterialSection';
 import BackupVideoSection from './components/BackupVideoSection';
+import MusicSelectModal from './components/musicSelect/MusicSelectModal';
 import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
-import { EditService, VideoEditConfig } from './api';
+import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
+import { MusicLibItem, StyleModel, SplitModel } from './api/types';
+import { VoiceInfo } from './api/VoiceService';
+
 
 /**
  * 编辑页主组件
@@ -23,6 +28,16 @@ import { EditService, VideoEditConfig } from './api';
 const EditPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // 获取所有URL参数
+  const urlParams = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const params: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    return params;
+  }, [location.search]);
   
   // 基本状态
   const [text, setText] = useState<string>('');
@@ -35,23 +50,30 @@ const EditPage: React.FC = () => {
   const [backupCount, setBackupCount] = useState<number>(1);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
-  const [speaker, setSpeaker] = useState({ name: '龙小明', tag: '温柔' });
+  const [speaker, setSpeaker] = useState<{ name: string; tag: string }>({ name: '选择说话人', tag: '' });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // 防止重复提交
+  const [showMusicModal, setShowMusicModal] = useState<boolean>(false);
+  const [selectedVoice, setSelectedVoice] = useState<VoiceInfo | null>(null);
+  const [defaultTextType, setDefaultTextType] = useState<string>('');
+  const [splitModel, setSplitModel] = useState<SplitModel>({
+    splitType: 'strict',
+    splitParams: { min_length: 20, max_length: 30 }
+  });
   
   // 数据源状态
   const [configData, setConfigData] = useState<VideoEditConfig | null>(null);
   
   // 获取URL参数中的styleId并加载初始配置数据
   useEffect(() => {
-    const fetchConfigData = async (styleId?: string) => {
+    const fetchConfigData = async () => {
       try {
         setLoadingData(true);
         setError('');
         
-        console.log('开始获取编辑页配置数据，styleId:', styleId || '无');
+        console.log('开始获取编辑页配置数据，URL参数:', urlParams);
         
-        // 发起API请求
-        const response = await EditService.getEditConfig(styleId);
+        // 发起API请求，传递所有URL参数
+        const response = await EditService.getEditConfig(urlParams);
         
         if (response.code === 0 && response.data) {
           const { config } = response.data;
@@ -61,15 +83,35 @@ const EditPage: React.FC = () => {
           // 更新状态
           setConfigData(config);
           
+          // 设置默认文案类型
+          if (config.preferences?.auto_select_text_type) {
+            setDefaultTextType(config.preferences.auto_select_text_type);
+          }
+          
           // 更新UI状态
           setText(config.content.text || '');
           setTitle(config.title || '');
+          
+          // 设置分句模式
+          if (config.content.splitModel) {
+            setSplitModel(config.content.splitModel);
+          }
           
           // 语音音量处理 - API 字段为 0-5 范围
           const voiceVol = config.content.volume !== undefined ? config.content.volume : 1;
           console.log('设置语音音量:', voiceVol, '(0-5范围)');
           setVoiceVolume(voiceVol);
-          
+
+           // 设置音色信息
+           if (config.content.voiceInfo) {
+              const voiceInfo = config.content.voiceInfo as VoiceInfo;
+              console.log('设置初始音色信息:', voiceInfo);
+              setSelectedVoice(voiceInfo);
+              setSpeaker({
+                name: voiceInfo.voicer,
+                tag: ''
+              });
+          }
           // 背景音乐音量处理 - API 字段为 0-5 范围
           const musicVol = config.backgroundMusic.volume !== undefined ? config.backgroundMusic.volume : 1;
           console.log('设置背景音乐音量:', musicVol, '(0-5范围)');
@@ -80,6 +122,13 @@ const EditPage: React.FC = () => {
             setBackupCount(config.backupVideoNum);
           }
           
+          // 设置styleId
+          if (config.style._id) {
+            setStyleId(config.style._id);
+          } else if (urlParams.styleId) {
+            setStyleId(urlParams.styleId);
+          }
+          
           console.log('配置数据加载成功', config);
         } else {
           throw new Error(response.message || '加载失败');
@@ -87,27 +136,19 @@ const EditPage: React.FC = () => {
       } catch (err) {
         console.error('加载配置数据失败:', err);
         setError('加载数据失败，请重试');
-        // 显示错误提示
-        alert('加载数据失败，请重试');
+        toast.error('加载数据失败，请重试');
       } finally {
         setLoadingData(false);
       }
     };
-
-    // 从URL获取styleId并直接请求数据
-    const searchParams = new URLSearchParams(location.search);
-    const urlStyleId = searchParams.get('styleId') || undefined;
-    if (urlStyleId) {
-      setStyleId(urlStyleId);
-      console.log('从URL获取到styleId:', urlStyleId);
-    }
     
-    // 只发起一次请求
-    fetchConfigData(urlStyleId);
-  }, [location.search]); // 只依赖 location.search
+    // 发起请求
+    fetchConfigData();
+  }, [urlParams]); // 依赖 urlParams
 
   // 当文案变化时，自动生成标题
   useEffect(() => {
+    console.log('autoGenerateTitle:', autoGenerateTitle, ' text:', text);
     if (autoGenerateTitle && text) {
       const newTitle = generateTitle(text);
       setTitle(newTitle);
@@ -118,7 +159,48 @@ const EditPage: React.FC = () => {
    * 处理文案变化
    */
   const handleTextChange = (newText: string) => {
+    setAutoGenerateTitle(true);
     setText(newText);
+  };
+
+  /**
+   * 处理清空文本
+   */
+  const handleClearText = () => {
+    setText('');
+    setTitle('');
+    toast.success('文本已清空');
+  };
+
+  /**
+   * 处理分句模式变化
+   */
+  const handleSplitModelChange = (newSplitModel: SplitModel) => {
+    setSplitModel(newSplitModel);
+    if (configData) {
+      setConfigData({
+        ...configData,
+        content: {
+          ...configData.content,
+          splitModel: newSplitModel
+        }
+      });
+    }
+  };
+
+  /**
+   * 处理文案类型变化
+   */
+  const handleTextTypeChange = (textType: string) => {
+    if (configData) {
+      setConfigData({
+        ...configData,
+        preferences: {
+          ...configData.preferences,
+          auto_select_text_type: textType
+        }
+      });
+    }
   };
 
   /**
@@ -147,10 +229,50 @@ const EditPage: React.FC = () => {
   };
 
   /**
-   * 处理说话人点击事件
+   * 处理音色选择事件
    */
-  const handleSpeakerClick = () => {
-    toast.info('说话人选择功能待开发');
+  const handleVoiceSelect = (voice: VoiceInfo) => {
+    if (!configData) return;
+
+    console.log('处理音色选择:', voice);
+
+    setSelectedVoice(voice);
+    setSpeaker({
+      name: voice.voicer,
+      tag: ''
+    });
+
+    // 更新配置数据
+    const newConfig = {
+      ...configData,
+      content: {
+        ...configData.content,
+        speakerID: voice.voiceName,
+        voiceService: voice.voiceServer,
+        voiceInfo: {
+          voiceCode: voice.voiceCode,
+          voicer: voice.voicer,
+          voiceServer: voice.voiceServer,
+          voiceName: voice.voiceName,
+          avatar: voice.avatar,
+          speech: voice.speech,
+          isFav: voice.isFav,
+          supportVoiceParam: voice.supportVoiceParam,
+          emotion: voice.emotion,
+          settings: voice.settings
+        },
+        voiceParams: {
+          speed: voice.settings?.speed ?? 0,
+          pitch: voice.settings?.pitch ?? 0,
+          intensity: voice.settings?.intensity ?? 0,
+          volume: voice.settings?.volume !== undefined ? voice.settings.volume : 5.0,
+          emotion: voice.settings?.emotion
+        }
+      }
+    };
+
+    setConfigData(newConfig);
+    console.log('更新配置数据:', newConfig);
   };
 
   /**
@@ -170,7 +292,9 @@ const EditPage: React.FC = () => {
       return;
     }
     
-    if (!text.trim()) {
+    // 根据 apimodel 参数判断是否需要验证文案
+    const apiModel = urlParams.apimodel || 'generate';
+    if (apiModel === 'generate' && !text.trim()) {
       toast.error('请输入文案内容');
       return;
     }
@@ -191,20 +315,33 @@ const EditPage: React.FC = () => {
         content: {
           ...configData.content,
           text: text,
-          volume: voiceVolume
+          volume: voiceVolume,
+          splitModel: splitModel
         },
         backgroundMusic: {
           ...configData.backgroundMusic,
           volume: volume
         },
+        preferences: configData.preferences || { auto_select_text_type: defaultTextType },
         backupVideoNum: backupCount
       };
       
-      console.log('准备提交数据，音量值:', voiceVolume, volume, '(0-5范围)');
-      console.log('提交数据:', JSON.stringify(submitData).substring(0, 200) + '...');
+      console.log('准备提交数据，音量值 voiceVolume:', voiceVolume, " volume:",volume, '(0-5范围)');
+      console.log('提交数据:', JSON.stringify(submitData));
+      console.log('URL参数:', urlParams);
       
-      // 发起提交请求
-      const response = await EditService.generateVideo(submitData);
+      // 根据 apimodel 参数选择不同的接口
+      let response;
+      if (apiModel === 'generate') {
+        console.log('使用 generateVideo 接口');
+        response = await EditService.generateVideo(submitData, urlParams);
+      } else if (apiModel === 'update') {
+        console.log('使用 updateConfig 接口');
+        response = await EditService.updateConfig(submitData, urlParams);
+      } else {
+        console.log('使用 createConfig 接口');
+        response = await EditService.createConfig(submitData, urlParams);
+      }
       
       if (response.code === 0 && response.data) {
         console.log('提交成功，生成任务ID:', response.data.generateId);
@@ -213,7 +350,9 @@ const EditPage: React.FC = () => {
         if (response.data.successUrl) {
           window.location.href = response.data.successUrl;
         } else {
-          toast.success(`视频生成请求已提交，视频生成ID: ${response.data.generateId}`);
+          const actionText = apiModel === 'generate' ? '视频生成' : 
+                            apiModel === 'update' ? '模板更新' : '模板生成';
+          toast.success(`${actionText}请求已提交，ID: ${response.data.generateId}`);
           // 跳转到主页的视频列表tab
           navigate('/?tab=videolist');
         }
@@ -222,7 +361,7 @@ const EditPage: React.FC = () => {
       }
     } catch (err) {
       console.error('提交配置失败:', err);
-      toast.error('视频生成失败，请重试');
+      toast.error('生成失败，请重试');
       setIsSubmitting(false);
     } finally {
       setLoading(false);
@@ -260,10 +399,40 @@ const EditPage: React.FC = () => {
   };
 
   /**
+   * 处理视频风格选择事件
+   */
+  const handleStyleSelect = (style: StyleModel) => {
+    if (configData) {
+      console.log('选择视频风格:', style);
+      setStyleId(style._id || '');
+      setConfigData({
+        ...configData,
+        style: style
+      });
+    }
+  };
+
+  /**
    * 处理备用视频数量变化
    */
   const handleBackupCountChange = (newCount: number) => {
     setBackupCount(newCount);
+  };
+
+  /**
+   * 处理背景图片选择
+   */
+  const handleBackgroundImageChange = (image: BackgroundImageModel) => {
+    if (configData) {
+      console.log('选择背景图片:', image);
+      setConfigData({
+        ...configData,
+        backgroundImage: {
+          ...configData.backgroundImage,
+          ...image
+        }
+      });
+    }
   };
 
   return (
@@ -279,13 +448,23 @@ const EditPage: React.FC = () => {
       <div className="edit-content">
         {/* 文案输入区域 */}
         <TextInputSection 
-          value={text} 
-          onChange={handleTextChange}
-          placeholder="这一刻的想法..."
-          voiceVolume={voiceVolume}
+          text={text} 
+          onTextChange={handleTextChange} 
+          onVoiceSelect={handleVoiceSelect}
+          selectedVoice={selectedVoice}
+          defaultVoice={configData?.content?.voiceInfo as VoiceInfo}
           onVoiceVolumeChange={handleVoiceVolumeChange}
-          speaker={speaker}
-          onSpeakerClick={handleSpeakerClick}
+          voiceVolume={voiceVolume}
+          splitModel={splitModel}
+          onSplitModelChange={handleSplitModelChange}
+          onClearText={handleClearText}
+        />
+
+        {/* 自动生成文案区域 */}
+        <AutoGenerateSection 
+          onTextGenerated={handleTextChange}
+          defaultTextType={defaultTextType}
+          onTextTypeChange={handleTextTypeChange}
         />
 
         {/* 标题输入区域 */}
@@ -301,6 +480,8 @@ const EditPage: React.FC = () => {
           stylePreviewUrl={configData?.style?.stylePreviewUrl || ""}
           onStyleClick={() => handleConfigClick('style')}
           onVideoPreviewClick={handleStyleVideoPreviewClick}
+          onStyleSelect={handleStyleSelect}
+          styleId={styleId}
         />
 
         {/* 背景音乐选择 */}
@@ -310,30 +491,76 @@ const EditPage: React.FC = () => {
           startTime={configData?.backgroundMusic?.start_time || ""}
           endTime={configData?.backgroundMusic?.end_time || ""}
           volume={volume}
-          onMusicClick={() => handleConfigClick('music')}
+          onMusicClick={() => {
+            if (configData) {
+              setShowMusicModal(true);
+            }
+          }}
           onVolumeChange={handleMusicVolumeChange}
         />
+
+        {/* 音乐选择弹窗 */}
+        {showMusicModal && configData && (
+          <MusicSelectModal
+            visible={showMusicModal}
+            currentMusicId={configData.backgroundMusic.musicId}
+            onClose={() => setShowMusicModal(false)}
+            onSelect={(music: MusicLibItem) => {
+              setConfigData({
+                ...configData,
+                backgroundMusic: {
+                  ...configData.backgroundMusic,
+                  musicId: music._id,
+                  name: music.name,
+                  url: music.url,
+                  start_time: music.start_time || "00:00:00",
+                  end_time: music.end_time || "00:00:00",
+                  discription: music.discription,
+                  volume: configData.backgroundMusic.volume,
+                  isloop: configData.backgroundMusic.isloop
+                }
+              });
+              setShowMusicModal(false);
+            }}
+          />
+        )}
 
         {/* 背景图片选择 */}
         <BackgroundImageSection
           imageName={configData?.backgroundImage?.name || ""}
           imageUrl={configData?.backgroundImage?.url || ""}
-          onImageClick={() => handleConfigClick('background')}
+          onImageChange={handleBackgroundImageChange}
           onPreviewClick={handleBackgroundImagePreviewClick}
         />
 
         {/* 素材库选择 */}
         <MaterialSection
           materialName={configData?.material?.name || ""}
+          materialId={configData?.material?.materialID || ""}
           previewUrl={configData?.material?.previewUrl || ""}
+          url={configData?.material?.url || ""}
           onMaterialClick={() => handleConfigClick('material')}
           onPreviewClick={handleMaterialPreviewClick}
+          onMaterialSelect={(material) => {
+            if (configData) {
+              console.log('选择素材:', material);
+              setConfigData({
+                ...configData,
+                material: {
+                  name: material.name,
+                  materialID: material.materialID,
+                  previewUrl: material.previewUrl,
+                  url: material.url
+                }
+              });
+            }
+          }}
         />
 
         {/* 备用视频数量 */}
         <BackupVideoSection
           backupCount={backupCount}
-          onConfigClick={() => handleConfigClick('backup')}
+          onConfigClick={() => {}}
           onBackupCountChange={handleBackupCountChange}
         />
       </div>
@@ -361,4 +588,4 @@ const EditPage: React.FC = () => {
   );
 };
 
-export default EditPage; 
+export default EditPage;

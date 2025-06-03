@@ -44,9 +44,7 @@ const TabContent: React.FC<{ id: string }> = React.memo(({ id }) => {
     
     // 将数据转换为符合HomeContentItem类型的格式
     const items = homeData.content.map(item => ({
-      ...item,
-      // 确保stars是字符串类型
-      stars: typeof item.stars === 'number' ? String(item.stars) : item.stars
+      ...item
     })) as HomeContentItem[];
     
     console.log(`[TabContent] ${id} 数据转换完成 - 前5项ID: ${items.slice(0, 5).map(item => item.styleId).join(', ')}`);

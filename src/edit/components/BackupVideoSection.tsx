@@ -151,7 +151,7 @@ const BackupVideoSection: React.FC<BackupVideoSectionProps> = ({
       <ConfigItem
         title="备用视频数量"
         value={`${backupCount}`}
-        onClick={onConfigClick}
+        onClick={handleCountClick}
         renderCustomValue={renderCustomValue}
       />
       
@@ -173,7 +173,7 @@ const BackupVideoSection: React.FC<BackupVideoSectionProps> = ({
           <input
             type="range"
             min={1}
-            max={5}
+            max={10}
             value={backupCount}
             step={1}
             onChange={handleSliderChange}

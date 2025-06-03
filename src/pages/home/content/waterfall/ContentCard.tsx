@@ -9,13 +9,16 @@ import './ContentCard.css';
 
 // 定义卡片数据接口
 export interface ContentCardItem {
+  _id: string;
   styleId: string;
   styleName?: string;
+  title?: string;
   text: string;
   cover: string;
-  stars: string;
+  stars: number;
   ratio?: string;
   coverRatio?: string;
+  videoUrl?: string;
   navUrl?: string;
 }
 
@@ -48,13 +51,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
   
   // 处理图片加载完成
   const handleImageLoad = () => {
-    console.log(`[ContentCard] 图片加载完成: ${item.styleId}`);
     setImageLoaded(true);
   };
   
   // 处理图片加载失败
   const handleImageError = () => {
-    console.log(`[ContentCard] 图片加载失败: ${item.styleId}`);
+    // console.log(`[ContentCard] 图片加载失败: ${item.styleId}`);
     setImageError(true);
   };
   
@@ -66,30 +68,11 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onClick }) => {
       return;
     }
     
-    // 构建URL参数
-    const params: Record<string, string> = {
-      title: item.styleName || item.text.split('.')[0] || '',
-      text: item.text || '',
-      ratio: item.ratio || item.coverRatio || '16:9',
-      cover: item.cover || ''
-    };
-    
     // 优先使用navUrl，如果没有则使用styleId构建路径
-    let url = item.navUrl || `/video/${item.styleId}`;
-    
-    // 将参数添加到URL中
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) searchParams.append(key, value);
-    });
-    
-    const queryString = searchParams.toString();
-    if (queryString) {
-      url = `${url}?${queryString}`;
-    }
-    
+    let url = item.navUrl || `/video/${item.styleId}`;  
     console.log(`[ContentCard] 点击卡片: ${item.styleId}, 跳转到: ${url}`);
-    navigate(url);
+    console.log(`[ContentCard] 卡片数据: ${JSON.stringify(item)}`);
+    navigate(url, { state: { cardData: item } });
   };
   
   return (

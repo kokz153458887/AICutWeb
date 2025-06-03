@@ -83,25 +83,42 @@ const VideoCardSlider: React.FC<VideoCardSliderProps> = ({
     }
   };
 
+  /**
+   * 处理视频点击
+   */
+  const handleVideoClick = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    onVideoClick(index);
+  };
+
   return (
-    <div className={`video-slider-container ${isGenerating ? 'generating' : ''}`}>
+    <div 
+      className={`video-slider-container ${isGenerating ? 'generating' : ''}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        // 如果整个容器处于生成中状态，点击任何区域都触发第一个视频的点击事件
+        if (isGenerating) {
+          onVideoClick(0);
+        }
+      }}
+    >
       {/* 左滚动按钮 */}
       {showLeftArrow && videos.length > 1 && (
-        <div className="slider-control left" onClick={scrollLeft}>
+        <div className="slider-control left" onClick={(e) => {
+          e.stopPropagation();
+          scrollLeft();
+        }}>
           <ArrowLeftIcon />
         </div>
       )}
       
       {/* 视频滑动容器 */}
-      <div className="video-slider-wrapper" ref={sliderRef}>
+      <div className="video-slider-wrapper" ref={sliderRef} onClick={(e) => e.stopPropagation()}>
         {videos.map((video, index) => (
           <div 
             key={index} 
-            className="video-slide"
-            onClick={(e) => {
-              e.stopPropagation(); // 阻止事件冒泡
-              onVideoClick(index);
-            }}
+            className={`video-slide ${!video.videoUrl ? 'unavailable' : ''}`}
+            onClick={(e) => handleVideoClick(e, index)}
           >
             <img src={video.coverImg} alt={`视频封面 ${index + 1}`} />
             
@@ -112,7 +129,10 @@ const VideoCardSlider: React.FC<VideoCardSliderProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="video-slide-unavailable">
+              <div 
+                className="video-slide-unavailable"
+                onClick={(e) => handleVideoClick(e, index)}
+              >
                 生成中...
               </div>
             )}
@@ -122,7 +142,10 @@ const VideoCardSlider: React.FC<VideoCardSliderProps> = ({
       
       {/* 右滚动按钮 */}
       {showRightArrow && videos.length > 1 && (
-        <div className="slider-control right" onClick={scrollRight}>
+        <div className="slider-control right" onClick={(e) => {
+          e.stopPropagation();
+          scrollRight();
+        }}>
           <ArrowRightIcon />
         </div>
       )}

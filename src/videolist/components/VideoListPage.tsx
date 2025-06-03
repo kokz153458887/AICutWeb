@@ -2,12 +2,12 @@
  * 视频列表页组件
  * 负责显示所有生成的视频卡片
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { VideoCardData, Video, getVideoList, regenerateVideo, PaginationParams } from '../api/videoListApi';
-import VideoCard from './VideoCard';
+import { VideoCardData, getVideoList, regenerateVideo, PaginationParams } from '../api/videoListApi';
+import { useVideoGenerationSocket } from '../hooks/useVideoGenerationSocket';
 import VirtualizedVideoList from './VirtualizedVideoList';
-import LoadingFooter from './LoadingFooter';
+import Toast from '../../components/Toast';
 import '../styles/VideoList.css';
 
 /**
@@ -21,8 +21,6 @@ const FilterIcon: React.FC = () => (
 
 // 默认分页大小
 const DEFAULT_PAGE_SIZE = 10;
-// 初始数据长度，用于预填充数组
-const INITIAL_DATA_LENGTH = 10;
 
 /**
  * 视频列表页组件
@@ -46,6 +44,151 @@ const VideoListPage: React.FC = () => {
   const [showToast, setShowToast] = useState<boolean>(false);
   const [lastAttemptedRange, setLastAttemptedRange] = useState<{start: number, end: number} | null>(null);
 
+  // 使用 Set 来跟踪正在加载的页码
+  const loadingPages = useRef<Set<number>>(new Set());
+
+  /**
+   * 统一的数据加载方法
+   */
+  const loadData = useCallback(async ({
+    pageNum,
+    reset = false,
+    startIndex,
+    stopIndex
+  }: {
+    pageNum: number;
+    reset?: boolean;
+    startIndex?: number;
+    stopIndex?: number;
+  }) => {
+    // 如果该页面正在加载中，则跳过
+    if (loadingPages.current.has(pageNum)) {
+      console.log(`页码 ${pageNum} 正在加载中，跳过重复请求`);
+      return;
+    }
+
+    // 记录正在加载的页码
+    loadingPages.current.add(pageNum);
+
+    try {
+      if (reset) {
+        setLoading(true);
+        setError(null);
+        setHasMore(true);
+        setLoadMoreError(false);
+      } else {
+        setLoadingMore(true);
+        setLoadMoreError(false);
+      }
+
+      if (startIndex !== undefined && stopIndex !== undefined) {
+        setLastAttemptedRange({ start: startIndex, end: stopIndex });
+      }
+
+      const params: PaginationParams = {
+        pageNum,
+        pageSize: DEFAULT_PAGE_SIZE,
+      };
+
+      console.log(`加载数据: pageNum=${pageNum}, reset=${reset}`);
+      const { videoList, hasMore: moreData } = await getVideoList(params);
+
+      if (!videoList || videoList.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      setVideos(prevVideos => {
+        if (reset) {
+          return [...videoList];
+        }
+
+        const newVideos = [...prevVideos];
+        const startIdx = (pageNum - 1) * DEFAULT_PAGE_SIZE;
+        
+        videoList.forEach((video, idx) => {
+          const realIndex = startIdx + idx;
+          if (realIndex < newVideos.length) {
+            newVideos[realIndex] = video;
+          } else {
+            newVideos.push(video);
+          }
+        });
+        
+        return newVideos;
+      });
+
+      setHasMore(moreData);
+      setPageNum(pageNum + 1);
+      setLastAttemptedRange(null);
+      setLoadMoreError(false);
+
+    } catch (error) {
+      console.error('加载数据失败:', error);
+      const errorMessage = (error instanceof Error) 
+        ? `加载失败: ${error.message}` 
+        : '加载失败，请检查网络连接';
+
+      if (reset) {
+        setError(errorMessage);
+      } else {
+        setLoadMoreError(true);
+        setHasMore(true);
+      }
+    } finally {
+      // 从加载集合中移除页码
+      loadingPages.current.delete(pageNum);
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, []);
+
+  // 首次加载
+  useEffect(() => {
+    if (!savedState?.videos) {
+      loadData({ pageNum: 1, reset: true });
+    }
+  }, []);
+
+  /**
+   * 检查项目是否已加载
+   */
+  const isItemLoaded = useCallback((index: number) => {
+    // console.log(`isItemLoaded检查: index=${index}, videos.length=${videos.length}`);
+    return index < videos.length && videos[index] !== null;
+  }, [videos]);
+
+  /**
+   * 加载更多项目
+   */
+  const loadMoreItems = useCallback(async (startIndex: number, stopIndex: number) => {
+    if (loadingMore || !hasMore) return Promise.resolve();
+
+    const targetPageNum = Math.floor(startIndex / DEFAULT_PAGE_SIZE) + 1;
+    return loadData({
+      pageNum: targetPageNum,
+      startIndex,
+      stopIndex
+    });
+  }, [hasMore, loadingMore, loadData]);
+
+  /**
+   * 处理重试加载
+   */
+  const handleRetry = useCallback((index: number) => {
+    if (loadingMore) return;
+
+    const startIndex = Math.floor(index / DEFAULT_PAGE_SIZE) * DEFAULT_PAGE_SIZE;
+    const stopIndex = startIndex + DEFAULT_PAGE_SIZE - 1;
+    const targetPageNum = Math.floor(startIndex / DEFAULT_PAGE_SIZE) + 1;
+
+    loadData({
+      pageNum: targetPageNum,
+      startIndex,
+      stopIndex
+    });
+  }, [loadingMore, loadData]);
+
   /**
    * 显示Toast提示
    */
@@ -55,85 +198,6 @@ const VideoListPage: React.FC = () => {
       setShowToast(false);
     }, 2000);
   };
-
-  /**
-   * 加载视频列表数据
-   */
-  const loadVideoList = async (reset: boolean = false) => {
-    // 如果有缓存数据且不是重置，则不重新加载
-    if (savedState?.videos && !reset) {
-      return;
-    }
-
-    try {
-      if (reset) {
-        setLoading(true);
-        setError(null);
-        setPageNum(1);
-        setHasMore(true);
-        setLoadMoreError(false);
-      }
-
-      const currentPageNum = reset ? 1 : pageNum;
-      console.log(`加载视频列表: pageNum=${currentPageNum}, reset=${reset}`);
-      
-      const params: PaginationParams = {
-        pageNum: currentPageNum,
-        pageSize: DEFAULT_PAGE_SIZE,
-      };
-      
-      const { videoList, hasMore: moreData } = await getVideoList(params);
-      console.log(`获取数据成功: 数据长度=${videoList.length}, 还有更多=${moreData}`);
-      
-      if (reset) {
-        setVideos([...videoList]);
-        console.log(`初始加载后，强制设置hasMore=true，以支持错误状态显示`);
-        setHasMore(true);
-      } else {
-        setVideos(prevVideos => {
-          const newVideos = [...prevVideos];
-          const startIndex = (currentPageNum - 1) * DEFAULT_PAGE_SIZE;
-          
-          videoList.forEach((video, index) => {
-            const realIndex = startIndex + index;
-            if (realIndex < newVideos.length) {
-              newVideos[realIndex] = video;
-            } else {
-              newVideos.push(video);
-            }
-          });
-          
-          return newVideos;
-        });
-        
-        setHasMore(moreData);
-      }
-      
-      setPageNum(currentPageNum + 1);
-      setLoadMoreError(false);
-    } catch (error) {
-      console.error('加载视频列表失败:', error);
-      const errorMessage = (error instanceof Error) 
-        ? `加载视频列表失败: ${error.message}` 
-        : '加载视频列表失败，请检查网络连接';
-        
-      if (reset) {
-        setError(errorMessage);
-      } else {
-        console.log('设置loadMoreError为true');
-        setLoadMoreError(true);
-        setHasMore(true);
-      }
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
-
-  // 首次加载时获取视频列表
-  useEffect(() => {
-    loadVideoList(!savedState?.videos);
-  }, []);
 
   /**
    * 处理编辑视频
@@ -195,135 +259,41 @@ const VideoListPage: React.FC = () => {
   }, [videos]);
 
   /**
-   * 检查项目是否已加载
+   * 处理视频状态更新
    */
-  const isItemLoaded = useCallback((index: number) => {
-    // 记录日志以便调试
-    console.log(`isItemLoaded检查: index=${index}, videos.length=${videos.length}, loadMoreError=${loadMoreError}`);
-    
-    // 如果索引超出数组范围，这是底部加载项，不需要考虑它是否加载
-    if (index >= videos.length) {
-      console.log(`索引 ${index} 超出数组范围，视为特殊底部项`);
-      return false; // 返回false会触发loadMoreItems调用
-    }
-    
-    // 正常检查索引是否小于数组长度且对应项不为null
-    const result = videos[index] !== null;
-    console.log(`索引 ${index} 的加载状态: ${result}`);
-    return result;
-  }, [videos]);
-
-  /**
-   * 加载更多项目
-   */
-  const loadMoreItems = useCallback(async (startIndex: number, stopIndex: number) => {
-    // 如果正在加载或没有更多数据，则直接返回
-    if (loadingMore || !hasMore) return Promise.resolve();
-    
-    console.log(`加载更多项目: ${startIndex} - ${stopIndex}`);
-    
-    // 设置加载状态
-    setLoadingMore(true);
-    setLoadMoreError(false);
-    
-    // 记录尝试加载的范围
-    setLastAttemptedRange({start: startIndex, end: stopIndex});
-    
-    // 计算应该加载的页码
-    const targetPageNum = Math.floor(startIndex / DEFAULT_PAGE_SIZE) + 1;
-    if (targetPageNum !== pageNum) {
-      setPageNum(targetPageNum);
-    }
-    
-    try {
-      const params: PaginationParams = {
-        pageNum: targetPageNum,
-        pageSize: DEFAULT_PAGE_SIZE
-      };
+  const handleVideoStatusUpdate = useCallback((
+    generateId: string, 
+    status: VideoCardData['status'],
+    videoCardData?: VideoCardData
+  ) => {
+    console.log('handleVideoStatusUpdate 处理视频状态更新:', generateId, "status:", status, "videoCardData:", videoCardData);
+    setVideos(prevVideos => {
+      // 找到需要更新的视频索引
+      const videoIndex = prevVideos.findIndex(v => v?.generateId === generateId);
       
-      console.log(`发起API请求，页码: ${targetPageNum}, 每页数量: ${DEFAULT_PAGE_SIZE}`);
+      if (videoIndex === -1) return prevVideos;
       
-      const { videoList, hasMore: moreData } = await getVideoList(params);
-      
-      // 如果返回的数据为空，说明没有更多数据了
-      if (!videoList || videoList.length === 0) {
-        console.log('返回数据为空，设置hasMore=false');
-        setHasMore(false);
-        setLoadingMore(false);
-        return Promise.resolve();
+      // 创建新的视频数组
+      const newVideos = [...prevVideos];
+      if (newVideos[videoIndex]) {
+        if (videoCardData) {
+          // 如果有完整的视频数据，更新整个对象
+          newVideos[videoIndex] = videoCardData;
+        } else {
+          // 否则只更新状态
+          newVideos[videoIndex] = {
+            ...newVideos[videoIndex]!,
+            status
+          };
+        }
       }
       
-      setVideos(prevVideos => {
-        const newVideos = [...prevVideos];
-        // 填充新获取的数据
-        videoList.forEach((video, idx) => {
-          const realIndex = startIndex + idx;
-          if (realIndex < newVideos.length) {
-            newVideos[realIndex] = video;
-          } else {
-            newVideos.push(video);
-          }
-        });
-        return newVideos;
-      });
-      
-      // 更新hasMore状态 - 只有当返回数据不为空且API指示还有更多数据时才设置为true
-      setHasMore(moreData && videoList.length > 0);
-      setPageNum(targetPageNum + 1);
-      
-      console.log(`数据加载成功，新数据长度: ${videoList.length}，还有更多: ${moreData}`);
-      
-      // 成功加载后清除上次尝试加载的范围
-      setLastAttemptedRange(null);
-      
-      // 重要：确保在成功时也将loadingMore设置为false
-      setLoadingMore(false);
-      return Promise.resolve();
-    } catch (error) {
-      console.error('加载更多视频失败:', error);
-      
-      // 确保即使发生错误，也重置加载状态并设置错误状态
-      setLoadingMore(false);
-      setLoadMoreError(true);
-      
-      // 重要：发生错误时，不修改hasMore状态，保持为true，以便显示错误状态
-      console.log('发生错误，hasMore状态保持为: true');
-      setHasMore(true);
-      
-      // 注意：错误时保留lastAttemptedRange，供VideoCard组件判断哪些项不应显示
-      
-      // 返回拒绝的Promise以便上层组件可以处理
-      return Promise.reject(error);
-    }
-  }, [hasMore, loadingMore, pageNum]);
-
-  // 处理重试加载，确保传入正确的索引范围
-  const handleRetry = useCallback((index: number) => {
-    // 如果正在加载，则不重复发起请求
-    if (loadingMore) return;
-    
-    console.log(`handleRetry 被调用: index=${index}`);
-    
-    // 设置加载状态为true，错误状态为false
-    setLoadingMore(true);
-    setLoadMoreError(false);
-    // 清除上次尝试范围，以便重新显示加载中状态
-    setLastAttemptedRange(null);
-    
-    // 计算加载的起始和结束索引
-    const startIndex = Math.floor(index / DEFAULT_PAGE_SIZE) * DEFAULT_PAGE_SIZE;
-    const stopIndex = startIndex + DEFAULT_PAGE_SIZE - 1;
-    
-    console.log(`重试加载区间: startIndex=${startIndex}, stopIndex=${stopIndex}`);
-    
-    // 执行加载操作
-    loadMoreItems(startIndex, stopIndex).catch((error) => {
-      // 确保错误状态被正确设置
-      console.error('重试加载失败:', error);
-      setLoadingMore(false);
-      setLoadMoreError(true);
+      return newVideos;
     });
-  }, [loadingMore, loadMoreItems]);
+  }, []);
+
+  // 使用Socket Hook监听视频状态更新
+  useVideoGenerationSocket(videos, handleVideoStatusUpdate);
 
   return (
     <div className="video-list-page">
@@ -353,7 +323,7 @@ const VideoListPage: React.FC = () => {
         ) : error ? (
           <div className="video-list-error">
             <p>{error}</p>
-            <button onClick={() => loadVideoList(true)}>重试</button>
+            <button onClick={() => loadData({ pageNum: 1, reset: true })}>重试</button>
           </div>
         ) : videos.length === 0 ? (
           <div className="video-list-empty">
@@ -374,6 +344,7 @@ const VideoListPage: React.FC = () => {
           />
         )}
       </div>
+      <Toast />
     </div>
   );
 };

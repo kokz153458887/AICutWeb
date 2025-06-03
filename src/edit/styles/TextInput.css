@@ -1,0 +1,297 @@
+/**
+ * 文本输入区样式
+ */
+:root {
+  --text-input-bg: #ffffff;
+  --text-input-border: #e0e0e0;
+  --text-input-text: #333333;
+  --text-input-placeholder: #999999;
+  --text-primary-color: #2080ff;
+  --text-button-hover: #f5f5f5;
+  --text-button-active: #e5e5e5;
+}
+
+/* 文本输入区容器 */
+.text-input-section {
+  width: 100%;
+  background-color: var(--text-input-bg);
+  border: 1px solid var(--text-input-border);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* 控制区域 */
+.text-input-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--text-input-border);
+}
+
+/* 文本输入区标题 */
+.text-input-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-input-text);
+}
+
+/* 操作按钮区域 */
+.text-input-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 音色选择按钮 */
+.text-input-voice-select {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border: 1px solid var(--text-input-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--text-input-bg);
+  color: var(--text-input-text);
+}
+
+.text-input-voice-select:hover {
+  background-color: var(--text-button-hover);
+}
+
+.text-input-voice-select:active {
+  background-color: var(--text-button-active);
+}
+
+.text-input-voice-select.active {
+  border-color: var(--text-primary-color);
+  color: var(--text-primary-color);
+}
+
+/* 音色选择图标 */
+.voice-select-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 已选择的音色 */
+.selected-voice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 已选择的音色头像 */
+.selected-voice-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 已选择的音色名称 */
+.selected-voice-name {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+/* 音量控制区 */
+.text-input-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+/* 音量图标 */
+.volume-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-input-text);
+}
+
+.volume-slider-container {
+  position: fixed;
+  z-index: 1000;
+  background-color: rgba(20, 20, 20, 0.95);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  box-sizing: border-box;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+/* 音量滑块 */
+.volume-slider {
+  -webkit-appearance: none;
+  flex: 1;
+  height: 4px;
+  background: #3a3a3a;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-primary-color);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-primary-color);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+/* 音量值 */
+.volume-value {
+  font-size: 12px;
+  color: var(--text-input-text);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* 预览按钮 */
+.preview-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--text-primary-color);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preview-button:hover {
+  background-color: #1a73e8;
+}
+
+.preview-button:active {
+  background-color: #1667d9;
+}
+
+/* 停止按钮 */
+.preview-button.stop {
+  background-color: #f5222d;
+}
+
+.preview-button.stop:hover {
+  background-color: #cf1322;
+}
+
+.preview-button.stop:active {
+  background-color: #a8071a;
+}
+
+/* 预览图标 */
+.preview-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 文本输入框容器 */
+.text-input-box {
+  padding: 16px;
+}
+
+/* 文本输入框 */
+.text-input-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  border: 1px solid var(--text-input-border);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-input-text);
+  resize: vertical;
+  transition: border 0.2s;
+}
+
+.text-input-textarea:focus {
+  outline: none;
+  border-color: var(--text-primary-color);
+}
+
+.text-input-textarea::placeholder {
+  color: var(--text-input-placeholder);
+}
+
+/* 输入信息区 */
+.text-input-info {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 0 0 0;
+}
+
+/* 字数统计 */
+.text-count {
+  font-size: 12px;
+  color: var(--text-input-placeholder);
+}
+
+/* 响应式适配 */
+@media screen and (max-width: 576px) {
+  .text-input-controls {
+    flex-wrap: wrap;
+  }
+  
+  .text-input-title {
+    margin-bottom: 8px;
+  }
+  
+  .text-input-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .selected-voice-name {
+    max-width: 60px;
+  }
+  
+  .text-input-volume {
+    order: 3;
+    width: 100%;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+  
+  .volume-slider {
+    flex: 1;
+    max-width: 120px;
+  }
+} 

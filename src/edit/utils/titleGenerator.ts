@@ -12,6 +12,8 @@ import { titleConfig } from '../config/titleConfig';
 export const generateTitle = (text: string): string => {
   if (!text) return '';
 
+  text = text.replace(/\[[^\]]*\]/g, '');
+
   // 查找第一个分隔符的位置
   let firstSentenceEnd = -1;
   for (const separator of titleConfig.separators) {
@@ -30,6 +32,7 @@ export const generateTitle = (text: string): string => {
     // 提取到分隔符的位置（不包含分隔符）
     firstSentence = text.substring(0, firstSentenceEnd);
   }
+  console.log('firstSentence:', firstSentence, "  text:", text);
 
   // 只有当第一句话超出最大长度时才截取
   if (firstSentence.length > titleConfig.maxLength) {

@@ -1,0 +1,333 @@
+/* 素材文件卡片样式 */
+.material-file-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.material-file-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.material-file-card.selected {
+  border-color: #00d4aa;
+  box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+  background: rgba(0, 212, 170, 0.08);
+}
+
+/* 文件夹样式 */
+.material-file-card.directory {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 193, 7, 0.05));
+  border-color: rgba(255, 215, 0, 0.2);
+}
+
+.material-file-card.directory:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 193, 7, 0.08));
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.folder-content {
+  padding: 16px;
+  text-align: center;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-icon {
+  color: #ffd700;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3));
+}
+
+.folder-info {
+  width: 100%;
+}
+
+.folder-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.3;
+  text-align: center;
+  word-wrap: break-word;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-path {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  word-wrap: break-word;
+  opacity: 0.8;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 文件样式 */
+.material-file-card.file .file-content {
+  display: flex;
+  flex-direction: column;
+  height: 180px
+}
+
+.file-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, rgba(42, 42, 42, 0.8), rgba(26, 26, 26, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.material-file-card:hover .preview-image {
+  transform: scale(1.05);
+}
+
+.no-preview {
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(64, 64, 64, 0.3), rgba(32, 32, 32, 0.5));
+}
+
+.duration-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.file-info {
+  padding: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.file-path {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.file-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.file-meta span {
+  font-size: 9px;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.size-tag {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.3), rgba(33, 150, 243, 0.2));
+  border: 1px solid rgba(33, 150, 243, 0.4);
+  color: #64b5f6 !important;
+}
+
+.resolution-tag {
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(156, 39, 176, 0.2));
+  border: 1px solid rgba(156, 39, 176, 0.4);
+  color: #ba68c8 !important;
+}
+
+.create-time {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: auto;
+  font-style: italic;
+}
+
+/* 选择框 */
+.selection-checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.selection-checkbox.checked {
+  background: linear-gradient(135deg, #00d4aa, #00b896);
+  border-color: #00d4aa;
+  transform: scale(1.1);
+}
+
+.selection-checkbox:hover {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.6);
+  transform: scale(1.05);
+}
+
+.selection-checkbox.checked:hover {
+  background: linear-gradient(135deg, #00b896, #009e82);
+  border-color: #00b896;
+}
+
+/* 选择状态下的特殊效果 */
+.material-file-card.selected .file-name {
+  color: #ffffff;
+}
+
+.material-file-card.selected .folder-name {
+  color: #ffffff;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .folder-content {
+    padding: 14px;
+    height: 160px;
+  }
+  
+  .folder-name {
+    font-size: 12px;
+  }
+  
+  .folder-path {
+    font-size: 9px;
+  }
+  
+  .file-info {
+    padding: 8px;
+    gap: 3px;
+  }
+  
+  .file-name {
+    font-size: 11px;
+  }
+  
+  .file-path {
+    font-size: 9px;
+  }
+  
+  .file-meta span {
+    font-size: 8px;
+    padding: 1px 3px;
+  }
+  
+  .create-time {
+    font-size: 8px;
+  }
+  
+  .duration-badge {
+    padding: 1px 4px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .folder-content {
+    padding: 12px;
+    height: 140px;
+  }
+  
+  .folder-name {
+    font-size: 11px;
+  }
+  
+  .file-info {
+    padding: 6px;
+  }
+  
+  .selection-checkbox {
+    width: 20px;
+    height: 20px;
+    top: 6px;
+    right: 6px;
+  }
+  
+  .duration-badge {
+    bottom: 4px;
+    right: 4px;
+    padding: 1px 3px;
+    font-size: 8px;
+  }
+} 

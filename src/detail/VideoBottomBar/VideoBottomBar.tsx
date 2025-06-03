@@ -7,7 +7,7 @@ import './VideoBottomBar.css';
 import { HeartIcon } from '../../components/icons';
 
 interface VideoBottomBarProps {
-  stars: string;
+  stars: number | string;
   onNavClick: () => void;
 }
 

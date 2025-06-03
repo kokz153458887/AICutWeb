@@ -1,0 +1,232 @@
+/* 自动生成文案区域样式 */
+.auto-generate-section {
+  margin: 4px 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.auto-generate-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 不喜欢按钮样式 */
+.dislike-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  color: #aaaaaa;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.dislike-btn:hover:not(.disabled) {
+  background-color: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  transform: translateY(-0.5px);
+}
+
+.dislike-btn:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.dislike-btn.disabled {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.04);
+  color: #666666;
+  cursor: default;
+  opacity: 0.6;
+}
+
+.dislike-btn.disabled:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.04);
+  color: #666666;
+  transform: none;
+  cursor: default;
+}
+
+/* 自动生成按钮样式 */
+.auto-generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  padding: 3px 8px 3px 3px;
+  position: relative;
+}
+
+/* 类型选择器容器 */
+.type-selector {
+  position: relative;
+  z-index: 9998;
+}
+
+/* 生活小妙招标签样式 */
+.auto-generate-label {
+  font-size: 9px;
+  color: #888888;
+  background-color: rgba(255, 255, 255, 0.08);
+  padding: 2px 5px;
+  border-radius: 8px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+}
+
+.auto-generate-label:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #aaaaaa;
+}
+
+/* 下拉菜单样式 */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  margin-top: 2px;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  padding: 6px 8px;
+  font-size: 9px;
+  color: #cccccc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.dropdown-item.selected {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* 自动生成文字样式 */
+.auto-generate-text {
+  font-size: 11px;
+  color: #cccccc;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* 自动生成按钮悬停效果 */
+.auto-generate-btn:hover:not(.disabled) {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.auto-generate-btn:hover:not(.disabled) .auto-generate-label {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #aaaaaa;
+}
+
+.auto-generate-btn:hover:not(.disabled) .auto-generate-text {
+  color: #ffffff;
+}
+
+/* 自动生成按钮按下效果 */
+.auto-generate-btn:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 自动生成按钮禁用状态 */
+.auto-generate-btn.disabled {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.04);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auto-generate-btn.disabled .auto-generate-label {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.auto-generate-btn.disabled .auto-generate-text {
+  color: #666666;
+}
+
+/* 自动生成按钮加载状态 */
+.auto-generate-btn.loading {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.auto-generate-btn.loading .auto-generate-label {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #666666;
+}
+
+.auto-generate-btn.loading .auto-generate-text {
+  color: #999999;
+}
+
+/* 自动生成按钮加载图标 */
+.auto-generate-spinner {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  border-top: 1.5px solid #aaaaaa;
+  animation: autoGenerateSpinner 1s linear infinite;
+}
+
+@keyframes autoGenerateSpinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

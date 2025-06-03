@@ -7,6 +7,12 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease;
   position: relative;
+  -webkit-transform: translateZ(0); /* 添加Safari硬件加速 */
+  transform: translateZ(0);
+  will-change: transform; /* 优化性能 */
+  /* 确保iOS Safari正确处理卡片 */
+  display: flex;
+  flex-direction: column;
 }
 
 .content-card:active {
@@ -21,6 +27,9 @@
   /* 3:4比例由组件中的style属性设置 */
   overflow: hidden;
   background-color: #f0f0f0;
+  /* 确保Safari正确渲染图像容器 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* 图片加载前的占位图 */
@@ -79,6 +88,8 @@
   object-position: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  -webkit-backface-visibility: hidden; /* 防止iOS Safari闪烁 */
+  backface-visibility: hidden;
 }
 
 .card-image.loaded {

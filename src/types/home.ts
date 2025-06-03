@@ -10,13 +10,18 @@ export interface HomeTabItem {
 
 // 内容项
 export interface HomeContentItem {
+  _id: string;
   styleId: string;
   styleName?: string;
+  title?: string;
   text: string;
   cover: string;
-  stars: string;
+  stars: number;
   ratio?: string;
   coverRatio?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  videoUrl?: string;
   navUrl?: string;
 }
 

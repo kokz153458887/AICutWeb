@@ -7,10 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { Video, VideoCardData } from '../api/videoListApi';
 import VideoCardSlider from './VideoCardSlider';
 import LoadingFooter from './LoadingFooter';
+import Toast, { toast } from '../../components/Toast';
 import '../styles/VideoCard.css';
 
-// 默认分页大小
-const DEFAULT_PAGE_SIZE = 10;
 
 interface VideoCardProps {
   index: number; 
@@ -49,19 +48,19 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   const { videos, hasMore, loadingMore, loadMoreError, onEdit, onRegenerate, onRetry, lastAttemptedRange } = data;
   const navigate = useNavigate();
   
-  console.log(`VideoCard渲染: index=${index}, hasMore=${hasMore}, loadMoreError=${loadMoreError}, videos.length=${videos.length}`);
+  // console.log(`VideoCard渲染: index=${index}, hasMore=${hasMore}, loadMoreError=${loadMoreError}, videos.length=${videos.length}`);
   
   // 是否为加载更多的底部项
   const isLoadMoreItem = index === videos.length && hasMore;
   
-  // 如果是底部加载项，显示加载更多或错误状态
-  if (isLoadMoreItem) {
+  // 如果是底部项，显示加载更多或错误状态
+  if (isLoadMoreItem || index === videos.length) {
     console.log(`VideoCard render footer: loadingMore=${loadingMore}, loadMoreError=${loadMoreError}`);
     
     return (
       <div style={style} className="footer-container">
         <LoadingFooter 
-          isLoading={loadingMore && !loadMoreError}
+          isLoading={loadingMore && !loadMoreError && hasMore}
           error={loadMoreError}
           onRetry={() => {
             console.log('触发重试事件: index =', index);
@@ -100,57 +99,85 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
   };
   
   /**
-   * 处理卡片点击，显示视频操作页模态层
+   * 处理卡片点击，根据视频状态显示不同的提示或跳转
    */
   const handleCardClick = () => {
-    // 使用 URL 参数控制模态层显示，同时传递视频数据
-    const newSearch = new URLSearchParams(location.search);
-    newSearch.set('videoId', video.id);
-    newSearch.set('initialIndex', '0');
-    if (!newSearch.has('tab')) {
-      newSearch.set('tab', 'videolist');
-    }
-    navigate(`/?${newSearch.toString()}`, {
-      state: { 
-        videoData: {
-          generateId: video.id,
-          title: video.title,
-          text: video.content,
-          createTime: new Date(video.createTime).toISOString(),
-          status: video.status === 'generated' ? 'done' : video.status,
-          ratio: video.tags[0] || '16:9',
-          materialName: video.tags[1] || '',
-          videolist: video.videos
+    // 根据视频状态处理点击事件
+    switch (video.status) {
+      case 'generating':
+        toast.info('视频生成中，请稍后查看');
+        return;
+      case 'failed':
+        toast.error('视频生成错误');
+        return;
+      case 'generated':
+        // 使用 URL 参数控制模态层显示，同时传递视频数据
+        const newSearch = new URLSearchParams(location.search);
+        newSearch.set('videoId', video.id);
+        newSearch.set('initialIndex', '0');
+        if (!newSearch.has('tab')) {
+          newSearch.set('tab', 'videolist');
         }
-      }
-    });
+
+        console.log('handleCardClick: ', video);
+        navigate(`/?${newSearch.toString()}`, {
+          state: { 
+            videoData: {
+              generateId: video.id,
+              title: video.title,
+              text: video.content,
+              createTime: new Date(video.createTime).toISOString(),
+              status: video.status === 'generated' ? 'done' : video.status,
+              ratio: video.tags[0] || '16:9',
+              materialName: video.tags[1] || '',
+              videolist: video.videos
+            }
+          }
+        });
+        return;
+      default:
+        return;
+    }
   };
   
   /**
-   * 处理视频点击，显示视频操作页模态层并播放指定视频
+   * 处理视频点击，根据视频状态显示不同的提示或跳转
    */
   const handleVideoClick = (videoIndex: number) => {
-    // 使用 URL 参数控制模态层显示，同时传递视频数据
-    const newSearch = new URLSearchParams(location.search);
-    newSearch.set('videoId', video.id);
-    newSearch.set('initialIndex', videoIndex.toString());
-    if (!newSearch.has('tab')) {
-      newSearch.set('tab', 'videolist');
-    }
-    navigate(`/?${newSearch.toString()}`, {
-      state: { 
-        videoData: {
-          generateId: video.id,
-          title: video.title,
-          text: video.content,
-          createTime: new Date(video.createTime).toISOString(),
-          status: video.status === 'generated' ? 'done' : video.status,
-          ratio: video.tags[0] || '16:9',
-          materialName: video.tags[1] || '',
-          videolist: video.videos
+    // 根据视频状态处理点击事件
+    switch (video.status) {
+      case 'generating':
+        toast.info('视频生成中，请稍后查看');
+        return;
+      case 'failed':
+        toast.error('视频生成错误');
+        return;
+      case 'generated':
+        // 使用 URL 参数控制模态层显示，同时传递视频数据
+        const newSearch = new URLSearchParams(location.search);
+        newSearch.set('videoId', video.id);
+        newSearch.set('initialIndex', videoIndex.toString());
+        if (!newSearch.has('tab')) {
+          newSearch.set('tab', 'videolist');
         }
-      }
-    });
+        navigate(`/?${newSearch.toString()}`, {
+          state: { 
+            videoData: {
+              generateId: video.id,
+              title: video.title,
+              text: video.content,
+              createTime: new Date(video.createTime).toISOString(),
+              status: video.status === 'generated' ? 'done' : video.status,
+              ratio: video.tags[0] || '16:9',
+              materialName: video.tags[1] || '',
+              videolist: video.videos
+            }
+          }
+        });
+        return;
+      default:
+        return;
+    }
   };
   
   // 处理编辑按钮点击
@@ -218,20 +245,41 @@ const VideoCard: React.FC<VideoCardProps> = ({ index, style, data }) => {
         
         {/* 标签列表 */}
         <div className="video-card-tags">
-          {video.tags && video.tags.map((tag: string, idx: number) => (
-            <span key={idx} className="video-card-tag">{tag}</span>
-          ))}
+          {/* 展示视频显示比例标签 */}
+          {videoCard.videoShowRatio && (
+            <span className="video-card-tag">{videoCard.videoShowRatio}</span>
+          )}
+          {/* 展示素材名称标签 */}
+          {videoCard.materialName && (
+            <span className="video-card-tag">{videoCard.materialName}</span>
+          )}
         </div>
         
-        {/* 视频预览滑动器 */}
-        <VideoCardSlider 
-          videos={video.videos} 
-          onVideoClick={handleVideoClick}
-          isGenerating={isGenerating}
-        />
+        {/* 视频预览区域 */}
+        <div className="video-preview-area" onClick={(e) => {
+          e.stopPropagation();
+          handleCardClick();
+        }}>
+          {video.videos && video.videos.length > 0 ? (
+            <VideoCardSlider 
+              videos={video.videos} 
+              onVideoClick={handleVideoClick}
+              isGenerating={isGenerating}
+            />
+          ) : (
+            <div className="empty-preview-area">
+              {video.status === 'generating' && (
+                <div className="generating-text">视频生成中...</div>
+              )}
+              {video.status === 'failed' && (
+                <div className="failed-text">视频生成失败</div>
+              )}
+            </div>
+          )}
+        </div>
         
-        {/* 操作按钮 */}
-        <div className="video-card-buttons">
+        {/* 底部操作按钮 */}
+        <div className="video-card-buttons" onClick={(e) => e.stopPropagation()}>
           <button 
             className="video-card-button button-edit" 
             onClick={handleEditClick}

@@ -1,7 +1,7 @@
 /**
  * 视频剪辑相关工具函数
  */
-import { SegmentInfo, WordInfo, VideoEditState } from '../types';
+import { SegmentInfo, WordInfo, VideoEditState } from '../../../cut/videoedit';
 
 /**
  * 将秒数转换为时间格式字符串（mm:ss.S）

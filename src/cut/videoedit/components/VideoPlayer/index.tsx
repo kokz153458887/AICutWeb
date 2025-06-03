@@ -346,7 +346,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       <div className="video-wrapper">
         <video
           ref={videoRef}
-          className="video-element"
+          className="edit-video-element"
           src={videoUrl}
           onTimeUpdate={handleTimeUpdate}
           onPlay={handlePlay}
@@ -359,7 +359,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
         
         {/* 封面图 - 在定位模式下自动隐藏 */}
         {showCover && coverUrl && !isLocationMode && (
-          <div className="video-cover" onClick={handleVideoClick}>
+          <div className="edit-video-cover" onClick={handleVideoClick}>
             <img src={coverUrl} alt="视频封面" />
             <div className="play-button">
               <svg width="60" height="60" viewBox="0 0 48 48" fill="none">

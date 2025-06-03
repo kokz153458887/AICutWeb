@@ -3,7 +3,7 @@
  * 支持文本编辑、时间调整和视频定位功能
  */
 import React, { useCallback, useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { VideoClipItem, MaterialFileStore } from '../../types';
+import { VideoClipItem, MaterialFileStore } from '../..';
 import { formatTime, parseTime } from '../../utils';
 import './styles.css';
 

@@ -5,13 +5,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BackIcon } from '../../../components/icons';
-import InputArea from '../../components/InputArea';
-import FilterTabs from '../../components/FilterTabs';
-import VideoSliceList from '../../components/VideoSliceList';
-import ParseLoadingDialog from '../../components/ParseLoadingDialog';
-import { VideoSliceFilter, VideoSliceItem, VideoSliceStatus } from '../../types';
-import { getParseList, parseVideo, deleteTask } from '../../api';
-import { extractUrlsFromText, transformTaskToSliceItem, filterToStatus } from '../../api/utils';
+import InputArea from '../components/InputArea';
+import FilterTabs from '../components/FilterTabs';
+import VideoSliceList from '../components/VideoSliceList';
+import ParseLoadingDialog from '../components/ParseLoadingDialog';
+import { VideoSliceFilter, VideoSliceItem, VideoSliceStatus } from '../types';
+import { getParseList, parseVideo, deleteTask } from '../api';
+import { extractUrlsFromText, transformTaskToSliceItem, filterToStatus } from '../api/utils';
 import { toast } from '../../../components/Toast';
 import './styles.css';
 

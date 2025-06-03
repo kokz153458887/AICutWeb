@@ -3,7 +3,7 @@
  * 负责视频解析和列表数据的获取
  */
 import axios from 'axios';
-import { API_CONFIG, API_HEADERS, API_RESPONSE_CODE } from '../../config/api';
+import { API_CONFIG, API_HEADERS, API_RESPONSE_CODE } from '../../../config/api';
 
 // 视频信息接口
 export interface VideoInfo {

@@ -4,10 +4,10 @@
  */
 import React, { useCallback } from 'react';
 import VideoSliceCard from '../VideoSliceCard';
-import LoadingView from '../../../components/LoadingView';
-import ErrorView from '../../../components/ErrorView';
+import LoadingView from '../../../../components/LoadingView';
+import ErrorView from '../../../../components/ErrorView';
 import { VideoSliceItem } from '../../types';
-import { toast } from '../../../components/Toast';
+import { toast } from '../../../../components/Toast';
 import './styles.css';
 
 interface VideoSliceListProps {

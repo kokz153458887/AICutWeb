@@ -238,13 +238,12 @@ const MaterialLibraryPage: React.FC = () => {
       if (rootData?.name) {
         fullVideoUrl += `/${rootData.name}`;
       }
-      if (currentPath.length > 0) {
-        fullVideoUrl += `/${currentPath.join('/')}`;
-      }
+ 
+      // relative_path 可能包含相对路径，直接使用，不要重复拼接当前路径
       fullVideoUrl += `/${item.relative_path}`;
       
-      // 统一使用正斜杠
-      fullVideoUrl = fullVideoUrl.replace(/\\/g, '/');
+      // 统一使用正斜杠，避免重复的斜杠
+      fullVideoUrl = fullVideoUrl.replace(/\\/g, '/').replace(/\/+/g, '/').replace('http:/', 'http://').replace('https:/', 'https://');
       
       setCurrentVideoUrl(fullVideoUrl);
       setShowVideoPlayer(true);
@@ -306,8 +305,8 @@ const MaterialLibraryPage: React.FC = () => {
   return (
     <div className="material-library-page">
       {/* 顶部导航栏 */}
-      <div className="page-header">
-        <div className="back-button" onClick={handleBackClick}>
+      <div className="meterial-page-header">
+        <div className="meterial-back-button" onClick={handleBackClick}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2"/>
           </svg>

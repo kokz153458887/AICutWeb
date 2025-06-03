@@ -1,7 +1,7 @@
 /* 视频播放器样式 */
 .video-player-container {
   width: 100%;
-  height: 250px ;
+  height: 200px ;
   background: #000;
   border-radius: 8px;
   overflow: hidden;
@@ -10,11 +10,11 @@
 
 .video-wrapper {
   width: 100%;
-  height: 250px;
+  height: 200px;
   position: relative;
 }
 
-.video-element {
+.edit-video-element {
   width: 100%;
   height: 100%; /* 固定高度，防止iPhone Safari自动全屏 */
   object-fit: cover;
@@ -23,7 +23,7 @@
 }
 
 /* 视频封面 */
-.video-cover {
+.edit-video-cover {
   position: absolute;
   top: 0;
   left: 0;
@@ -36,7 +36,7 @@
   z-index: 2;
 }
 
-.video-cover img {
+.edit-video-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -250,10 +250,7 @@
 
 /* 响应式设计 */
 @media screen and (max-width: 480px) {
-  .video-player-container {
-    border-radius: 6px;
-  }
-  
+
   .progress-controls {
     padding: 8px 12px;
     gap: 8px;

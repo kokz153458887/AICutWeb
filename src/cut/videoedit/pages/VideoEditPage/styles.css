@@ -23,12 +23,10 @@
   flex-shrink: 0;
 }
 
-.back-button {
+.video-back-button {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +34,7 @@
   transition: all 0.2s ease;
 }
 
-.back-button:hover {
+.video-back-button:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -55,8 +53,8 @@
   gap: 8px;
 }
 
-.delete-button {
-  padding: 6px 12px;
+.page-delete-button {
+  padding: 4px 10px;
   background: rgba(255, 59, 48, 0.1);
   color: rgba(255, 59, 48, 0.9);
   border: 1px solid rgba(255, 59, 48, 0.2);
@@ -67,7 +65,7 @@
   transition: all 0.2s ease;
 }
 
-.delete-button:hover {
+.page-delete-button:hover {
   background: rgba(255, 59, 48, 0.2);
   border-color: rgba(255, 59, 48, 0.4);
   color: rgba(255, 59, 48, 1);
@@ -264,14 +262,10 @@
     gap: 6px;
   }
 
-  .delete-button,
+
   .submit-button {
     padding: 5px 10px;
     font-size: 12px;
-  }
-
-  .video-section {
-    padding: 8px 12px 0;
   }
 
   .clips-section {

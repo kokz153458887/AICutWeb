@@ -47,23 +47,20 @@ const MaterialFileCard: React.FC<MaterialFileCardProps> = ({
     }
     
     if (showFullPath && 'fullPath' in item) {
-      // 搜索模式下使用完整路径
-      const pathParts = (item as any).fullPath.split('/');
+      // 搜索模式下使用完整路径，但要排除文件名本身
+      const fullPath = (item as any).fullPath;
+      const pathParts = fullPath.split('/');
       pathParts.pop(); // 移除文件名
       if (pathParts.length > 0) {
         imageUrl += `/${pathParts.join('/')}`;
       }
-    } else {
-      // 正常模式下使用当前路径
-      if (currentPath.length > 0) {
-        imageUrl += `/${currentPath.join('/')}`;
-      }
-    }
+    } 
     
+    // 添加预览图片名称，不要重复添加路径
     imageUrl += `/${item.preview_image}`;
     
-    // 统一使用正斜杠
-    return imageUrl.replace(/\\/g, '/');
+    // 统一使用正斜杠，避免重复的斜杠
+    return imageUrl.replace(/\\/g, '/').replace(/\/+/g, '/').replace('http:/', 'http://').replace('https:/', 'https://');
   };
 
   /**
@@ -78,9 +75,9 @@ const MaterialFileCard: React.FC<MaterialFileCardProps> = ({
   };
 
   /**
-   * 处理选择框点击
+   * 处理选择框区域点击
    */
-  const handleSelectionClick = (e: React.MouseEvent) => {
+  const handleSelectionAreaClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelectionChange(item.name, !isSelected);
   };
@@ -121,7 +118,7 @@ const MaterialFileCard: React.FC<MaterialFileCardProps> = ({
     const imageUrl = getImageUrl();
     
     return (
-      <div className="file-content">
+      <div>
         <div className="file-preview">
           {imageUrl && !imageError ? (
             <img 
@@ -183,16 +180,18 @@ const MaterialFileCard: React.FC<MaterialFileCardProps> = ({
     >
       {item.type === 'directory' ? renderFolderContent() : renderFileContent()}
       
-      {/* 选择框 */}
+      {/* 选择框区域（增大点击范围） */}
       <div 
-        className={`selection-checkbox ${isSelected ? 'checked' : ''}`}
-        onClick={handleSelectionClick}
+        className="selection-area"
+        onClick={handleSelectionAreaClick}
       >
-        {isSelected && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
+        <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+          {isSelected && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+        </div>
       </div>
     </div>
   );

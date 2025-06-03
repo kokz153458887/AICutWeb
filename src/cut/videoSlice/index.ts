@@ -2,7 +2,7 @@
 export * from './types';
 
 // 导出页面组件
-export { default as VideoSlicePage } from './pages/VideoSlicePage';
+export { default as VideoSlicePage } from './page/index';
 
 // 导出子组件
 export { default as InputArea } from './components/InputArea';

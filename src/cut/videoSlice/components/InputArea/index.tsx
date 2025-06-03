@@ -3,8 +3,8 @@
  * 负责处理用户输入、剪切板粘贴、清除内容和解析功能
  */
 import React, { useState, useRef } from 'react';
-import { ClipboardIcon, ClearIcon } from '../../../components/icons';
-import { toast } from '../../../components/Toast';
+import { ClipboardIcon, ClearIcon } from '../../../../components/icons';
+import { toast } from '../../../../components/Toast';
 import './styles.css';
 
 interface InputAreaProps {

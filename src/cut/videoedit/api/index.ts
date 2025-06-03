@@ -3,9 +3,9 @@
  * 负责获取解析任务详情
  */
 import axios from 'axios';
-import { API_CONFIG, API_HEADERS, API_RESPONSE_CODE } from '../../config/api';
-import { ParseTaskDetail, VideoClipItem } from '../types';
-import { MaterialLibItem } from '../../edit/api/types';
+import { API_CONFIG, API_HEADERS, API_RESPONSE_CODE } from '../../../config/api';
+import { ParseTaskDetail, VideoClipItem } from '../index';
+import { MaterialLibItem } from '../../../edit/api/types';
 
 // API通用响应接口
 interface ApiResponse<T> {

@@ -4,17 +4,17 @@
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BackIcon } from '../../../components/icons';
-import VideoPlayer, { VideoPlayerRef } from '../../components/VideoPlayer';
-import VideoClipItemComponent, { VideoClipItemRef } from '../../components/VideoClipItem';
-import MaterialSelectModal from '../../../edit/components/meterialSelect/MaterialSelectModal';
-import ConfirmDialog from '../../../components/ConfirmDialog';
+import { BackIcon } from '../../../../components/icons';
+import VideoPlayer, { VideoPlayerRef } from '../../../videoedit/components/VideoPlayer';
+import VideoClipItemComponent, { VideoClipItemRef } from '../../../videoedit/components/VideoClipItem';
+import MaterialSelectModal from '../../../../edit/components/meterialSelect/MaterialSelectModal';
+import ConfirmDialog from '../../../../components/ConfirmDialog';
 import { getParseTaskDetail, addMaterialVideo } from '../../api';
-import { deleteTask } from '../../../cutvideo/api';
-import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFileItem, MaterialFileStore } from '../../types';
-import { MaterialLibItem, MaterialModel } from '../../../edit/api/types';
-import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, convertSpacedPositionToPurePosition, removePunctuationAndSpaces } from '../../utils';
-import { toast } from '../../../components/Toast';
+import { deleteTask } from '../../../../cut/videoSlice/api';
+import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFileItem, MaterialFileStore } from '../..';
+import { MaterialLibItem, MaterialModel } from '../../../../edit/api/types';
+import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, convertSpacedPositionToPurePosition, removePunctuationAndSpaces } from '../../../videoedit/utils';
+import { toast } from '../../../../components/Toast';
 import './styles.css';
 
 /**
@@ -941,12 +941,12 @@ const VideoEditPage: React.FC = () => {
     <div className="video-edit-page">
       {/* 顶部导航栏 - 固定位置 */}
       <div className="page-header">
-        <div className="back-button" onClick={handleBackClick}>
+        <div className="video-back-button" onClick={handleBackClick}>
           <BackIcon />
         </div>
         <span className="page-title">视频剪辑</span>
         <div className="header-actions">
-          <div className="delete-button" onClick={handleDeleteClick}>
+          <div className="page-delete-button" onClick={handleDeleteClick}>
             删除
           </div>
           <div 

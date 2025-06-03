@@ -8,7 +8,9 @@ import { MaterialLibItem } from '../../api/types';
 import { MaterialRoot, MaterialFileItem, BreadcrumbItem } from './types';
 import MaterialFileCard from './MaterialFileCard';
 import VideoPlayer from './VideoPlayer';
+import { EditSelectAPI } from '../../api/EditSelectAPI';
 import { toast } from '../../../components/Toast';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import './styles/MaterialLibraryPage.css';
 
 /**
@@ -29,6 +31,7 @@ const MaterialLibraryPage: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // 基础URL构建：域名 + /material
   const baseUrl = useMemo(() => {
@@ -274,7 +277,84 @@ const MaterialLibraryPage: React.FC = () => {
    * 处理删除操作
    */
   const handleDeleteSelected = () => {
-    toast.info('功能待开发');
+    if (!materialId || selectedItems.size === 0) {
+      toast.error('请选择要删除的项目');
+      return;
+    }
+    
+    // 显示确认对话框
+    setShowDeleteConfirm(true);
+  };
+
+  /**
+   * 确认删除操作
+   */
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
+    
+    try {
+      // 构建删除路径数组
+      const deleteFilePath: string[] = [];
+      
+      selectedItems.forEach(itemName => {
+        // 根据当前路径构建完整路径
+        if (currentPath.length === 0) {
+          // 在根目录，直接使用文件名
+          deleteFilePath.push(itemName);
+        } else {
+          // 在子目录，需要包含完整路径
+          const fullPath = [...currentPath, itemName].join('/');
+          deleteFilePath.push(fullPath);
+        }
+      });
+
+      console.log('准备删除的路径:', deleteFilePath);
+      
+      // 调用删除接口
+      const response = await EditSelectAPI.deleteMaterial(materialId!, deleteFilePath);
+      
+      if (response.code === 0) {
+        toast.success(`成功删除 ${selectedItems.size} 个项目`);
+        
+        // 清空选中状态
+        setSelectedItems(new Set());
+        
+        // 重新加载素材库数据
+        const reloadData = async () => {
+          try {
+            setLoading(true);
+            
+            // 重新获取素材库JSON数据
+            if (materialInfo?.url) {
+              const response = await fetch(materialInfo.url);
+              if (response.ok) {
+                const data: MaterialRoot = await response.json();
+                setRootData(data);
+              }
+            }
+          } catch (error) {
+            console.error('重新加载数据失败:', error);
+            toast.error('刷新数据失败');
+          } finally {
+            setLoading(false);
+          }
+        };
+        
+        await reloadData();
+      } else {
+        toast.error(response.message || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除操作失败:', error);
+      toast.error('删除操作失败，请稍后重试');
+    }
+  };
+
+  /**
+   * 取消删除操作
+   */
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   if (loading) {
@@ -411,6 +491,18 @@ const MaterialLibraryPage: React.FC = () => {
           onClose={() => setShowVideoPlayer(false)}
         />
       )}
+
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        visible={showDeleteConfirm}
+        title="确认删除"
+        message={`确定要删除选中的 ${selectedItems.size} 个项目吗？删除后无法恢复。`}
+        confirmText="删除"
+        cancelText="取消"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };

@@ -66,6 +66,21 @@ export class EditSelectAPI {
   }
 
   /**
+   * 删除素材库中的文件或目录
+   * @param materialId 素材库ID
+   * @param deleteFilePath 要删除的文件路径数组
+   * @returns 删除结果
+   */
+  static async deleteMaterial(materialId: string, deleteFilePath: string[]): Promise<ApiResponse<{id: string}>> {
+    console.log(`[EditSelectAPI] 删除素材: materialId=${materialId}, deleteFilePath=`, deleteFilePath);
+    
+    return apiClient.post(API_PATHS.material.delete, {
+      id: materialId,
+      deleteFilePath
+    });
+  }
+
+  /**
    * 获取音乐列表
    * @param page 页码，默认1
    * @param limit 每页记录数，默认20，设置为-1时返回所有记录

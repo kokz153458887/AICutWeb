@@ -1,0 +1,388 @@
+/* 任务信息卡片容器 */
+.task-info-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 任务文本 */
+.task-text {
+  margin-bottom: 12px;
+}
+
+.text-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}
+
+/* 视频信息 */
+.task-video-info {
+  margin-bottom: 12px;
+}
+
+.video-info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.info-tag {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(0, 214, 201, 0.2), rgba(0, 214, 201, 0.1));
+  color: rgba(0, 214, 201, 0.9);
+  border: 1px solid rgba(0, 214, 201, 0.3);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.info-tag:hover {
+  background: linear-gradient(135deg, rgba(0, 214, 201, 0.3), rgba(0, 214, 201, 0.15));
+  border-color: rgba(0, 214, 201, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 类型信息 */
+.task-type-info {
+  margin-bottom: 16px;
+}
+
+.video-type-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.type-tag {
+  padding: 5px 10px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.type-tag:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+/* 预览图容器 */
+.task-preview-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  margin-bottom: 16px;
+  transition: transform 0.2s ease;
+}
+
+.task-preview-container:hover {
+  transform: scale(1.02);
+}
+
+/* 预览图片 */
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.preview-image.loaded {
+  opacity: 1;
+}
+
+/* 图片占位符 */
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  gap: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid #00d6c9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+}
+
+/* 预览图片错误状态 */
+.preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.4);
+  gap: 8px;
+}
+
+.fallback-icon {
+  font-size: 32px;
+  opacity: 0.6;
+}
+
+.fallback-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* 播放按钮覆盖层 */
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.task-preview-container:hover .play-overlay {
+  opacity: 1;
+}
+
+.play-button {
+  transition: opacity 0.2s ease;
+}
+
+/* 操作按钮区 */
+.task-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 通用按钮样式 */
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 主要按钮（原链接） */
+.action-btn.primary {
+  background: linear-gradient(135deg, #007AFF, #0056CC);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.action-btn.primary:hover {
+  background: linear-gradient(135deg, #0056CC, #003D99);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+/* 次要按钮（视频地址） */
+.action-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 素材库按钮 */
+.action-btn.material {
+  background: linear-gradient(135deg, #00d6c9, #00b8ab);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 214, 201, 0.3);
+}
+
+.action-btn.material:hover {
+  background: linear-gradient(135deg, #00b8ab, #009688);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 214, 201, 0.4);
+}
+
+/* 视频地址下拉包装器 */
+.video-address-wrapper {
+  position: relative;
+}
+
+/* 下拉图标 */
+.dropdown-icon {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* 文件URL下拉框 */
+.file-urls-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(20, 20, 20, 0.95);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* 文件URL项目 */
+.file-url-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.file-url-item:last-child {
+  border-bottom: none;
+}
+
+.file-url-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.url-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.url-text {
+  display: block;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+/* 无URL状态 */
+.no-urls {
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 480px) {
+  .task-info-card {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .text-content {
+    font-size: 13px;
+  }
+
+  .info-text {
+    font-size: 11px;
+  }
+
+  .type-text {
+    font-size: 10px;
+  }
+
+  .task-actions {
+    gap: 8px;
+  }
+
+  .action-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .play-button svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .file-urls-dropdown {
+    left: -12px;
+    right: -12px;
+  }
+} 

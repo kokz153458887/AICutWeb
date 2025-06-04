@@ -17,6 +17,7 @@ interface VideoPlayerProps {
   seekToTime?: number;
   showProgressBar?: boolean;
   isLocationMode?: boolean; // 是否处于定位模式
+  autoPlay?: boolean; // 是否自动播放
 }
 
 export interface VideoPlayerRef {
@@ -38,7 +39,8 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   onPlayStateChange,
   seekToTime,
   showProgressBar = true,
-  isLocationMode = false
+  isLocationMode = false,
+  autoPlay = false
 }, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -104,10 +106,19 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       setDuration(videoRef.current.duration);
       // 播放器完成初始化后，移除封面图
       setShowCover(false);
-      // seek到第一帧并暂停
+      // seek到第一帧
       videoRef.current.currentTime = 0;
       setCurrentTime(0);
       setShowPauseButton(true);
+
+      // 如果需要自动播放，则播放视频
+      if (autoPlay) {
+        try {
+          videoRef.current.play();
+        } catch (error) {
+          console.warn('自动播放失败:', error);
+        }
+      }
 
        // Safari兼容性：强制渲染第一帧
        const userAgent = navigator.userAgent;
@@ -124,6 +135,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
                  if (videoRef.current) {
                    videoRef.current.pause();
                    videoRef.current.currentTime = 0;
+                   // 如果需要自动播放，重新播放
+                   if (autoPlay) {
+                     videoRef.current.play();
+                   }
                  }
                }, 50);
              }

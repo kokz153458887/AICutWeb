@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
 import TabBar from './components/TabBar'
 import Home from './pages/home/Home'
@@ -12,6 +12,7 @@ import VideoListPage from './videolist'
 import VideoOperatePage from './operate/components/VideoOperatePage'
 import VideoSlicePage from './cut/videoSlice/page'
 import VideoEditPage from './cut/videoedit/pages/VideoEditPage'
+import VideoParseResultPage from './cut/videoParse/pages/VideoParseResultPage'
 import MaterialLibraryPage from './edit/components/meterialSelect/MaterialLibraryPage'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
@@ -93,6 +94,8 @@ const AppContainer: React.FC = () => {
         <Route path="/video-slice" element={<VideoSlicePage />} />
         {/* 视频剪辑页路由 */}
         <Route path="/video-edit/:id" element={<VideoEditPage />} />
+        {/* 视频解析结果页路由 */}
+        <Route path="/video-parse-result/:id" element={<VideoParseResultPage />} />
         {/* 素材库详情页路由 */}
         <Route path="/material-library/:materialId" element={<MaterialLibraryPage />} />
         {/* 将 /videolist 路由移除，统一使用 tab 参数 */}

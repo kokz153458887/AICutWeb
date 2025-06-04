@@ -1,0 +1,306 @@
+/* 视频片段卡片容器 */
+.video-clip-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 片段头部信息 */
+.clip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.clip-info {
+  flex: 1;
+}
+
+.clip-name {
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+}
+
+.clip-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.folder-tag,
+.time-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.folder-tag {
+  background: linear-gradient(135deg, #00d6c9, #00b8ab);
+  border-color: #00d6c9;
+}
+
+.time-tag {
+  background: linear-gradient(135deg, #ffa502, #ff8f00);
+  border-color: #ffa502;
+}
+
+/* 删除按钮 */
+.delete-btn {
+  padding: 8px;
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 71, 87, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 71, 87, 0.2);
+  color: rgba(255, 71, 87, 1);
+  transform: scale(1.05);
+}
+
+/* 文本内容区域 */
+.clip-text {
+  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.text-content {
+  display: block;
+}
+
+.text-expand-btn,
+.text-collapse-btn {
+  color: #00d6c9;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.text-expand-btn:hover,
+.text-collapse-btn:hover {
+  color: #00b8ab;
+}
+
+/* 媒体容器 */
+.clip-media-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+}
+
+/* 预览图片 */
+.clip-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.preview-image.loaded {
+  opacity: 1;
+}
+
+/* 图片占位符 */
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid #00d6c9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 预览图片错误状态 */
+.preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.fallback-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.6;
+}
+
+.fallback-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* 播放按钮覆盖层 */
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.clip-preview:hover .play-overlay {
+  opacity: 1;
+}
+
+.play-button {
+  transition: transform 0.2s ease;
+}
+
+/* 视频播放器容器 */
+.clip-video-player {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 全屏播放按钮 */
+.fullscreen-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.fullscreen-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 480px) {
+  .video-clip-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .clip-name {
+    font-size: 13px;
+  }
+
+  .clip-tags {
+    gap: 6px;
+  }
+
+  .folder-tag,
+  .time-tag {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .delete-btn {
+    padding: 6px;
+  }
+
+  .clip-text {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .play-button svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .fullscreen-btn {
+    bottom: 8px;
+    right: 8px;
+    padding: 6px;
+  }
+
+  .fullscreen-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+} 

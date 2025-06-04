@@ -1,0 +1,321 @@
+/* 视频解析结果页面容器 */
+.video-parse-result-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(180deg, #0f0f0f 0%, #141414 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 顶部导航栏 */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 返回按钮 */
+.back-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.back-button:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 页面标题 */
+.page-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* 删除按钮 */
+.delete-button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  background: rgba(255, 71, 87, 0.1);
+  color: rgba(255, 71, 87, 0.8);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+}
+
+.delete-button:hover {
+  background: rgba(255, 71, 87, 0.2);
+  color: rgba(255, 71, 87, 1);
+  transform: translateY(-1px);
+}
+
+.delete-button:active {
+  transform: scale(0.95);
+}
+
+/* 页面内容 */
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  padding: 16px;
+  background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%);
+}
+
+/* 任务信息区域 */
+.task-info-section {
+  margin-bottom: 24px;
+}
+
+/* 主视频播放器 */
+.main-video-player {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.close-video-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 5;
+}
+
+.close-video-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+/* 视频片段区域 */
+.clips-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* 片段头部 */
+.clips-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clips-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 片段列表 */
+.clips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 空片段状态 */
+.empty-clips {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.4);
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* 全屏视频覆盖层 */
+.fullscreen-video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 全屏头部 */
+.fullscreen-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.close-fullscreen-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* 全屏视频容器 */
+.fullscreen-video-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px 16px;
+}
+
+.fullscreen-video-container .video-player-container {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+/* 滚动条样式优化 */
+.page-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.page-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.page-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 214, 201, 0.3);
+  border-radius: 2px;
+}
+
+.page-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 214, 201, 0.5);
+}
+
+/* iOS Safari 兼容性修复 */
+@supports (-webkit-touch-callout: none) {
+  .video-parse-result-page {
+    height: -webkit-fill-available;
+  }
+  
+  .page-content {
+    height: -webkit-fill-available;
+  }
+}
+
+/* 移动端适配 */
+@media screen and (max-width: 480px) {
+  .page-header {
+    padding: 6px 12px;
+  }
+
+  .page-title {
+    font-size: 14px;
+  }
+
+  .page-content {
+    padding: 12px;
+  }
+
+  .clips-section {
+    padding: 12px;
+  }
+
+  .clips-title {
+    font-size: 14px;
+  }
+
+  .empty-clips {
+    padding: 30px 16px;
+  }
+
+  .empty-icon {
+    font-size: 36px;
+  }
+
+  .empty-text {
+    font-size: 12px;
+  }
+
+  .fullscreen-header {
+    padding: 12px;
+  }
+
+  .close-fullscreen-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .fullscreen-video-container {
+    padding: 0 12px 12px;
+  }
+} 

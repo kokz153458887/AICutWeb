@@ -9,8 +9,8 @@ import InputArea from '../components/InputArea';
 import FilterTabs from '../components/FilterTabs';
 import VideoSliceList from '../components/VideoSliceList';
 import ParseLoadingDialog from '../components/ParseLoadingDialog';
-import { VideoSliceFilter, VideoSliceItem, VideoSliceStatus } from '../types';
-import { getParseList, parseVideo, deleteTask } from '../api';
+import { VideoSliceFilter, VideoSliceItem } from '../types';
+import { getParseList, parseVideo, deleteTask, ParseTask } from '../api';
 import { extractUrlsFromText, transformTaskToSliceItem, filterToStatus } from '../api/utils';
 import { toast } from '../../../components/Toast';
 import './styles.css';
@@ -53,7 +53,7 @@ const VideoSlicePage: React.FC = () => {
     }
 
     try {
-      let allItems: any[] = [];
+      let allItems: ParseTask[] = [];
       let totalCount = 0;
       let totalPages = 1;
 
@@ -129,7 +129,7 @@ const VideoSlicePage: React.FC = () => {
     try {
       // 不要提前清除当前缓存，保持显示当前数据
       // 重新加载数据
-      let allItems: any[] = [];
+      let allItems: ParseTask[] = [];
       let totalCount = 0;
       let totalPages = 1;
 
@@ -239,9 +239,10 @@ const VideoSlicePage: React.FC = () => {
         refreshCurrentTab();
       }, 1000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('视频解析失败:', err);
-      toast.error(err.message || '视频解析失败');
+      const errorMessage = err instanceof Error ? err.message : '视频解析失败';
+      toast.error(errorMessage);
     } finally {
       setIsParsingVideo(false);
     }
@@ -287,8 +288,14 @@ const VideoSlicePage: React.FC = () => {
    */
   const handleItemClick = useCallback((item: VideoSliceItem) => {
     console.log('点击视频切片:', item);
-    // 跳转到视频剪辑页面
-    navigate(`/video-edit/${item.id}`);
+    
+    // 如果是recorded状态，跳转到视频解析结果页面
+    if (item.status === 'recorded') {
+      navigate(`/video-parse-result/${item.id}`);
+    } else {
+      // 其他状态跳转到视频剪辑页面
+      navigate(`/video-edit/${item.id}`);
+    }
   }, [navigate]);
 
   /**
@@ -325,9 +332,10 @@ const VideoSlicePage: React.FC = () => {
         refreshCurrentTab();
       }, 1000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('重试失败:', err);
-      toast.error(err.message || '重试失败');
+      const errorMessage = err instanceof Error ? err.message : '重试失败';
+      toast.error(errorMessage);
     } finally {
       setIsParsingVideo(false);
     }

@@ -496,7 +496,7 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
       {/* 标题输入区域 */}
       <div className="clip-title">
         <div className="title-row">
-          <div className="play-clip-btn" onClick={handlePlayClick}>
+          <button className="play-clip-btn" onClick={handlePlayClick}>
             {isPlaying ? (
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z" fill="currentColor"/>
@@ -506,7 +506,7 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
                 <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
               </svg>
             )}
-          </div>
+          </button>
           <div className="title-input-container">
             <input
               ref={titleInputRef}
@@ -575,11 +575,11 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
             </div>
           )}
           
-          <div className="delete-clip-btn" onClick={handleDeleteClick}>
+          <button className="delete-clip-btn" onClick={handleDeleteClick}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
               <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/>
             </svg>
-          </div>
+          </button>
         </div>
       </div>
 

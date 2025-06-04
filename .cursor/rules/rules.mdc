@@ -24,5 +24,69 @@ alwaysApply: true
 16. 在完成需求的时候，不需要考虑对旧逻辑的兼容性，旧的属性、方法不用的要及时删除
 17. 我的电脑是Mac环境，X86架构
 18. 回答问题使用中文回复
+19. 为了避免CSS样式冲突和全局污染问题，请遵循 [CSS 命名规范]
+20. 代码文件结构按照 [推荐的文件结构] 进行
  
- 
+ # CSS 命名规范
+
+为了避免CSS样式冲突和全局污染问题，请遵循以下命名规范：
+
+## 1. css文件命名
+CSS 文件命名为 *.module.css ,保障当前的 vite 工程能够自动启用css模块化
+
+## 2. 组件级别命名
+
+每个组件的CSS类名应该以组件名为前缀：
+
+```css
+/* TaskInfoCard 组件 */
+.task-info-card { }
+.task-info-text-content { }
+.task-text-expand-btn { }
+
+/* VideoParseResultPage 组件 */
+.parse-result-delete-button { }
+.parse-result-header { }
+
+/* EditPage 组件 */
+.edit-cancel-button { }
+.edit-submit-button { }
+```
+
+## 3. 页面级别命名
+
+页面特有的样式使用页面名前缀：
+
+```css
+/* 编辑页面 */
+.edit-page { }
+.edit-header { }
+.edit-content { }
+
+/* 视频解析结果页面 */
+.video-parse-result-page { }
+.parse-result-container { }
+```
+
+## 4. 避免的通用命名
+
+以下命名容易造成冲突，应该避免：
+
+- `.delete-button` → 使用 `.component-delete-button`
+- `.cancel-button` → 使用 `.component-cancel-button`
+- `.text-content` → 使用 `.component-text-content`
+- `.submit-button` → 使用 `.component-submit-button`
+
+# 推荐的文件结构
+
+```
+src/
+├── components/
+│   ├── ComponentA/
+│   │   ├── index.tsx
+│   │   └── styles.css (使用 .component-a- 前缀)
+├── pages/
+│   ├── PageA/
+│   │   ├── index.tsx
+│   │   └── styles.css (使用 .page-a- 前缀)
+```

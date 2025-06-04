@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import { VideoClip } from '../../api';
-import VideoPlayer from '../../../videoedit/components/VideoPlayer';
+import VideoPlayer from '../../../../components/VideoPlayer';
 import './styles.css';
 
 interface VideoClipCardProps {

@@ -1,23 +1,19 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
 import TabBar from './components/TabBar'
-import Home from './pages/home/Home'
-import Mine from './pages/mine/Mine'
 import DebugConsole from './components/DebugConsole'
-import { VideoDetail } from './detail'
-import EditPage from './edit'
-import VideoListPage from './videolist'
-import VideoOperatePage from './operate/components/VideoOperatePage'
-import VideoSlicePage from './cut/videoSlice/page'
-import VideoEditPage from './cut/videoedit/pages/VideoEditPage'
-import VideoParseResultPage from './cut/videoParse/pages/VideoParseResultPage'
-import MaterialLibraryPage from './edit/components/meterialSelect/MaterialLibraryPage'
 import { initDeviceInfo } from './utils/deviceInfo'
 import { debugConfig } from './config/debug'
 import Toast from './components/Toast'
+import LoadingView from './components/LoadingView'
 import { VideoOperateData } from './operate/api/types'
+
+// 只导入首页需要的组件
+const Home = React.lazy(() => import('./pages/home/Home'));
+const Mine = React.lazy(() => import('./pages/mine/Mine'));
+const VideoListPage = React.lazy(() => import('./videolist'));
 
 // 内容容器组件，根据URL参数显示不同页面
 const ContentContainer: React.FC = () => {
@@ -28,16 +24,22 @@ const ContentContainer: React.FC = () => {
   return (
     <div className="content">
       <div style={{ display: currentTab === 'home' ? 'block' : 'none', height: '100%' }}>
-        <Home />
+        <Suspense fallback={<LoadingView />}>
+          <Home />
+        </Suspense>
       </div>
       <div style={{ display: currentTab === 'mine' ? 'block' : 'none', height: '100%' }}>
-        <Mine />
+        <Suspense fallback={<LoadingView />}>
+          <Mine />
+        </Suspense>
       </div>
       <div style={{ 
         display: currentTab === 'videolist' ? 'block' : 'none', 
         height: '100%'
       }}>
-        <VideoListPage />
+        <Suspense fallback={<LoadingView />}>
+          <VideoListPage />
+        </Suspense>
       </div>
     </div>
   );
@@ -81,34 +83,61 @@ const AppContainer: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Routes>
-        <Route path="/" element={<>
-          <ContentContainer />
-          {!isVideoOperateVisible && <TabBar />}
-        </>} />
-        {/* 视频播放页路由 */}
-        <Route path="/video/:id" element={<VideoDetail />} />
-        {/* 视频编辑页路由 */}
-        <Route path="/edit" element={<EditPage />} />
-        {/* 视频切片页路由 */}
-        <Route path="/video-slice" element={<VideoSlicePage />} />
-        {/* 视频剪辑页路由 */}
-        <Route path="/video-edit/:id" element={<VideoEditPage />} />
-        {/* 视频解析结果页路由 */}
-        <Route path="/video-parse-result/:id" element={<VideoParseResultPage />} />
-        {/* 素材库详情页路由 */}
-        <Route path="/material-library/:materialId" element={<MaterialLibraryPage />} />
-        {/* 将 /videolist 路由移除，统一使用 tab 参数 */}
-      </Routes>
+      <Suspense fallback={<LoadingView />}>
+        <Routes>
+          <Route path="/" element={<>
+            <ContentContainer />
+            {!isVideoOperateVisible && <TabBar />}
+          </>} />
+          {/* 视频播放页路由 - 按需加载 */}
+          <Route path="/video/:id" element={
+            <Suspense fallback={<LoadingView />}>
+              {React.createElement(React.lazy(() => import('./detail').then(module => ({ default: module.VideoDetail }))))}
+            </Suspense>
+          } />
+          {/* 视频编辑页路由 - 按需加载 */}
+          <Route path="/edit" element={
+            <Suspense fallback={<LoadingView />}>
+              {React.createElement(React.lazy(() => import('./edit')))}
+            </Suspense>
+          } />
+          {/* 视频切片页路由 - 按需加载 */}
+          <Route path="/video-slice" element={
+            <Suspense fallback={<LoadingView />}>
+              {React.createElement(React.lazy(() => import('./cut/videoSlice/page')))}
+            </Suspense>
+          } />
+          {/* 视频剪辑页路由 - 按需加载 */}
+          <Route path="/video-edit/:id" element={
+            <Suspense fallback={<LoadingView />}>
+              {React.createElement(React.lazy(() => import('./cut/videoedit/pages/VideoEditPage')))}
+            </Suspense>
+          } />
+          {/* 视频解析结果页路由 - 按需加载 */}
+          <Route path="/video-parse-result/:id" element={
+            <Suspense fallback={<LoadingView />}>
+              {React.createElement(React.lazy(() => import('./cut/videoParse/pages/VideoParseResultPage')))}
+            </Suspense>
+          } />
+          {/* 素材库详情页路由 - 按需加载 */}
+          <Route path="/material-library/:materialId" element={
+            <Suspense fallback={<LoadingView />}>
+              {React.createElement(React.lazy(() => import('./edit/components/meterialSelect/MaterialLibraryPage')))}
+            </Suspense>
+          } />
+        </Routes>
+      </Suspense>
       {debugConfig.showDebugConsole && <DebugConsole />}
       <Toast />
-      {/* 视频操作页作为模态层 */}
+      {/* 视频操作页作为模态层 - 按需加载 */}
       {isVideoOperateVisible && (
-        <VideoOperatePage 
-          videoId={searchParams.get('videoId')!}
-          initialIndex={parseInt(searchParams.get('initialIndex') || '0', 10)}
-          videoData={state?.videoData}
-        />
+        <Suspense fallback={<LoadingView />}>
+          {React.createElement(React.lazy(() => import('./operate/components/VideoOperatePage')), {
+            videoId: searchParams.get('videoId')!,
+            initialIndex: parseInt(searchParams.get('initialIndex') || '0', 10),
+            videoData: state?.videoData
+          })}
+        </Suspense>
       )}
     </div>
   );

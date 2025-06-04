@@ -1,9 +1,9 @@
 /* 任务信息卡片容器 */
-.task-info-card {
+.video-parse-task-info-card {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 12px; /* 减少间距 */
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -11,36 +11,100 @@
 }
 
 /* 任务文本 */
-.task-text {
+.video-parse-task-text {
   margin-bottom: 12px;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
 }
 
-.text-content {
+.video-parse-task-text-content {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: pre-wrap !important;
+  /* 确保有足够高度显示2行文本 */
+  min-height: calc(1.6em * 2) !important;
+  max-height: calc(1.6em * 2) !important;
+}
+
+/* 展开状态的文本内容 */
+.video-parse-task-text-content.expanded {
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 展开/收起按钮容器 */
+.video-parse-task-text-expand-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 50px 0 0 0;
+  height: calc(1.6em * 2);
+  display: flex;
+  align-items: center;
+}
+
+/* 展开/收起按钮 - 优化样式使其更协调 */
+.video-parse-task-text-expand-btn {
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.video-parse-task-text-expand-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
   color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-wrap: break-word;
+  transform: translateY(-1px);
+}
+
+.video-parse-task-text-expand-btn:active {
+  transform: scale(0.95);
+}
+
+/* 展开按钮图标 */
+.video-parse-task-expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.video-parse-task-expand-icon.expanded {
+  transform: rotate(180deg);
 }
 
 /* 视频信息 */
-.task-video-info {
-  margin-bottom: 12px;
+.video-parse-task-video-info {
+  margin-bottom: 5px;
 }
 
-.video-info-tags {
+.video-parse-video-info-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.info-tag {
-  padding: 6px 12px;
+.video-parse-info-tag {
+  padding: 0px 12px;
   background: linear-gradient(135deg, rgba(0, 214, 201, 0.2), rgba(0, 214, 201, 0.1));
   color: rgba(0, 214, 201, 0.9);
   border: 1px solid rgba(0, 214, 201, 0.3);
@@ -53,25 +117,25 @@
   transition: all 0.2s ease;
 }
 
-.info-tag:hover {
+.video-parse-info-tag:hover {
   background: linear-gradient(135deg, rgba(0, 214, 201, 0.3), rgba(0, 214, 201, 0.15));
   border-color: rgba(0, 214, 201, 0.4);
   transform: translateY(-1px);
 }
 
 /* 类型信息 */
-.task-type-info {
-  margin-bottom: 16px;
+.video-parse-task-type-info {
+  margin-bottom: 8px;
 }
 
-.video-type-tags {
+.video-parse-video-type-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.type-tag {
-  padding: 5px 10px;
+.video-parse-type-tag {
+  padding: 0px 10px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
   color: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -84,7 +148,7 @@
   transition: all 0.2s ease;
 }
 
-.type-tag:hover {
+.video-parse-type-tag:hover {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
   border-color: rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
@@ -92,7 +156,7 @@
 }
 
 /* 预览图容器 */
-.task-preview-container {
+.video-parse-task-preview-container {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
@@ -104,12 +168,12 @@
   transition: transform 0.2s ease;
 }
 
-.task-preview-container:hover {
+.video-parse-task-preview-container:hover {
   transform: scale(1.02);
 }
 
 /* 预览图片 */
-.preview-image {
+.video-parse-preview-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -117,12 +181,12 @@
   opacity: 0;
 }
 
-.preview-image.loaded {
+.video-parse-preview-image.loaded {
   opacity: 1;
 }
 
 /* 图片占位符 */
-.image-placeholder {
+.video-parse-image-placeholder {
   position: absolute;
   top: 0;
   left: 0;
@@ -152,7 +216,7 @@
   }
 }
 
-.loading-spinner {
+.video-parse-loading-spinner {
   width: 24px;
   height: 24px;
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -166,13 +230,13 @@
   100% { transform: rotate(360deg); }
 }
 
-.loading-text {
+.video-parse-loading-text {
   color: rgba(255, 255, 255, 0.4);
   font-size: 12px;
 }
 
 /* 预览图片错误状态 */
-.preview-fallback {
+.video-parse-preview-fallback {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -183,18 +247,18 @@
   gap: 8px;
 }
 
-.fallback-icon {
+.video-parse-fallback-icon {
   font-size: 32px;
   opacity: 0.6;
 }
 
-.fallback-text {
+.video-parse-fallback-text {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.3);
 }
 
 /* 播放按钮覆盖层 */
-.play-overlay {
+.video-parse-play-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -208,23 +272,23 @@
   transition: opacity 0.3s ease;
 }
 
-.task-preview-container:hover .play-overlay {
+.video-parse-task-preview-container:hover .video-parse-play-overlay {
   opacity: 1;
 }
 
-.play-button {
+.video-parse-play-button {
   transition: opacity 0.2s ease;
 }
 
-/* 操作按钮区 */
-.task-actions {
+/* 操作按钮 */
+.video-parse-task-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
 /* 通用按钮样式 */
-.action-btn {
+.video-parse-action-btn {
   padding: 8px 16px;
   border-radius: 12px;
   font-size: 12px;
@@ -239,59 +303,59 @@
 }
 
 /* 主要按钮（原链接） */
-.action-btn.primary {
+.video-parse-action-btn.primary {
   background: linear-gradient(135deg, #007AFF, #0056CC);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
-.action-btn.primary:hover {
+.video-parse-action-btn.primary:hover {
   background: linear-gradient(135deg, #0056CC, #003D99);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
 }
 
 /* 次要按钮（视频地址） */
-.action-btn.secondary {
+.video-parse-action-btn.secondary {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.action-btn.secondary:hover {
+.video-parse-action-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.15);
   color: rgba(255, 255, 255, 0.9);
 }
 
 /* 素材库按钮 */
-.action-btn.material {
+.video-parse-action-btn.material {
   background: linear-gradient(135deg, #00d6c9, #00b8ab);
   color: white;
   box-shadow: 0 2px 8px rgba(0, 214, 201, 0.3);
 }
 
-.action-btn.material:hover {
+.video-parse-action-btn.material:hover {
   background: linear-gradient(135deg, #00b8ab, #009688);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 214, 201, 0.4);
 }
 
-/* 视频地址下拉包装器 */
-.video-address-wrapper {
+/* 视频地址下拉包装层 */
+.video-parse-video-address-wrapper {
   position: relative;
 }
 
 /* 下拉图标 */
-.dropdown-icon {
+.video-parse-dropdown-icon {
   transition: transform 0.2s ease;
 }
 
-.dropdown-icon.expanded {
+.video-parse-dropdown-icon.expanded {
   transform: rotate(180deg);
 }
 
-/* 文件URL下拉框 */
-.file-urls-dropdown {
+/* 文件URL下拉层 - 提高z-index解决被覆盖问题 */
+.video-parse-file-urls-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -302,29 +366,29 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  z-index: 10000; /* 大幅提高z-index */
   margin-top: 4px;
   max-height: 200px;
   overflow-y: auto;
 }
 
 /* 文件URL项目 */
-.file-url-item {
+.video-parse-file-url-item {
   padding: 12px 16px;
   cursor: pointer;
   transition: background 0.2s ease;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.file-url-item:last-child {
+.video-parse-file-url-item:last-child {
   border-bottom: none;
 }
 
-.file-url-item:hover {
+.video-parse-file-url-item:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.url-label {
+.video-parse-url-label {
   display: block;
   color: rgba(255, 255, 255, 0.9);
   font-size: 11px;
@@ -332,7 +396,7 @@
   margin-bottom: 4px;
 }
 
-.url-text {
+.video-parse-url-text {
   display: block;
   color: rgba(255, 255, 255, 0.6);
   font-size: 10px;
@@ -341,7 +405,7 @@
 }
 
 /* 无URL状态 */
-.no-urls {
+.video-parse-no-urls {
   padding: 12px 16px;
   color: rgba(255, 255, 255, 0.5);
   font-size: 11px;
@@ -350,38 +414,38 @@
 
 /* 移动端适配 */
 @media screen and (max-width: 480px) {
-  .task-info-card {
+  .video-parse-task-info-card {
     padding: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
 
-  .text-content {
+  .video-parse-task-text-content {
     font-size: 13px;
   }
 
-  .info-text {
+  .video-parse-info-tag {
     font-size: 11px;
   }
 
-  .type-text {
+  .video-parse-type-tag {
     font-size: 10px;
   }
 
-  .task-actions {
+  .video-parse-task-actions {
     gap: 8px;
   }
 
-  .action-btn {
+  .video-parse-action-btn {
     padding: 6px 12px;
     font-size: 11px;
   }
 
-  .play-button svg {
+  .video-parse-play-button svg {
     width: 48px;
     height: 48px;
   }
 
-  .file-urls-dropdown {
+  .video-parse-file-urls-dropdown {
     left: -12px;
     right: -12px;
   }

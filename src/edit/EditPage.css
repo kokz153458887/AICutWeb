@@ -18,21 +18,23 @@
 }
 
 /* 禁用所有可点击元素的默认触摸高亮效果 */
-.cancel-button,
-.submit-button {
+.edit-cancel-button,
+.edit-submit-button {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-.cancel-button {
+.edit-cancel-button {
   color: #ffffff;
   font-size: 16px;
   padding: 5px 10px;
   cursor: pointer;
+  background: transparent;
+  border: none;
 }
 
 /* 取消按钮按下效果 */
-.cancel-button:active {
+.edit-cancel-button:active {
   opacity: 0.7;
 }
 
@@ -42,17 +44,18 @@
   font-weight: 600;
 }
 
-.submit-button {
+.edit-submit-button {
   color: #ffffff;
   font-size: 16px;
   background-color: #00e676;
   padding: 5px 15px;
   border-radius: 20px;
   cursor: pointer;
+  border: none;
 }
 
 /* 提交按钮按下效果 */
-.submit-button:active {
+.edit-submit-button:active {
   transform: scale(0.95);
   background-color: #00c566;
 }
@@ -79,7 +82,7 @@
 }
 
 /* 允许点击取消按钮 */
-.edit-header .cancel-button {
+.edit-header .edit-cancel-button {
   z-index: 10001;
   position: relative;
 }

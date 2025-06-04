@@ -439,9 +439,9 @@ const EditPage: React.FC = () => {
     <div className="edit-page">
       {/* 顶部导航栏 */}
       <div className="edit-header">
-        <div className="cancel-button" onClick={handleCancel}>取消</div>
+        <div className="edit-cancel-button" onClick={handleCancel}>取消</div>
         <div className="page-title">创建视频</div>
-        <div className="submit-button" onClick={handleGenerate}>生成</div>
+        <div className="edit-submit-button" onClick={handleGenerate}>生成</div>
       </div>
 
       {/* 主要内容区域 */}

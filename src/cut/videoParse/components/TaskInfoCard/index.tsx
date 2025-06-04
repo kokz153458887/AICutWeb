@@ -2,7 +2,7 @@
  * 任务信息卡片组件
  * 展示解析任务的基本信息，包含文本、视频信息、预览图等
  */
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ParseResultDetail } from '../../api';
 import { formatFileSize, formatDuration } from '../../utils';
 import './styles.css';
@@ -27,6 +27,37 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   const [showFileUrls, setShowFileUrls] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isTextExpanded, setIsTextExpanded] = useState(false);
+  const [showExpandButton, setShowExpandButton] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  /**
+   * 检测文本是否超出2行
+   */
+  useEffect(() => {
+    const checkTextOverflow = () => {
+      if (textRef.current) {
+        const element = textRef.current;
+        // 临时移除line-clamp限制来检测实际高度
+        const originalStyle = element.style.cssText;
+        element.style.cssText = 'display: block !important; -webkit-line-clamp: unset !important; max-height: none !important; overflow: visible !important;';
+        
+        const fullHeight = element.scrollHeight;
+        
+        // 恢复原始样式
+        element.style.cssText = originalStyle;
+        
+        // 计算2行的高度（1.6 * 14px * 2 ≈ 44.8px）
+        const twoLineHeight = 45;
+        
+        setShowExpandButton(fullHeight > twoLineHeight);
+      }
+    };
+
+    // 延迟检测，确保文本已渲染
+    const timer = setTimeout(checkTextOverflow, 100);
+    return () => clearTimeout(timer);
+  }, [taskData.text]);
 
   /**
    * 处理图片加载完成
@@ -67,6 +98,13 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   };
 
   /**
+   * 处理文本展开/收起
+   */
+  const handleTextToggle = () => {
+    setIsTextExpanded(!isTextExpanded);
+  };
+
+  /**
    * 获取视频信息标签
    */
   const getVideoInfoTags = () => {
@@ -92,58 +130,85 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   };
 
   return (
-    <div className="task-info-card">
+    <div className="video-parse-task-info-card">
       {/* 第一行：文本内容 */}
-      <div className="task-text">
-        <p className="text-content">{taskData.text}</p>
+      <div className="video-parse-task-text">
+        <p 
+          ref={textRef}
+          className={`video-parse-task-text-content ${isTextExpanded ? 'expanded' : ''}`}
+        >
+          {taskData.text}
+        </p>
+        {showExpandButton && (
+          <div className="video-parse-task-text-expand-container">
+            <button className="video-parse-task-text-expand-btn" onClick={handleTextToggle}>
+              {isTextExpanded ? '收起' : '展开'}
+              <svg 
+                width="12" 
+                height="12" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                className={`video-parse-task-expand-icon ${isTextExpanded ? 'expanded' : ''}`}
+              >
+                <path 
+                  d="M7 10l5 5 5-5" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 第二行：视频信息 */}
-      <div className="task-video-info">
-        <div className="video-info-tags">
+      <div className="video-parse-task-video-info">
+        <div className="video-parse-video-info-tags">
           {getVideoInfoTags().map((tag, index) => (
-            <span key={index} className="info-tag">{tag}</span>
+            <span key={index} className="video-parse-info-tag">{tag}</span>
           ))}
         </div>
       </div>
 
       {/* 第三行：视频类型信息 */}
-      <div className="task-type-info">
-        <div className="video-type-tags">
+      <div className="video-parse-task-type-info">
+        <div className="video-parse-video-type-tags">
           {getVideoTypeTags().map((tag, index) => (
-            <span key={index} className="type-tag">{tag}</span>
+            <span key={index} className="video-parse-type-tag">{tag}</span>
           ))}
         </div>
       </div>
 
       {/* 第四行：预览图 */}
-      <div className="task-preview-container" onClick={handlePreviewClick}>
+      <div className="video-parse-task-preview-container" onClick={handlePreviewClick}>
         {!imageError && taskData.preview_image ? (
           <>
             {!imageLoaded && (
-              <div className="image-placeholder">
-                <div className="loading-spinner"></div>
-                <span className="loading-text">加载中...</span>
+              <div className="video-parse-image-placeholder">
+                <div className="video-parse-loading-spinner"></div>
+                <span className="video-parse-loading-text">加载中...</span>
               </div>
             )}
             <img
               src={taskData.preview_image}
               alt="视频预览"
-              className={`preview-image ${imageLoaded ? 'loaded' : ''}`}
+              className={`video-parse-preview-image ${imageLoaded ? 'loaded' : ''}`}
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
           </>
         ) : (
-          <div className="preview-fallback">
-            <div className="fallback-icon">📹</div>
-            <div className="fallback-text">暂无预览图</div>
+          <div className="video-parse-preview-fallback">
+            <div className="video-parse-fallback-icon">📹</div>
+            <div className="video-parse-fallback-text">暂无预览图</div>
           </div>
         )}
         
         {/* 播放按钮覆盖层 */}
-        <div className="play-overlay">
-          <div className="play-button">
+        <div className="video-parse-play-overlay">
+          <div className="video-parse-play-button">
             <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
               <circle cx="24" cy="24" r="24" fill="rgba(0, 0, 0, 0.6)"/>
               <path d="M32 24L20 32V16L32 24Z" fill="white"/>
@@ -153,44 +218,44 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
       </div>
 
       {/* 操作按钮区 */}
-      <div className="task-actions">
-        <button className="action-btn primary" onClick={onOriginalLinkClick}>
+      <div className="video-parse-task-actions">
+        <button className="video-parse-action-btn primary" onClick={onOriginalLinkClick}>
           原链接
         </button>
         
-        <div className="video-address-wrapper">
+        <div className="video-parse-video-address-wrapper">
           <button 
-            className="action-btn secondary" 
+            className="video-parse-action-btn secondary" 
             onClick={handleVideoAddressClick}
           >
             视频地址
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className={`dropdown-icon ${showFileUrls ? 'expanded' : ''}`}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className={`video-parse-dropdown-icon ${showFileUrls ? 'expanded' : ''}`}>
               <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
           
           {/* 文件URL下拉框 */}
           {showFileUrls && (
-            <div className="file-urls-dropdown">
+            <div className="video-parse-file-urls-dropdown">
               {taskData.file_urls && taskData.file_urls.length > 0 ? (
                 taskData.file_urls.map((url, index) => (
                   <div 
                     key={index} 
-                    className="file-url-item"
+                    className="video-parse-file-url-item"
                     onClick={() => handleFileUrlClick(url)}
                   >
-                    <span className="url-label">视频链接 {index + 1}</span>
-                    <span className="url-text">{url.length > 50 ? `${url.slice(0, 50)}...` : url}</span>
+                    <span className="video-parse-url-label">视频链接 {index + 1}</span>
+                    <span className="video-parse-url-text">{url.length > 50 ? `${url.slice(0, 50)}...` : url}</span>
                   </div>
                 ))
               ) : (
-                <div className="no-urls">暂无视频地址</div>
+                <div className="video-parse-no-urls">暂无视频地址</div>
               )}
             </div>
           )}
         </div>
         
-        <button className="action-btn material" onClick={onMaterialLibraryClick}>
+        <button className="video-parse-action-btn material" onClick={onMaterialLibraryClick}>
           {taskData.materialName || '素材库'}
         </button>
       </div>

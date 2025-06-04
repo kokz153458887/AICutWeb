@@ -59,30 +59,33 @@
   margin: 0;
 }
 
-/* 删除按钮 */
-.delete-button {
-  width: 36px;
-  height: 36px;
+/* 删除按钮 - 重新设计样式 */
+.parse-result-delete-button {
+  padding: 6px 12px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  gap: 4px;
+  border-radius: 10px;
   transition: all 0.3s ease;
   -webkit-tap-highlight-color: transparent;
-  background: rgba(255, 71, 87, 0.1);
-  color: rgba(255, 71, 87, 0.8);
-  border: 1px solid rgba(255, 71, 87, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.delete-button:hover {
-  background: rgba(255, 71, 87, 0.2);
-  color: rgba(255, 71, 87, 1);
+.parse-result-delete-button:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: rgba(255, 71, 87, 0.9);
+  border-color: rgba(255, 71, 87, 0.3);
   transform: translateY(-1px);
 }
 
-.delete-button:active {
+.parse-result-delete-button:active {
   transform: scale(0.95);
 }
 
@@ -98,7 +101,7 @@
 
 /* 任务信息区域 */
 .task-info-section {
-  margin-bottom: 24px;
+  margin-bottom: 8px; /* 减少间距 */
 }
 
 /* 主视频播放器 */
@@ -143,6 +146,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  z-index: 1;
 }
 
 /* 片段头部 */
@@ -267,9 +271,9 @@
     height: -webkit-fill-available;
   }
   
-  .page-content {
+  /* .page-content {
     height: -webkit-fill-available;
-  }
+  } */
 }
 
 /* 移动端适配 */
@@ -284,6 +288,10 @@
 
   .page-content {
     padding: 12px;
+  }
+
+  .task-info-section {
+    margin-bottom: 0px;
   }
 
   .clips-section {

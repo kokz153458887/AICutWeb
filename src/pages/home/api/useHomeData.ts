@@ -54,8 +54,7 @@ export const useHomeData = (): UseHomeDataResult => {
         setIsLoadingMore,
         setLoadMoreError
       },
-      { isMountedRef, currentTabIdRef, requestIdRef, currentPageRef },
-      searchParams
+      { isMountedRef, currentTabIdRef, requestIdRef }
     );
   }
   

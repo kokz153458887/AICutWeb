@@ -3,8 +3,22 @@
  * 支持进度控制、拖拽和时间显示
  */
 import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { formatTime } from '../../utils';
 import './styles.css';
+
+// 格式化时间工具函数
+const formatTime = (seconds: number): string => {
+  if (isNaN(seconds) || seconds < 0) return '00:00';
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  } else {
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+};
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -320,7 +334,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
         }
       }
     }
-  }, [seekToTime, isLocationMode]); // 合并逻辑，移除onTimeUpdate依赖
+  }, [seekToTime, isLocationMode]);
 
   /**
    * 定位模式下自动移除封面图 - 优化条件

@@ -9,7 +9,7 @@ import TaskInfoCard from '../../components/TaskInfoCard';
 import VideoClipCard from '../../components/VideoClipCard';
 import LoadingView from '../../../../components/LoadingView';
 import ErrorView from '../../../../components/ErrorView';
-import VideoPlayer from '../../../videoedit/components/VideoPlayer';
+import VideoPlayer from '../../../../components/VideoPlayer';
 import { getParseResultDetail, ParseResultDetail } from '../../api';
 import { toast } from '../../../../components/Toast';
 import './styles.css';
@@ -137,8 +137,8 @@ const VideoParseResultPage: React.FC = () => {
           <BackIcon />
         </div>
         <span className="page-title">视频切片录入结果</span>
-        <div className="delete-button" onClick={handleDeleteClick}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <div className="parse-result-delete-button" onClick={handleDeleteClick}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h2m4 5v6m4-6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>

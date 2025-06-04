@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BackIcon } from '../../../../components/icons';
-import VideoPlayer, { VideoPlayerRef } from '../../../videoedit/components/VideoPlayer';
+import VideoPlayer, { VideoPlayerRef } from '../../../../components/VideoPlayer';
 import VideoClipItemComponent, { VideoClipItemRef } from '../../../videoedit/components/VideoClipItem';
 import MaterialSelectModal from '../../../../edit/components/meterialSelect/MaterialSelectModal';
 import ConfirmDialog from '../../../../components/ConfirmDialog';

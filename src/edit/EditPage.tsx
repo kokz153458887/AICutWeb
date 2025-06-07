@@ -2,10 +2,11 @@
  * 视频生成配置编辑页组件
  * 负责整合各个配置项，提供用户编辑视频生成参数的界面
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './EditPage.css';
 import TextInputSection from './components/TextInputSection';
+import { TextInputSectionRef } from './components/TextInputSection';
 import TitleInputSection from './components/TitleInputSection';
 import AutoGenerateSection from './components/AutoGenerateSection';
 import VideoStyleSection from './components/VideoStyleSection';
@@ -17,7 +18,7 @@ import MusicSelectModal from './components/musicSelect/MusicSelectModal';
 import { generateTitle } from './utils/titleGenerator';
 import LoadingView from '../components/LoadingView';
 import Toast, { toast } from '../components/Toast';
-import { EditService, VideoEditConfig, BackgroundMusicModel, BackgroundImageModel } from './api';
+import { EditService, VideoEditConfig, BackgroundImageModel } from './api';
 import { MusicLibItem, StyleModel, SplitModel } from './api/types';
 import { VoiceInfo } from './api/VoiceService';
 
@@ -28,6 +29,7 @@ import { VoiceInfo } from './api/VoiceService';
 const EditPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const textInputRef = useRef<TextInputSectionRef>(null);
   
   // 获取所有URL参数
   const urlParams = useMemo(() => {
@@ -44,13 +46,11 @@ const EditPage: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingData, setLoadingData] = useState<boolean>(true); // 数据加载状态
-  const [error, setError] = useState<string>(''); // 错误信息
   const [volume, setVolume] = useState<number>(1); // 默认音量为1 (100%)
   const [voiceVolume, setVoiceVolume] = useState<number>(1); // 默认音量为1 (100%)
   const [backupCount, setBackupCount] = useState<number>(1);
   const [styleId, setStyleId] = useState<string>('');
   const [autoGenerateTitle, setAutoGenerateTitle] = useState<boolean>(true);
-  const [speaker, setSpeaker] = useState<{ name: string; tag: string }>({ name: '选择说话人', tag: '' });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // 防止重复提交
   const [showMusicModal, setShowMusicModal] = useState<boolean>(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceInfo | null>(null);
@@ -68,7 +68,6 @@ const EditPage: React.FC = () => {
     const fetchConfigData = async () => {
       try {
         setLoadingData(true);
-        setError('');
         
         console.log('开始获取编辑页配置数据，URL参数:', urlParams);
         
@@ -107,10 +106,6 @@ const EditPage: React.FC = () => {
               const voiceInfo = config.content.voiceInfo as VoiceInfo;
               console.log('设置初始音色信息:', voiceInfo);
               setSelectedVoice(voiceInfo);
-              setSpeaker({
-                name: voiceInfo.voicer,
-                tag: ''
-              });
           }
           // 背景音乐音量处理 - API 字段为 0-5 范围
           const musicVol = config.backgroundMusic.volume !== undefined ? config.backgroundMusic.volume : 1;
@@ -135,7 +130,6 @@ const EditPage: React.FC = () => {
         }
       } catch (err) {
         console.error('加载配置数据失败:', err);
-        setError('加载数据失败，请重试');
         toast.error('加载数据失败，请重试');
       } finally {
         setLoadingData(false);
@@ -161,6 +155,34 @@ const EditPage: React.FC = () => {
   const handleTextChange = (newText: string) => {
     setAutoGenerateTitle(true);
     setText(newText);
+  };
+
+  /**
+   * 处理AI生成文案后的光标重置
+   */
+  const handleTextResetCursor = () => {
+    if (textInputRef.current) {
+      textInputRef.current.resetCursor();
+    }
+  };
+
+  /**
+   * 处理选中行用于AI补齐
+   */
+  const handleProcessSelectedLine = () => {
+    if (textInputRef.current) {
+      return textInputRef.current.processSelectedLineForRewrite();
+    }
+    return null;
+  };
+
+  /**
+   * 选择指定行
+   */
+  const handleSelectLineByIndex = (lineIndex: number) => {
+    if (textInputRef.current) {
+      textInputRef.current.selectLineByIndex(lineIndex);
+    }
   };
 
   /**
@@ -237,10 +259,6 @@ const EditPage: React.FC = () => {
     console.log('处理音色选择:', voice);
 
     setSelectedVoice(voice);
-    setSpeaker({
-      name: voice.voicer,
-      tag: ''
-    });
 
     // 更新配置数据
     const newConfig = {
@@ -448,6 +466,7 @@ const EditPage: React.FC = () => {
       <div className="edit-content">
         {/* 文案输入区域 */}
         <TextInputSection 
+          ref={textInputRef}
           text={text} 
           onTextChange={handleTextChange} 
           onVoiceSelect={handleVoiceSelect}
@@ -458,6 +477,7 @@ const EditPage: React.FC = () => {
           splitModel={splitModel}
           onSplitModelChange={handleSplitModelChange}
           onClearText={handleClearText}
+          materialUrl={configData?.material?.url || ''}
         />
 
         {/* 自动生成文案区域 */}
@@ -465,6 +485,11 @@ const EditPage: React.FC = () => {
           onTextGenerated={handleTextChange}
           defaultTextType={defaultTextType}
           onTextTypeChange={handleTextTypeChange}
+          currentText={text}
+          materialId={configData?.material?.materialID || ''}
+          onTextResetCursor={handleTextResetCursor}
+          onProcessSelectedLine={handleProcessSelectedLine}
+          onSelectLineByIndex={handleSelectLineByIndex}
         />
 
         {/* 标题输入区域 */}

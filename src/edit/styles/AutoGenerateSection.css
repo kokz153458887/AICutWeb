@@ -12,6 +12,143 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  /* 添加整体背景，让按钮组看起来是一个整体 */
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 2px;
+  backdrop-filter: blur(2px);
+}
+
+/* AI模型选择器样式 */
+.ai-model-selector {
+  position: relative;
+  z-index: 9998;
+}
+
+.ai-model-label {
+  font-size: 9px;
+  color: #888888;
+  background-color: rgba(255, 255, 255, 0.06);
+  padding: 2px 5px;
+  border-radius: 8px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ai-model-label:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #aaaaaa;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* AI模型下拉菜单样式 */
+.ai-model-dropdown {
+  width: 200px; /* 为AI模型名称提供更多空间 */
+}
+
+/* 统一按钮基础样式 */
+.auto-generate-btn,
+.ai-rewrite-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  position: relative;
+  /* 统一的基础样式 */
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cccccc;
+}
+
+/* AI生成按钮特殊样式 */
+.auto-generate-btn {
+  padding: 3px 8px 3px 3px;
+}
+
+/* AI补齐按钮特殊样式 */
+.ai-rewrite-btn {
+  padding: 3px 8px;
+}
+
+/* 统一悬停效果 */
+.auto-generate-btn:hover:not(.disabled),
+.ai-rewrite-btn:hover:not(.disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-0.5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.auto-generate-btn:hover:not(.disabled) .auto-generate-label {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #aaaaaa;
+}
+
+.auto-generate-btn:hover:not(.disabled) .auto-generate-text,
+.ai-rewrite-btn:hover:not(.disabled) .ai-rewrite-text {
+  color: #ffffff;
+}
+
+/* 统一按下效果 */
+.auto-generate-btn:active:not(.disabled),
+.ai-rewrite-btn:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 统一禁用状态 */
+.auto-generate-btn.disabled,
+.ai-rewrite-btn.disabled {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.04);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auto-generate-btn.disabled .auto-generate-label {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.auto-generate-btn.disabled .auto-generate-text,
+.ai-rewrite-btn.disabled .ai-rewrite-text {
+  color: #666666;
+}
+
+/* 统一加载状态 */
+.auto-generate-btn.loading,
+.ai-rewrite-btn.loading {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.auto-generate-btn.loading .auto-generate-label {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #666666;
+}
+
+.auto-generate-btn.loading .auto-generate-text,
+.ai-rewrite-btn.loading .ai-rewrite-text {
+  color: #999999;
 }
 
 /* 不喜欢按钮样式 */
@@ -60,25 +197,6 @@
   color: #666666;
   transform: none;
   cursor: default;
-}
-
-/* 自动生成按钮样式 */
-.auto-generate-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  backdrop-filter: blur(2px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  padding: 3px 8px 3px 3px;
-  position: relative;
 }
 
 /* 类型选择器容器 */
@@ -148,8 +266,9 @@
   color: #ffffff;
 }
 
-/* 自动生成文字样式 */
-.auto-generate-text {
+/* 统一文字样式 */
+.auto-generate-text,
+.ai-rewrite-text {
   font-size: 11px;
   color: #cccccc;
   font-weight: 400;
@@ -158,65 +277,7 @@
   gap: 3px;
 }
 
-/* 自动生成按钮悬停效果 */
-.auto-generate-btn:hover:not(.disabled) {
-  background-color: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-0.5px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.auto-generate-btn:hover:not(.disabled) .auto-generate-label {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: #aaaaaa;
-}
-
-.auto-generate-btn:hover:not(.disabled) .auto-generate-text {
-  color: #ffffff;
-}
-
-/* 自动生成按钮按下效果 */
-.auto-generate-btn:active:not(.disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* 自动生成按钮禁用状态 */
-.auto-generate-btn.disabled {
-  background-color: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.04);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.auto-generate-btn.disabled .auto-generate-label {
-  background-color: rgba(255, 255, 255, 0.04);
-  color: #666666;
-  cursor: not-allowed;
-}
-
-.auto-generate-btn.disabled .auto-generate-text {
-  color: #666666;
-}
-
-/* 自动生成按钮加载状态 */
-.auto-generate-btn.loading {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.05);
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.auto-generate-btn.loading .auto-generate-label {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #666666;
-}
-
-.auto-generate-btn.loading .auto-generate-text {
-  color: #999999;
-}
-
-/* 自动生成按钮加载图标 */
+/* 统一加载图标 */
 .auto-generate-spinner {
   width: 9px;
   height: 9px;

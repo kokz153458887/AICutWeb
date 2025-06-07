@@ -240,8 +240,11 @@ export interface ImageLibItem {
 export interface AutoGenerateTextRequest {
   type: string;
   subType?: string;
-  generate_size: number;
+  generate_size?: number;
   allow_used: boolean;
+  ai_model?: string; // AI模型类型
+  rewrite_text?: string; // 需要改写的文本
+  materialId?: string; // 素材ID
 }
 
 /**

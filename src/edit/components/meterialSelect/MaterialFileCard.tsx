@@ -16,6 +16,7 @@ interface MaterialFileCardProps {
   onFileClick: (item: MaterialFileItem) => void;
   onSelectionChange: (itemName: string, selected: boolean) => void;
   showFullPath?: boolean;
+  isSearchMode?: boolean;
 }
 
 /**
@@ -30,7 +31,8 @@ const MaterialFileCard: React.FC<MaterialFileCardProps> = ({
   onFolderClick,
   onFileClick,
   onSelectionChange,
-  showFullPath = false
+  showFullPath = false,
+  isSearchMode = false
 }) => {
   const [imageError, setImageError] = useState(false);
 
@@ -40,24 +42,21 @@ const MaterialFileCard: React.FC<MaterialFileCardProps> = ({
   const getImageUrl = () => {
     if (!item.preview_image || imageError) return '';
     
-    // 构建完整的图片URL：baseUrl + rootName + currentPath + preview_image
+    // 构建完整的图片URL：baseUrl + rootName + preview_image
     let imageUrl = baseUrl;
     if (rootName) {
       imageUrl += `/${rootName}`;
     }
     
-    if (showFullPath && 'fullPath' in item) {
-      // 搜索模式下使用完整路径，但要排除文件名本身
-      const fullPath = (item as any).fullPath;
-      const pathParts = fullPath.split('/');
-      pathParts.pop(); // 移除文件名
-      if (pathParts.length > 0) {
-        imageUrl += `/${pathParts.join('/')}`;
-      }
-    } 
-    
-    // 添加预览图片名称，不要重复添加路径
-    imageUrl += `/${item.preview_image}`;
+    if (isSearchMode && 'fullPath' in item) {
+      // 搜索模式下，预览图片路径已经是相对于根目录的完整路径
+      // item.preview_image 本身就包含了正确的路径，例如: "厨房/去鸡翅骨.jpg"
+      imageUrl += `/${item.preview_image}`;
+    } else {
+      // 正常浏览模式下，根据当前路径构建
+  
+      imageUrl += `/${item.preview_image}`;
+    }
     
     // 统一使用正斜杠，避免重复的斜杠
     return imageUrl.replace(/\\/g, '/').replace(/\/+/g, '/').replace('http:/', 'http://').replace('https:/', 'https://');

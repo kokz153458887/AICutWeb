@@ -2,7 +2,7 @@
  * 文本输入区域组件
  * 负责处理用户输入的文案内容
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import '../styles/TextInputSection.css';
 import { SpeakerIcon, LoadingIcon, ClearTextIcon, DropdownArrowIcon } from './icons/SvgIcons';
 import { titleConfig } from '../config/titleConfig';
@@ -13,8 +13,9 @@ import VoiceSelectModal from './voiceSelect/VoiceSelectModal';
 import AudioPlayer from '../utils/AudioPlayer';
 import AudioCacheManager from '../utils/AudioCacheManager';
 import { getApiBaseUrl } from '../../config/api';
-import { EditService } from '../api/service';
-import { AutoGenerateTextRequest, SplitModel } from '../api/types';
+import { SplitModel } from '../api/types';
+import AutoSuggestionOverlay from './AutoSuggestionOverlay';
+import { MaterialService, SuggestionItem } from '../services/MaterialService';
 
 interface TextInputSectionProps {
   text: string;
@@ -29,6 +30,16 @@ interface TextInputSectionProps {
   splitModel?: SplitModel;
   onSplitModelChange?: (splitModel: SplitModel) => void;
   onClearText?: () => void;
+  materialUrl?: string; // 材料URL，用于自动联想
+}
+
+/**
+ * TextInputSection组件实例方法接口
+ */
+export interface TextInputSectionRef {
+  resetCursor: () => void; // 重置光标到顶部
+  processSelectedLineForRewrite: () => { processedText: string; selectedLineIndex: number } | null; // 处理选中行用于AI补齐
+  selectLineByIndex: (lineIndex: number) => void; // 选择指定行
 }
 
 /**
@@ -40,7 +51,7 @@ const SPLIT_MODE_OPTIONS = [
   { value: 'smart', label: '智能' }
 ];
 
-const TextInputSection: React.FC<TextInputSectionProps> = ({
+const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(({
   text,
   onTextChange,
   disabled = false,
@@ -52,8 +63,9 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   defaultVoice,
   splitModel = { splitType: 'strict', splitParams: { min_length: 20, max_length: 30 } },
   onSplitModelChange,
-  onClearText
-}) => {
+  onClearText,
+  materialUrl = ''
+}, ref) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
   const [showVolumeSlider, setShowVolumeSlider] = useState<boolean>(false);
@@ -66,19 +78,332 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
   const [showSplitDropdown, setShowSplitDropdown] = useState(false);
   const splitDropdownRef = useRef<HTMLDivElement>(null);
   
+  // 自动联想相关状态
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
+  const [suggestionPosition, setSuggestionPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [currentTagInfo, setCurrentTagInfo] = useState<{
+    type: 'directory' | 'file' | null;
+    startPos: number;
+    endPos: number;
+    input: string;
+  }>({ type: null, startPos: 0, endPos: 0, input: '' });
+  
   // 从配置文件获取最大行数
   const maxRows = titleConfig.textareaMaxRows || 12;
+
+  // 暴露重置光标方法给父组件
+  useImperativeHandle(ref, () => ({
+    resetCursor: () => {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        // 重置滚动位置到顶部
+        textarea.scrollTop = 0;
+        // 设置光标位置到文本开头
+        textarea.setSelectionRange(0, 0);
+        // 聚焦到文本框
+        textarea.focus();
+        console.log('文本光标已重置到顶部');
+      }
+    },
+    processSelectedLineForRewrite: () => {
+      const textarea = textareaRef.current;
+      if (!textarea) return null;
+
+      const selectionStart = textarea.selectionStart;
+      const selectionEnd = textarea.selectionEnd;
+      
+      // 如果没有选中文本，返回null
+      if (selectionStart === selectionEnd) {
+        return null;
+      }
+
+      const lines = text.split('\n');
+      let currentPos = 0;
+      let selectedLineIndex = -1;
+
+      // 找到选中文本所在的行
+      for (let i = 0; i < lines.length; i++) {
+        const lineStart = currentPos;
+        const lineEnd = currentPos + lines[i].length;
+        
+        // 检查选中区域是否与当前行有重叠
+        if (selectionStart <= lineEnd && selectionEnd >= lineStart) {
+          selectedLineIndex = i;
+          break;
+        }
+        
+        currentPos = lineEnd + 1; // +1 for newline character
+      }
+
+      if (selectedLineIndex === -1) return null;
+
+      // 处理选中行，保留标签，删除标签后的内容
+      const selectedLine = lines[selectedLineIndex];
+      const tagMatch = selectedLine.match(/^(\[[%@][^\]]*\])/);
+      
+      if (tagMatch) {
+        // 如果有标签，保留标签，删除后面的内容
+        const processedLine = tagMatch[1];
+        const newLines = [...lines];
+        newLines[selectedLineIndex] = processedLine;
+        const processedText = newLines.join('\n');
+        
+        return {
+          processedText,
+          selectedLineIndex
+        };
+      } else {
+        // 如果没有标签，直接清空这一行
+        const newLines = [...lines];
+        newLines[selectedLineIndex] = '';
+        const processedText = newLines.join('\n');
+        
+        return {
+          processedText,
+          selectedLineIndex
+        };
+      }
+    },
+    selectLineByIndex: (lineIndex: number) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const lines = text.split('\n');
+      if (lineIndex < 0 || lineIndex >= lines.length) return;
+
+      let currentPos = 0;
+      for (let i = 0; i < lineIndex; i++) {
+        currentPos += lines[i].length + 1; // +1 for newline
+      }
+
+      const lineStart = currentPos;
+      const lineEnd = currentPos + lines[lineIndex].length;
+
+      // 选中整行
+      textarea.setSelectionRange(lineStart, lineEnd);
+      textarea.focus();
+      
+      console.log(`已选中第${lineIndex + 1}行文本`);
+    }
+  }), [text]);
 
   // 组件加载时清理过期缓存
   useEffect(() => {
     AudioCacheManager.cleanExpiredCache();
   }, []);
 
+  // 加载材料数据
+  useEffect(() => {
+    const loadMaterialData = async () => {
+      if (materialUrl && !MaterialService.hasData()) {
+        try {
+          console.log('开始加载材料数据:', materialUrl);
+          await MaterialService.fetchMaterialData(materialUrl);
+          console.log('材料数据加载完成');
+        } catch (error) {
+          console.error('加载材料数据失败:', error);
+        }
+      }
+    };
+    
+    loadMaterialData();
+  }, [materialUrl]);
+
+  /**
+   * 检测标签输入并触发自动联想
+   */
+  const detectTagInput = (text: string, cursorPos: number) => {
+    // 检查光标前的文字，寻找 [%...] 或 [@...] 模式
+    const beforeCursor = text.substring(0, cursorPos);
+    const afterCursor = text.substring(cursorPos);
+    
+    // 查找最近的 [% 或 [@
+    const directoryMatch = beforeCursor.match(/\[%([^\]]*)$/);
+    const fileMatch = beforeCursor.match(/\[@([^\]]*)$/);
+    
+    // 检查光标是否在标签内（光标后面是否有对应的 ] 符号）
+    const isInCompleteTag = (tagType: 'directory' | 'file') => {
+      const tagStart = tagType === 'directory' ? '[%' : '[@';
+      const tagStartIndex = beforeCursor.lastIndexOf(tagStart);
+      if (tagStartIndex === -1) return false;
+      
+      // 检查从标签开始到光标之间是否没有 ]
+      const betweenTagAndCursor = beforeCursor.substring(tagStartIndex);
+      if (betweenTagAndCursor.includes(']')) return false;
+      
+      // 检查光标后面是否有 ]
+      const hasClosingBracket = afterCursor.indexOf(']') !== -1;
+      return hasClosingBracket;
+    };
+    
+    if (directoryMatch) {
+      const input = directoryMatch[1];
+      const startPos = beforeCursor.lastIndexOf('[%') + 2;
+      setCurrentTagInfo({
+        type: 'directory',
+        startPos,
+        endPos: cursorPos,
+        input
+      });
+      
+      // 获取目录建议（空输入时也显示所有目录）
+      const dirSuggestions = MaterialService.getDirectorySuggestions(input);
+      setSuggestions(dirSuggestions);
+      
+      // 只要在目录标签内就显示建议
+      updateSuggestionPosition();
+      setShowSuggestions(true);
+      
+      return true;
+    } else if (fileMatch) {
+      const input = fileMatch[1];
+      const startPos = beforeCursor.lastIndexOf('[@') + 2;
+      setCurrentTagInfo({
+        type: 'file',
+        startPos,
+        endPos: cursorPos,
+        input
+      });
+      
+      // 获取文件建议（空输入时也显示所有文件）
+      const fileSuggestions = MaterialService.getFileSuggestions(input);
+      setSuggestions(fileSuggestions);
+      
+      // 只要在文件标签内就显示建议
+      updateSuggestionPosition();
+      setShowSuggestions(true);
+      
+      return true;
+    } else {
+      // 检查光标是否在完整的标签内（[%...] 或 [@...]）
+      const inDirectoryTag = isInCompleteTag('directory');
+      const inFileTag = isInCompleteTag('file');
+      
+      if (inDirectoryTag) {
+        const tagStartIndex = beforeCursor.lastIndexOf('[%');
+        const input = beforeCursor.substring(tagStartIndex + 2);
+        const startPos = tagStartIndex + 2;
+        
+        setCurrentTagInfo({
+          type: 'directory',
+          startPos,
+          endPos: cursorPos,
+          input
+        });
+        
+        const dirSuggestions = MaterialService.getDirectorySuggestions(input);
+        setSuggestions(dirSuggestions);
+        updateSuggestionPosition();
+        setShowSuggestions(true);
+        return true;
+      } else if (inFileTag) {
+        const tagStartIndex = beforeCursor.lastIndexOf('[@');
+        const input = beforeCursor.substring(tagStartIndex + 2);
+        const startPos = tagStartIndex + 2;
+        
+        setCurrentTagInfo({
+          type: 'file',
+          startPos,
+          endPos: cursorPos,
+          input
+        });
+        
+        const fileSuggestions = MaterialService.getFileSuggestions(input);
+        setSuggestions(fileSuggestions);
+        updateSuggestionPosition();
+        setShowSuggestions(true);
+        return true;
+      }
+    }
+    
+    // 如果没有匹配到标签，隐藏建议
+    setShowSuggestions(false);
+    setCurrentTagInfo({ type: null, startPos: 0, endPos: 0, input: '' });
+    return false;
+  };
+
+  /**
+   * 更新建议浮层位置
+   */
+  const updateSuggestionPosition = () => {
+    const textarea = textareaRef.current;
+    const inputSection = inputSectionRef.current;
+    
+    if (textarea && inputSection) {
+      const textareaRect = textarea.getBoundingClientRect();
+      const inputSectionRect = inputSection.getBoundingClientRect();
+      
+      setSuggestionPosition({
+        top: textareaRect.bottom + window.scrollY + 5,
+        left: inputSectionRect.left + window.scrollX,
+        width: inputSectionRect.width
+      });
+    }
+  };
+
+  /**
+   * 处理建议选择
+   */
+  const handleSuggestionSelect = (suggestion: SuggestionItem) => {
+    const textarea = textareaRef.current;
+    if (!textarea || currentTagInfo.type === null) return;
+    
+    // 构建新文本
+    const beforeTag = text.substring(0, currentTagInfo.startPos - 2); // -2 是为了包含 [% 或 [@
+    const afterCursor = text.substring(currentTagInfo.endPos);
+    const tagPrefix = currentTagInfo.type === 'directory' ? '[%' : '[@';
+    
+    // 检查是否需要添加闭合括号
+    let needsCloseBracket = true;
+    if (afterCursor.startsWith(']')) {
+      needsCloseBracket = false;
+    }
+    
+    const newText = needsCloseBracket 
+      ? `${beforeTag}${tagPrefix}${suggestion.name}]${afterCursor}`
+      : `${beforeTag}${tagPrefix}${suggestion.name}${afterCursor}`;
+    
+    // 更新文本
+    onTextChange(newText);
+    
+    // 设置光标位置到标签后面
+    setTimeout(() => {
+      const bracketLength = needsCloseBracket ? 1 : 0;
+      const newCursorPos = beforeTag.length + tagPrefix.length + suggestion.name.length + bracketLength;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      textarea.focus();
+    }, 0);
+    
+    // 隐藏建议
+    setShowSuggestions(false);
+    setCurrentTagInfo({ type: null, startPos: 0, endPos: 0, input: '' });
+  };
+
   /**
    * 处理文本变化事件
    */
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onTextChange(e.target.value);
+    const newText = e.target.value;
+    const cursorPos = e.target.selectionStart;
+    
+    onTextChange(newText);
+    
+    // 检测标签输入
+    setTimeout(() => {
+      detectTagInput(newText, cursorPos);
+    }, 0);
+  };
+
+  /**
+   * 处理键盘事件
+   */
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    const cursorPos = target.selectionStart;
+    
+    // 检测标签输入
+    detectTagInput(text, cursorPos);
   };
 
   /**
@@ -417,6 +742,14 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
     return JSON.stringify(params);
   };
 
+  /**
+   * 处理建议浮层关闭
+   */
+  const handleSuggestionClose = () => {
+    setShowSuggestions(false);
+    setCurrentTagInfo({ type: null, startPos: 0, endPos: 0, input: '' });
+  };
+
   return (
     <>
       <div className="text-input-section" ref={inputSectionRef}>
@@ -425,6 +758,7 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
           className="text-input"
           value={text}
           onChange={handleChange}
+          onKeyUp={handleKeyUp}
           placeholder={placeholder}
           style={{ resize: 'none' }}
           disabled={disabled}
@@ -530,8 +864,17 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
         initialSelectedVoiceId={selectedVoice?.voiceCode}
         defaultVoice={defaultVoice}
       />
+
+      {/* 自动联想浮层 */}
+      <AutoSuggestionOverlay
+        visible={showSuggestions}
+        suggestions={suggestions}
+        position={suggestionPosition}
+        onSelect={handleSuggestionSelect}
+        onClose={handleSuggestionClose}
+      />
     </>
   );
-};
+});
 
 export default TextInputSection; 

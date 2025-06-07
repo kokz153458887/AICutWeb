@@ -74,17 +74,19 @@ const MaterialLibraryPage: React.FC = () => {
     if (!searchQuery.trim()) return getCurrentItems;
     
     const query = searchQuery.toLowerCase();
-    const allFiles: (MaterialFileItem & { fullPath: string })[] = [];
+    const allFiles: (MaterialFileItem & { fullPath: string; deletePath: string })[] = [];
     
     // 递归搜索所有文件
     const searchInDirectory = (items: MaterialFileItem[], pathPrefix: string = '') => {
       items.forEach(item => {
         const itemPath = pathPrefix ? `${pathPrefix}/${item.name}` : item.name;
+        const deletePath = pathPrefix ? `${pathPrefix}/${item.name}` : item.name; // 用于删除的完整路径
         
         if (item.name.toLowerCase().includes(query)) {
           allFiles.push({
             ...item,
-            fullPath: itemPath
+            fullPath: itemPath, // 用于显示的路径
+            deletePath: deletePath // 用于删除的路径
           });
         }
         
@@ -297,14 +299,24 @@ const MaterialLibraryPage: React.FC = () => {
       const deleteFilePath: string[] = [];
       
       selectedItems.forEach(itemName => {
-        // 根据当前路径构建完整路径
-        if (currentPath.length === 0) {
-          // 在根目录，直接使用文件名
-          deleteFilePath.push(itemName);
+        if (searchQuery.trim()) {
+          // 搜索模式下，从搜索结果中找到对应的删除路径
+          const searchItem = searchResults.find(item => item.name === itemName);
+          if (searchItem && 'deletePath' in searchItem) {
+            deleteFilePath.push((searchItem as any).deletePath);
+          } else {
+            deleteFilePath.push(itemName); // 降级处理
+          }
         } else {
-          // 在子目录，需要包含完整路径
-          const fullPath = [...currentPath, itemName].join('/');
-          deleteFilePath.push(fullPath);
+          // 正常浏览模式下，根据当前路径构建完整路径
+          if (currentPath.length === 0) {
+            // 在根目录，直接使用文件名
+            deleteFilePath.push(itemName);
+          } else {
+            // 在子目录，需要包含完整路径
+            const fullPath = [...currentPath, itemName].join('/');
+            deleteFilePath.push(fullPath);
+          }
         }
       });
 
@@ -456,6 +468,7 @@ const MaterialLibraryPage: React.FC = () => {
               onFileClick={handleFileClick}
               onSelectionChange={handleItemSelect}
               showFullPath={!!searchQuery}
+              isSearchMode={!!searchQuery}
             />
           ))}
         </div>

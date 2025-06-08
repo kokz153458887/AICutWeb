@@ -3,20 +3,24 @@
  * 展示单个视频片段，包含名称、时间范围、文本和预览图
  */
 import React, { useState } from 'react';
-import { VideoClip } from '../../api';
+import { VideoClip, ParseResultDetail, deleteClip } from '../../api';
 import VideoPlayer from '../../../../components/VideoPlayer';
+import { EditSelectAPI } from '../../../../edit/api/EditSelectAPI';
+import { toast } from '../../../../components/Toast';
 import './styles.css';
 
 interface VideoClipCardProps {
   clip: VideoClip;
+  taskData: ParseResultDetail;
   onFullScreenPlay?: (videoUrl: string) => void;
+  onDeleted?: () => void; // 删除成功后的回调
 }
 
 /**
  * 视频片段卡片组件
  * 显示视频片段的基本信息和播放功能
  */
-const VideoClipCard: React.FC<VideoClipCardProps> = ({ clip, onFullScreenPlay }) => {
+const VideoClipCard: React.FC<VideoClipCardProps> = ({ clip, taskData, onFullScreenPlay, onDeleted }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showExpandedText, setShowExpandedText] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -25,10 +29,52 @@ const VideoClipCard: React.FC<VideoClipCardProps> = ({ clip, onFullScreenPlay })
   /**
    * 处理删除按钮点击
    */
-  const handleDeleteClick = (e: React.MouseEvent) => {
+  const handleDeleteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: 实际删除逻辑
-    alert('功能待开发');
+    
+    if (!taskData?.materialId) {
+      toast.error('素材信息不存在');
+      return;
+    }
+    
+    // 确认删除
+    if (!window.confirm(`确定要删除片段"${clip.name}"吗？删除后无法恢复。`)) {
+      return;
+    }
+
+    let loadingToastId: number | null = null;
+    
+    try {
+      // 显示loading提示
+      loadingToastId = toast.loading('正在删除片段...');
+
+      // 调用删除API
+      const result = await deleteClip(taskData.id, clip.folder, clip.name);
+      
+      // 关闭loading
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
+      
+      if (result.code === 0) {
+        toast.success('删除成功');
+        // 调用删除成功回调，刷新页面数据
+        if (onDeleted) {
+          onDeleted();
+        }
+      } else {
+        toast.error(result.message || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除片段失败:', error);
+      
+      // 关闭loading
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
+      
+      toast.error('删除失败，请稍后重试');
+    }
   };
 
   /**
@@ -107,11 +153,11 @@ const VideoClipCard: React.FC<VideoClipCardProps> = ({ clip, onFullScreenPlay })
         <div className="clip-info">
           <span className="clip-name">{clip.name}</span>
           <div className="clip-tags">
-            <span className="folder-tag">{clip.folder}</span>
+            {clip.folder && <span className="folder-tag">{clip.folder}</span>}
             <span className="time-tag">{clip.beginTime}-{clip.endTime}</span>
           </div>
         </div>
-        <button className="delete-btn" onClick={handleDeleteClick}>
+        <button className="clip-delete-btn" onClick={handleDeleteClick}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h2m4 5v6m4-6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

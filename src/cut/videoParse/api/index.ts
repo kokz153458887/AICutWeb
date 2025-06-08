@@ -84,4 +84,53 @@ export const getParseResultDetail = async (id: string): Promise<ParseResultDetai
     console.error('获取解析结果失败:', error);
     throw error;
   }
+};
+
+/**
+ * 删除视频解析任务
+ * @param taskId 解析任务ID
+ * @returns 删除结果
+ */
+export const deleteParseTask = async (taskId: string): Promise<{code: number; message: string}> => {
+  try {
+    const response = await axios.post<ApiResponse<any>>(
+      '/video/parse/deleteTask',
+      { taskId },
+      {
+        baseURL: API_CONFIG.fullBaseURL,
+        timeout: API_CONFIG.timeout,
+        headers: API_HEADERS
+      }
+    );
+    
+    return {
+      code: response.data.code,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('删除解析任务失败:', error);
+    throw error;
+  }
+}; 
+
+export const deleteClip = async (taskId: string, folder: string, name: string): Promise<{code: number; message: string}> => {
+  try {
+    const response = await axios.post<ApiResponse<any>>(
+      '/video/parse/deleteClip',
+      { taskId, folder, name },
+      {
+        baseURL: API_CONFIG.fullBaseURL,
+        timeout: API_CONFIG.timeout,
+        headers: API_HEADERS
+      }
+    );
+    
+    return {
+      code: response.data.code,
+      message: response.data.message
+    };
+  } catch (error) {
+    console.error('删除解析任务失败:', error);
+    throw error;
+  }
 }; 

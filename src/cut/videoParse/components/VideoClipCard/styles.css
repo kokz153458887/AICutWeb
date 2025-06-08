@@ -61,7 +61,7 @@
 }
 
 /* 删除按钮 */
-.delete-btn {
+.clip-delete-btn {
   padding: 8px;
   background: rgba(255, 71, 87, 0.1);
   border: 1px solid rgba(255, 71, 87, 0.3);
@@ -74,7 +74,7 @@
   justify-content: center;
 }
 
-.delete-btn:hover {
+.clip-delete-btn:hover {
   background: rgba(255, 71, 87, 0.2);
   color: rgba(255, 71, 87, 1);
   transform: scale(1.05);
@@ -279,7 +279,7 @@
     padding: 3px 6px;
   }
 
-  .delete-btn {
+  .clip-delete-btn {
     padding: 6px;
   }
 

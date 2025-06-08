@@ -10,7 +10,7 @@ import VideoClipCard from '../../components/VideoClipCard';
 import LoadingView from '../../../../components/LoadingView';
 import ErrorView from '../../../../components/ErrorView';
 import VideoPlayer from '../../../../components/VideoPlayer';
-import { getParseResultDetail, ParseResultDetail } from '../../api';
+import { getParseResultDetail, ParseResultDetail, deleteParseTask } from '../../api';
 import { toast } from '../../../../components/Toast';
 import './styles.css';
 
@@ -69,9 +69,48 @@ const VideoParseResultPage: React.FC = () => {
   /**
    * 处理删除按钮点击
    */
-  const handleDeleteClick = useCallback(() => {
-    toast.info('功能待开发');
-  }, []);
+  const handleDeleteClick = useCallback(async () => {
+    if (!id || !taskData) {
+      toast.error('任务信息不存在');
+      return;
+    }
+
+    // 确认删除
+    if (!window.confirm('确定要删除这个解析任务吗？删除后无法恢复。')) {
+      return;
+    }
+
+    let loadingToastId: number | null = null;
+    
+    try {
+      // 显示loading对话框
+      loadingToastId = toast.loading('正在删除任务...');
+      
+      const result = await deleteParseTask(id);
+      
+      // 关闭loading
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
+      
+      if (result.code === 0) {
+        toast.success('删除成功');
+        // 返回上一页
+        navigate(-1);
+      } else {
+        toast.error(result.message || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除任务失败:', error);
+      
+      // 关闭loading
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+      }
+      
+      toast.error('删除失败，请稍后重试');
+    }
+  }, [id, taskData, navigate]);
 
   /**
    * 处理主视频播放
@@ -190,7 +229,9 @@ const VideoParseResultPage: React.FC = () => {
                 <VideoClipCard
                   key={index}
                   clip={clip}
+                  taskData={taskData}
                   onFullScreenPlay={handleFullScreenPlay}
+                  onDeleted={loadTaskDetail}
                 />
               ))
             ) : (

@@ -118,9 +118,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 0px;
+  padding-bottom: 0px;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -303,6 +302,21 @@
     width: 12px;
     height: 12px;
   }
+  
+  .translate-section {
+    height: 12px;
+  }
+  
+  .translate-label {
+    font-size: 9px;
+    gap: 2px;
+  }
+  
+  .translate-loading .loading-spinner {
+    width: 6px;
+    height: 6px;
+    margin: 0 auto;
+  }
 }
 
 .material-select-entry {
@@ -394,4 +408,56 @@
 .checkbox-label {
   font-weight: 500;
   user-select: none;
+}
+
+/* 翻译功能区域 */
+.translate-section {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+.translate-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #00d6c9;
+  font-size: 10px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.translate-label:hover {
+  color: #00b8ab;
+}
+
+.translate-label.translating {
+  color: rgba(0, 214, 201, 0.6);
+  cursor: not-allowed;
+}
+
+.translate-loading {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 2px;
+}
+
+.translate-loading .loading-spinner {
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgba(0, 214, 201, 0.3);
+  border-top-color: #00d6c9;
+  border-radius: 50%;
+  animation: translate-spinner 0.8s linear infinite;
+}
+
+@keyframes translate-spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 } 

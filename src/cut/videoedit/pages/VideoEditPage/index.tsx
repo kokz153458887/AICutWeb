@@ -9,7 +9,7 @@ import VideoPlayer, { VideoPlayerRef } from '../../../../components/VideoPlayer'
 import VideoClipItemComponent, { VideoClipItemRef } from '../../../videoedit/components/VideoClipItem';
 import MaterialSelectModal from '../../../../edit/components/meterialSelect/MaterialSelectModal';
 import ConfirmDialog from '../../../../components/ConfirmDialog';
-import { getParseTaskDetail, addMaterialVideo } from '../../api';
+import { getParseTaskDetail, addMaterialVideo, translateText } from '../../api';
 import { deleteTask } from '../../../../cut/videoSlice/api';
 import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFileItem, MaterialFileStore } from '../..';
 import { MaterialLibItem, MaterialModel } from '../../../../edit/api/types';
@@ -33,6 +33,7 @@ const VideoEditPage: React.FC = () => {
   
   // 基础数据状态
   const [taskData, setTaskData] = useState<ParseTaskDetail | null>(null);
+  const [translatedText, setTranslatedText] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -71,31 +72,12 @@ const VideoEditPage: React.FC = () => {
   // 删除确认弹窗状态
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
+  // 翻译状态
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [hasTranslated, setHasTranslated] = useState<boolean>(false);
+
   // 素材库记忆键
   const getMaterialStorageKey = (taskId: string) => `selected_material_${taskId}`;
-
-  /**
-   * 创建默认切片 - 使用useMemo优化，只有taskData变化时才重新计算
-   */
-  const createDefaultClip = useMemo(() => {
-    if (!taskData) return null;
-    
-    const text = taskData.text || '';
-    if (text && taskData.video_info) {
-      // 设置默认标题为text内容的前20个字符
-      const defaultTitle = text.length > 20 ? text.substring(0, 20) + '...' : text;
-      
-      return {
-        id: generateId(),
-        title: defaultTitle,
-        text: text,
-        startTime: 0,
-        endTime: taskData.video_info.file_duration,
-        isDefault: true
-      };
-    }
-    return null;
-  }, [taskData]);
 
   /**
    * 初始化页面数据
@@ -118,6 +100,7 @@ const VideoEditPage: React.FC = () => {
         const data = await getParseTaskDetail(id, true);
         setTaskData(data);
         console.log('initData taskData:', data); // 修复：使用获取的data而不是状态中的taskData
+        console.log('initData language:', data.video_info?.language);
         
         if (savedState) {
           // 使用保存的状态
@@ -425,9 +408,23 @@ const VideoEditPage: React.FC = () => {
       console.error('清空本地存储失败:', error);
     }
     
-    // 重置到默认状态 - 使用当前的taskData
-    if (createDefaultClip) {
-      setClips([createDefaultClip]);
+    if (taskData?.video_info) {
+      let text = taskData.text || '';
+      if (translatedText) {
+        text = translatedText;
+      }
+      // 设置默认标题为text内容的前20个字符
+      const defaultTitle = text?.length && text.length > 20 ? text?.substring(0, 20) + '...' : text;
+      
+      const defaultClip: VideoClipItem = {
+        id: generateId(),
+        title: defaultTitle || '',
+        text: text || '',
+        startTime: 0,
+        endTime: taskData.video_info.file_duration,
+        isDefault: true
+      };
+      setClips([defaultClip]);
     }
     
     // 重置其他状态
@@ -435,6 +432,7 @@ const VideoEditPage: React.FC = () => {
     setLocationActiveField(null);
     setLocationActiveIndex(-1);
     setVideoSeekTime(0);
+    setHasTranslated(false);
     
     toast.success('已重置到初始状态');
   };
@@ -921,6 +919,47 @@ const VideoEditPage: React.FC = () => {
     setShowDeleteConfirm(false);
   };
 
+  /**
+   * 处理翻译功能
+   */
+  const handleTranslate = async () => {
+    if (!taskData?.text || isTranslating) {
+      return;
+    }
+
+    setIsTranslating(true);
+
+    try {
+      const result = await translateText(taskData.text);
+      const translatedText = result.text;
+      setTranslatedText(translatedText);
+      console.log('handleTranslate translatedText', translatedText);
+
+      // 翻译成功，更新第一个切片的文本
+      if (clips.length > 0) {
+        setClips(prevClips => 
+          prevClips.map((clip, index) => 
+            index === 0 
+              ? { 
+                  ...clip, 
+                  text: translatedText,
+                  title: translatedText.length > 20 ? translatedText.substring(0, 20) + '...' : translatedText
+                } 
+              : clip
+          )
+        );
+        
+        setHasTranslated(true);
+        toast.success('翻译成功');
+      }
+    } catch (error: any) {
+      console.error('翻译请求失败:', error);
+      toast.error(error.message || '翻译失败，请稍后重试');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="video-edit-page">
@@ -1023,6 +1062,23 @@ const VideoEditPage: React.FC = () => {
             </div>
           </div>
         </div>
+        
+        {/* 翻译功能区域 - 只在非中文语言且未翻译时显示 */}
+        {taskData?.video_info?.language && taskData.video_info.language !== 'zh' && !hasTranslated && (
+          <div className="translate-section">
+            <span 
+              className={`translate-label ${isTranslating ? 'translating' : ''}`}
+              onClick={isTranslating ? undefined : handleTranslate}
+            >
+              {isTranslating && (
+                <span className="translate-loading">
+                  <span className="loading-spinner"></span>
+                </span>
+              )}
+              {isTranslating ? '翻译中...' : '翻译'}
+            </span>
+          </div>
+        )}
         
         <div className="clips-list">
           {clips.map((clip, index) => (

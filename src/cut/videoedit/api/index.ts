@@ -160,4 +160,34 @@ export const addMaterialVideo = async (params: {
     console.error('添加素材视频失败:', error);
     throw error;
   }
+};
+
+/**
+ * 翻译文本
+ * @param text 待翻译的文本
+ * @returns 翻译结果
+ */
+export const translateText = async (text: string): Promise<{text: string}> => {
+  try {
+    const response = await axios.post<ApiResponse<{text: string}>>(
+      '/ai/translate',
+      {
+        text,
+        aiModel: 'qwen-turbo'
+      },
+      {
+        baseURL: API_CONFIG.fullBaseURL,
+        timeout: API_CONFIG.timeout,
+        headers: API_HEADERS
+      }
+    );
+    
+    if (response.data.code === API_RESPONSE_CODE.SUCCESS) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || '翻译失败');
+  } catch (error) {
+    console.error('翻译失败:', error);
+    throw error;
+  }
 }; 

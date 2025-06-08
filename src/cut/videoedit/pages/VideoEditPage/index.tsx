@@ -266,13 +266,17 @@ const VideoEditPage: React.FC = () => {
     const clipStartInFullText = calculateClipPositionInFullText(clipId, clips);
     const fullOriginalText = getFullOriginalText();
     
+    //处理 SegmentInfo.words为空的情况，切片的 startTime 和 endTime为0
+    let timeRange = { startTime: 0, endTime: taskData?.video_info?.file_duration || 0};
+    if (taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0) {
     // 使用精确的时间算法
-    const timeRange = findPreciseTimeRangeByText(
-      fullOriginalText,
-      textBeforeCursor,
-      clipStartInFullText,
-      taskData.segments
-    );
+      timeRange = findPreciseTimeRangeByText(
+        fullOriginalText,
+        textBeforeCursor,
+        clipStartInFullText,
+        taskData.segments
+      );
+    }
     
     // 创建新切片
     const newClip: VideoClipItem = {
@@ -284,12 +288,15 @@ const VideoEditPage: React.FC = () => {
     };
     
     // 计算剩余文本的开始时间
-    const remainingStartTime = findPreciseTimeRangeByText(
+    let remainingStartTime = 0;
+    if (taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0) {
+      remainingStartTime = findPreciseTimeRangeByText(
       fullOriginalText,
       textAfterCursor,
       clipStartInFullText + textBeforeCursor.length,
       taskData.segments
-    ).startTime;
+      ).startTime;
+    }
     
     // 为剩余文本设置新的标题
     const remainingTitle = textAfterCursor.length > 20 

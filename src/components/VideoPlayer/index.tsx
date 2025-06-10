@@ -37,6 +37,7 @@ interface VideoPlayerProps {
 export interface VideoPlayerRef {
   pauseVideo: () => void;
   playVideo: () => void;
+  getVideoElement: () => HTMLVideoElement | null;
 }
 
 /**
@@ -78,6 +79,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       if (videoRef.current && videoRef.current.paused) {
         videoRef.current.play();
       }
+    },
+    getVideoElement: () => {
+      return videoRef.current;
     }
   }), []);
 

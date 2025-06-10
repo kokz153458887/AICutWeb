@@ -9,7 +9,8 @@ import VideoPlayer, { VideoPlayerRef } from '../../../../components/VideoPlayer'
 import VideoClipItemComponent, { VideoClipItemRef } from '../../../videoedit/components/VideoClipItem';
 import MaterialSelectModal from '../../../../edit/components/meterialSelect/MaterialSelectModal';
 import ConfirmDialog from '../../../../components/ConfirmDialog';
-import { getParseTaskDetail, addMaterialVideo, translateText } from '../../api';
+import VideoCropModal from '../../components/VideoCropModal';
+import { getParseTaskDetail, addMaterialVideo, translateText, CropParams } from '../../api';
 import { deleteTask } from '../../../../cut/videoSlice/api';
 import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFileItem, MaterialFileStore } from '../..';
 import { MaterialLibItem, MaterialModel } from '../../../../edit/api/types';
@@ -75,6 +76,10 @@ const VideoEditPage: React.FC = () => {
   // 翻译状态
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
   const [hasTranslated, setHasTranslated] = useState<boolean>(false);
+
+  // 裁剪相关状态
+  const [showCropModal, setShowCropModal] = useState<boolean>(false);
+  const [cropParams, setCropParams] = useState<CropParams | null>(null);
 
   // 素材库记忆键
   const getMaterialStorageKey = (taskId: string) => `selected_material_${taskId}`;
@@ -375,7 +380,8 @@ const VideoEditPage: React.FC = () => {
         taskData,
         clips,
         selectedMaterial,
-        needRemoveSubtitle
+        needRemoveSubtitle,
+        cropParams: cropParams || undefined
       });
       
       toast.success('提交成功！' + (result.message || ''));
@@ -960,6 +966,29 @@ const VideoEditPage: React.FC = () => {
     }
   };
 
+  /**
+   * 处理裁剪按钮点击
+   */
+  const handleCropClick = useCallback(() => {
+    setShowCropModal(true);
+  }, []);
+
+  /**
+   * 处理裁剪浮层关闭
+   */
+  const handleCropModalClose = useCallback(() => {
+    setShowCropModal(false);
+  }, []);
+
+  /**
+   * 处理裁剪确认
+   */
+  const handleCropConfirm = useCallback((params: CropParams) => {
+    setCropParams(params);
+    setShowCropModal(false);
+    toast.success('裁剪范围已设置');
+  }, []);
+
   if (loading) {
     return (
       <div className="video-edit-page">
@@ -1006,23 +1035,38 @@ const VideoEditPage: React.FC = () => {
       
       {/* 视频播放器区域 - 固定位置 */}
       <div className="video-section">
-        <VideoPlayer
-          videoUrl={taskData.video_url || ''}
-          coverUrl={taskData.preview_image}
-          seekToTime={videoSeekTime}
-          showProgressBar={showProgressBar}
-          isLocationMode={isLocationMode}
-          onTimeUpdate={handleVideoTimeUpdate}
-          onDragging={handleDragging}
-          onSeekEnd={() => {
-            // 拖拽结束后重置视频跳转时间（但保持定位模式）
-            if (!isLocationMode) {
-              setVideoSeekTime(undefined);
-            }
-          }}
-          onPlayStateChange={handleVideoPlayStateChange}
-          ref={videoPlayerRef}
-        />
+        <div className="video-player-wrapper">
+          <VideoPlayer
+            videoUrl={taskData.video_url || ''}
+            coverUrl={taskData.preview_image}
+            seekToTime={videoSeekTime}
+            showProgressBar={showProgressBar}
+            isLocationMode={isLocationMode}
+            onTimeUpdate={handleVideoTimeUpdate}
+            onDragging={handleDragging}
+            onSeekEnd={() => {
+              // 拖拽结束后重置视频跳转时间（但保持定位模式）
+              if (!isLocationMode) {
+                setVideoSeekTime(undefined);
+              }
+            }}
+            onPlayStateChange={handleVideoPlayStateChange}
+            ref={videoPlayerRef}
+          />
+          
+          {/* 裁剪控制区域 */}
+          <div className="video-crop-controls">
+            {cropParams && (
+              <div className="crop-status-text">已选定裁剪范围</div>
+            )}
+            <div className="crop-button" onClick={handleCropClick}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M6.13 1L6 16a2 2 0 0 0 2 2h15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M1 6.13L16 6a2 2 0 0 1 2 2v15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* 视频切片列表 - 可滚动区域 */}
@@ -1133,6 +1177,18 @@ const VideoEditPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+
+      {/* 视频裁剪浮层 */}
+      {showCropModal && videoPlayerRef.current && videoPlayerRef.current.getVideoElement() && (
+        <VideoCropModal
+          videoElement={videoPlayerRef.current.getVideoElement()!}
+          videoResolution={taskData.video_info?.resolution || '640x360'}
+          visible={showCropModal}
+          onClose={handleCropModalClose}
+          onConfirm={handleCropConfirm}
+          initialCropParams={cropParams || undefined}
+        />
+      )}
     </div>
   );
 };

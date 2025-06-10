@@ -15,7 +15,7 @@ interface ApiResponse<T> {
 }
 
 // 裁剪参数接口
-interface CropParams {
+export interface CropParams {
   cropStartX: number;
   cropStartY: number;
   cropEndX: number;
@@ -112,9 +112,10 @@ export const addMaterialVideo = async (params: {
   clips: VideoClipItem[];
   selectedMaterial: MaterialLibItem;
   needRemoveSubtitle: boolean;
+  cropParams?: CropParams;
 }): Promise<AddMaterialVideoResponse> => {
   try {
-    const { taskData, clips, selectedMaterial, needRemoveSubtitle } = params;
+    const { taskData, clips, selectedMaterial, needRemoveSubtitle, cropParams } = params;
     
     // 构建请求体
     const requestBody: AddMaterialVideoRequest = {
@@ -127,7 +128,7 @@ export const addMaterialVideo = async (params: {
       materialId: selectedMaterial._id,
       type: selectedMaterial.contentType || '',
       subtype: selectedMaterial.contentSubtype || '',
-      crop: {
+      crop: cropParams || {
         cropStartX: 0,
         cropStartY: 0,
         cropEndX: -1,

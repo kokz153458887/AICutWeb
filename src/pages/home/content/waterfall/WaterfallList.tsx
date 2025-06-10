@@ -21,8 +21,8 @@ interface WaterfallListProps {
  * 加载中状态组件
  */
 const LoadingItem: React.FC = () => (
-  <div className="loading-more">
-    <div className="loading-spinner"></div>
+  <div className="home-loading-more">
+    <div className="home-loading-spinner"></div>
     <span>加载中...</span>
   </div>
 );
@@ -31,7 +31,7 @@ const LoadingItem: React.FC = () => (
  * 加载错误状态组件
  */
 const ErrorItem: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => (
-  <div className="load-more-error">
+  <div className="home-load-more-error">
     <p>加载失败，请点击重试</p>
     {onRetry && (
       <button onClick={onRetry}>重试</button>
@@ -43,7 +43,7 @@ const ErrorItem: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => (
  * 没有更多数据状态组件
  */
 const NoMoreItem: React.FC = () => (
-  <div className="no-more-data">
+  <div className="home-no-more-data">
     <p>已全部加载</p>
   </div>
 );
@@ -52,7 +52,7 @@ const NoMoreItem: React.FC = () => (
  * 加载更多按钮组件
  */
 const LoadMoreButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <div className="load-more-button">
+  <div className="home-load-more-button">
     <button onClick={onClick}>加载更多</button>
   </div>
 );

@@ -104,6 +104,78 @@
   background: rgba(255, 255, 255, 0.01);
 }
 
+/* 视频播放器包装器 */
+.video-player-wrapper {
+  position: relative;
+}
+
+/* 裁剪控制区域 */
+.video-crop-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  pointer-events: none; /* 避免遮挡视频播放器操作 */
+}
+
+.video-crop-controls > * {
+  pointer-events: auto; /* 恢复子元素的点击事件 */
+}
+
+/* 裁剪状态文字 */
+.crop-status-text {
+  font-size: 11px;
+  color: rgba(0, 214, 201, 0.9);
+  background: rgba(0, 214, 201, 0.15);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 214, 201, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 214, 201, 0.2);
+  animation: cropStatusGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes cropStatusGlow {
+  0% {
+    background: rgba(0, 214, 201, 0.15);
+    border-color: rgba(0, 214, 201, 0.3);
+  }
+  100% {
+    background: rgba(0, 214, 201, 0.25);
+    border-color: rgba(0, 214, 201, 0.5);
+  }
+}
+
+/* 裁剪按钮 */
+.crop-button {
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.crop-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+}
+
 /* 切片列表区域 - 可滚动 */
 .clips-section {
   flex: 1;
@@ -316,6 +388,28 @@
     width: 6px;
     height: 6px;
     margin: 0 auto;
+  }
+
+  /* 裁剪控制区域移动端优化 */
+  .video-crop-controls {
+    top: 6px;
+    right: 6px;
+    gap: 6px;
+  }
+
+  .crop-status-text {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .crop-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .crop-button svg {
+    width: 14px;
+    height: 14px;
   }
 }
 

@@ -1,0 +1,477 @@
+/* 视频裁剪浮层组件样式 */
+.video-crop-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 背景遮罩 */
+.crop-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.3s ease-out;
+}
+
+/* 主容器 */
+.crop-modal-content {
+  position: relative;
+  width: 95vw;
+  height: 90vh;
+  max-width: 800px;
+  max-height: 600px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slide-up 0.3s ease-out;
+}
+
+/* 头部 */
+.crop-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+  background: #2a2a2a;
+}
+
+.crop-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.crop-modal-close {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.crop-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* 视频预览容器 */
+.crop-preview-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+/* 视频预览包装器 */
+.crop-video-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 视频容器 */
+.crop-video-container {
+  position: relative;
+  display: block;
+}
+
+/* 视频预览 */
+.crop-video {
+  display: block;
+  border-radius: 4px;
+  background: #000;
+}
+
+/* 视频控制层 */
+.crop-video-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* 播放按钮 */
+.play-button {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.play-button:hover {
+  opacity: 1;
+}
+
+/* 裁剪框 */
+.crop-box {
+  position: absolute;
+  border: 2px solid #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  pointer-events: all;
+  transition: box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+.crop-box:hover {
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(255, 71, 87, 0.4);
+}
+
+.crop-box:active {
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 25px rgba(255, 71, 87, 0.6);
+}
+
+/* 裁剪框中心指示器 */
+.crop-box-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.crop-box-center-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4757;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+  animation: pulse 2s infinite;
+}
+
+/* 遮罩层 */
+.crop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.crop-overlay-part {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.crop-overlay-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.crop-overlay-middle {
+  left: 0;
+  width: 100%;
+  display: flex;
+}
+
+.crop-overlay-left {
+  height: 100%;
+}
+
+.crop-overlay-right {
+  height: 100%;
+}
+
+.crop-overlay-bottom {
+  left: 0;
+  width: 100%;
+}
+
+/* 控制区域 */
+.crop-controls {
+  padding: 20px;
+  background: #2a2a2a;
+  border-top: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 比例选择器 */
+.crop-ratios {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.crop-ratio-btn {
+  padding: 8px 16px;
+  background: #3a3a3a;
+  color: #ccc;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.crop-ratio-btn:hover {
+  background: #4a4a4a;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.crop-ratio-btn.active {
+  background: #007AFF;
+  color: #fff;
+  border-color: #007AFF;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+/* 操作按钮 */
+.crop-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.crop-btn {
+  flex: 1;
+  max-width: 120px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  border: none;
+  outline: none;
+}
+
+.crop-btn-cancel {
+  background: #555;
+  color: #fff;
+}
+
+.crop-btn-cancel:hover {
+  background: #666;
+  transform: translateY(-1px);
+}
+
+.crop-btn-confirm {
+  background: #007AFF;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.crop-btn-confirm:hover:not(.disabled) {
+  background: #0056CC;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+.crop-btn-confirm.disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 加载状态 */
+.crop-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #fff;
+}
+
+.crop-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #333;
+  border-top: 3px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.crop-loading-text {
+  font-size: 14px;
+  color: #ccc;
+}
+
+/* 错误状态 */
+.crop-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #fff;
+  text-align: center;
+}
+
+.crop-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.crop-error-text {
+  font-size: 16px;
+  color: #ff6b6b;
+  margin-bottom: 16px;
+}
+
+.crop-error-retry {
+  padding: 8px 16px;
+  background: #007AFF;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.crop-error-retry:hover {
+  background: #0056CC;
+  transform: translateY(-1px);
+}
+
+/* 动画效果 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .crop-modal-content {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .crop-modal-header {
+    padding: 12px 16px;
+  }
+
+  .crop-modal-title {
+    font-size: 16px;
+  }
+
+  .crop-controls {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .crop-ratios {
+    gap: 6px;
+  }
+
+  .crop-ratio-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .crop-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .crop-box {
+    border-width: 3px;
+  }
+  
+  .crop-box-center-dot {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .crop-ratio-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .crop-btn {
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+} 

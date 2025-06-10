@@ -43,12 +43,11 @@
 }
 
 /* 加载状态容器 - 单列横向铺满 */
-.loading-more,
-.load-more-error,
-.no-more-data,
-.load-more-button {
+.home-loading-more,
+.home-load-more-error,
+.home-no-more-data,
+.home-load-more-button {
   grid-column: 1 / -1; /* 横跨所有列 */
-  background-color: #1e1e24;
   border-radius: 8px;
   margin: 10px 0;
   padding: 15px;
@@ -59,7 +58,7 @@
 }
 
 /* 加载更多状态 */
-.loading-more {
+.home-loading-more {
   color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
   display: flex;
@@ -68,7 +67,7 @@
 }
 
 /* 加载中的转圈动画 */
-.loading-spinner {
+.home-loading-spinner {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -84,14 +83,14 @@
 }
 
 /* 加载错误状态 */
-.load-more-error {
+.home-load-more-error {
   color: #ff5555;
   font-size: 14px;
   flex-direction: column;
   background-color: rgba(255, 85, 85, 0.1);
 }
 
-.load-more-error button {
+.home-load-more-error button {
   margin-top: 8px;
   padding: 5px 15px;
   background-color: rgba(255, 85, 85, 0.2);
@@ -102,28 +101,28 @@
 }
 
 /* 没有更多数据状态 */
-.no-more-data {
+.home-no-more-data {
   color: rgba(255, 255, 255, 0.4);
   font-size: 14px;
 }
 
 /* 加载更多按钮 */
-.load-more-button button {
+.home-load-more-button button {
   padding: 8px 20px;
   background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 4px;
+
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.load-more-button button:hover {
+.home-load-more-button button:hover {
   background-color: #2980b9;
 }
 
-.load-more-button button:active {
+.home-load-more-button button:active {
   background-color: #1f6aa5;
 }
 

@@ -30,8 +30,8 @@
   position: relative;
   width: 95vw;
   height: 90vh;
-  max-width: 800px;
-  max-height: 600px;
+  /* max-width: 800px;
+  max-height: 600px; */
   background: #1a1a1a;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -93,54 +93,84 @@
   justify-content: center;
 }
 
-/* 视频容器 */
+/* 视频容器 - 确保VideoPlayer组件正确尺寸 */
 .crop-video-container {
   position: relative;
   display: block;
-}
-
-/* 视频预览 */
-.crop-video {
-  display: block;
+  overflow: hidden;
   border-radius: 4px;
-  background: #000;
 }
 
-/* 视频控制层 */
-.crop-video-controls {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 5;
+/* 确保VideoPlayer组件填满容器 */
+.crop-video-container .video-player-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
 }
 
-/* 播放按钮 */
-.play-button {
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
+.crop-video-container .video-wrapper {
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.play-button:hover {
-  opacity: 1;
+.crop-video-container .edit-video-element {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 0 !important;
 }
 
-/* 裁剪框 */
+.crop-video-container .edit-video-cover {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.crop-video-container .edit-video-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* 隐藏VideoPlayer的进度条和控制按钮 */
+.crop-video-container .progress-controls {
+  display: none !important;
+}
+
+.crop-video-container .location-mode-indicator {
+  display: none !important;
+}
+
+.crop-video-container .drag-time-overlay {
+  display: none !important;
+}
+
+/* 裁剪框 - 确保与视频播放器完全重合，支持点透 */
 .crop-box {
   position: absolute;
   border: 2px solid #ff4757;
-  background: rgba(255, 71, 87, 0.1);
+  background: transparent;
   box-shadow: 
     0 0 0 9999px rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  pointer-events: all;
+  pointer-events: none; /* 默认不阻止点击事件 */
   transition: box-shadow 0.2s ease;
   z-index: 10;
+}
+
+/* 裁剪框的拖拽区域 - 只有边框可以拖拽 */
+.crop-box-drag-area {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  pointer-events: all;
+  cursor: grab;
+  border: 10px solid transparent;
+}
+
+.crop-box.dragging .crop-box-drag-area {
+  cursor: grabbing;
 }
 
 .crop-box:hover {

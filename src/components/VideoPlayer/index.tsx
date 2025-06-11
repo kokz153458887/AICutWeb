@@ -32,6 +32,9 @@ interface VideoPlayerProps {
   showProgressBar?: boolean;
   isLocationMode?: boolean; // 是否处于定位模式
   autoPlay?: boolean; // 是否自动播放
+  width?: string | number; // 自定义宽度
+  height?: string | number; // 自定义高度
+  className?: string; // 自定义类名
 }
 
 export interface VideoPlayerRef {
@@ -55,7 +58,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   seekToTime,
   showProgressBar = true,
   isLocationMode = false,
-  autoPlay = false
+  autoPlay = false,
+  width,
+  height,
+  className
 }, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -374,8 +380,14 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   // 计算进度百分比
   const progressPercent = duration > 0 ? (isDragging ? dragTime : currentTime) / duration * 100 : 0;
 
+  // 计算容器样式
+  const containerStyle: React.CSSProperties = {
+    width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined,
+    height: height ? (typeof height === 'number' ? `${height}px` : height) : undefined,
+  };
+
   return (
-    <div className="video-player-container">
+    <div className={`video-player-container ${className || ''}`} style={containerStyle}>
       <div className="video-wrapper">
         <video
           ref={videoRef}

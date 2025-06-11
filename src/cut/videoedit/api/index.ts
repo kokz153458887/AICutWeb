@@ -16,10 +16,17 @@ interface ApiResponse<T> {
 
 // 裁剪参数接口
 export interface CropParams {
-  cropStartX: number;
-  cropStartY: number;
-  cropEndX: number;
-  cropEndY: number;
+  cropStartXRatio: number;
+  cropStartYRatio: number;
+  cropEndXRatio: number;
+  cropEndYRatio: number;
+  // 可选的额外信息，用于调试和验证
+  cropStartX?: number;
+  cropStartY?: number;
+  cropEndX?: number;
+  cropEndY?: number;
+  originalWidth?: number;
+  originalHeight?: number;
 }
 
 // 切片参数接口
@@ -129,10 +136,10 @@ export const addMaterialVideo = async (params: {
       type: selectedMaterial.contentType || '',
       subtype: selectedMaterial.contentSubtype || '',
       crop: cropParams || {
-        cropStartX: 0,
-        cropStartY: 0,
-        cropEndX: -1,
-        cropEndY: -1
+        cropStartXRatio: 0,
+        cropStartYRatio: 0,
+        cropEndXRatio: -1,
+        cropEndYRatio: -1
       },
       clips: clips.map(clip => ({
         name: cleanFileName(clip.title || ''),

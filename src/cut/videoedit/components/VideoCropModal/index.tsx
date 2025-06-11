@@ -3,7 +3,9 @@
  * 支持选择裁剪范围、调整比例和拖动定位
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import VideoPlayer, { VideoPlayerRef } from '../../../../components/VideoPlayer';
 import { CropParams } from '../../api';
+import { ParseTaskDetail } from '../..';
 import './styles.css';
 
 // 裁剪比例选项
@@ -16,8 +18,7 @@ const CROP_RATIOS = [
 ];
 
 interface VideoCropModalProps {
-  videoElement: HTMLVideoElement;
-  videoResolution: string; // 格式如 "1080x1920"
+  taskData: ParseTaskDetail;
   visible: boolean;
   onClose: () => void;
   onConfirm: (cropParams: CropParams) => void;
@@ -29,15 +30,14 @@ interface VideoCropModalProps {
  * 提供可视化的视频裁剪范围选择功能
  */
 const VideoCropModal: React.FC<VideoCropModalProps> = ({
-  videoElement,
-  videoResolution,
+  taskData,
   visible,
   onClose,
   onConfirm,
   initialCropParams
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const previewVideoRef = useRef<HTMLVideoElement>(null);
+  const videoPlayerRef = useRef<VideoPlayerRef>(null);
   
   const [selectedRatio, setSelectedRatio] = useState<number>(1); // 默认1:1
   const [cropBox, setCropBox] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -46,7 +46,6 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   /**
    * 解析视频分辨率
@@ -61,11 +60,11 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
    */
   const getVideoSize = useCallback(() => {
     // 优先使用传入的分辨率信息，因为更准确
-    const resolution = parseResolution(videoResolution);
+    const resolution = parseResolution(taskData.video_info?.resolution || '640x360');
     const videoWidth = resolution.width;
     const videoHeight = resolution.height;
 
-    console.log('视频分辨率信息:', { videoResolution, videoWidth, videoHeight });
+    console.log('视频分辨率信息:', { resolution: taskData.video_info?.resolution, videoWidth, videoHeight });
 
     // 防止尺寸为0的情况
     if (videoWidth === 0 || videoHeight === 0) {
@@ -74,7 +73,7 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
     }
 
     return { width: videoWidth, height: videoHeight };
-  }, [videoResolution, parseResolution]);
+  }, [taskData.video_info?.resolution, parseResolution]);
 
   /**
    * 计算视频显示尺寸和位置
@@ -84,7 +83,7 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
 
     const container = containerRef.current;
     const containerWidth = container.clientWidth - 40; // 减少边距
-    const containerHeight = container.clientHeight - 200; // 留出底部控制区域
+    const containerHeight = container.clientHeight; // 留出底部控制区域
 
     // 计算缩放比例，保持宽高比
     const scaleX = containerWidth / originalWidth;
@@ -115,7 +114,7 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
   const initializeCropBox = useCallback((displayWidth: number, displayHeight: number) => {
     if (initialCropParams) {
       // 使用传入的初始参数
-      const { cropStartX, cropStartY, cropEndX, cropEndY } = initialCropParams;
+      const { cropStartXRatio: cropStartX, cropStartYRatio: cropStartY, cropEndXRatio: cropEndX, cropEndYRatio: cropEndY } = initialCropParams;
       const width = cropEndX - cropStartX;
       const height = cropEndY - cropStartY;
       
@@ -131,14 +130,16 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
         setSelectedRatio(width / height);
       }
     } else {
-      // 默认创建1:1的裁剪框，居中显示
-      const size = Math.min(displayWidth, displayHeight) * 0.6;
+      // 默认创建完全覆盖视频的裁剪框
       setCropBox({
-        x: (displayWidth - size) / 2,
-        y: (displayHeight - size) / 2,
-        width: size,
-        height: size
+        x: 0,
+        y: 0,
+        width: displayWidth,
+        height: displayHeight
       });
+      
+      // 设置默认比例为视频本身的比例
+      setSelectedRatio(displayWidth / displayHeight);
     }
   }, [initialCropParams]);
 
@@ -148,13 +149,13 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
   const updateCropBoxRatio = useCallback((ratio: number, displayWidth: number, displayHeight: number) => {
     setCropBox(prev => {
       // 以视频宽度的80%为基准
-      const baseWidth = displayWidth * 0.8;
+      const baseWidth = displayWidth;
       let newWidth = baseWidth;
       let newHeight = baseWidth / ratio;
 
       // 如果计算出的高度超出视频高度，则以高度为准重新计算宽度
-      if (newHeight > displayHeight * 0.9) {
-        newHeight = displayHeight * 0.9;
+      if (newHeight > displayHeight) {
+        newHeight = displayHeight ;
         newWidth = newHeight * ratio;
       }
 
@@ -263,49 +264,45 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
   }, []);
 
   /**
-   * 计算最终的裁剪参数
+   * 计算最终的裁剪参数 - 返回基于视频实际分辨率的像素坐标
    */
   const calculateCropParams = useCallback((): CropParams => {
-    const { displayWidth, displayHeight } = videoSize;
+    const { displayWidth, displayHeight, width: originalWidth, height: originalHeight } = videoSize;
     
     // 转换为原始视频坐标系的比例
     const cropStartX = Math.max(0, cropBox.x / displayWidth);
-    const cropStartY = Math.max(0, cropBox.y / displayHeight);
+    const cropStartY = Math.max(0, cropBox.y / displayHeight);  
     const cropEndX = Math.min(1, (cropBox.x + cropBox.width) / displayWidth);
     const cropEndY = Math.min(1, (cropBox.y + cropBox.height) / displayHeight);
 
+    // 计算实际像素位置（基于原始视频分辨率）
+    const actualStartX = Math.round(cropStartX * originalWidth);
+    const actualStartY = Math.round(cropStartY * originalHeight);
+    const actualEndX = Math.round(cropEndX * originalWidth);
+    const actualEndY = Math.round(cropEndY * originalHeight);
+
+    console.log('裁剪参数计算:', {
+      显示尺寸: { displayWidth, displayHeight },
+      原始尺寸: { originalWidth, originalHeight },
+      裁剪框: cropBox,
+      比例坐标: { cropStartX, cropStartY, cropEndX, cropEndY },
+      像素坐标: { actualStartX, actualStartY, actualEndX, actualEndY }
+    });
+
     return {
-      cropStartX,
-      cropStartY,
-      cropEndX,
-      cropEndY
+      cropStartXRatio: cropStartX,
+      cropStartYRatio: cropStartY,
+      cropEndXRatio: cropEndX,
+      cropEndYRatio: cropEndY,
+      // 添加实际像素坐标信息
+      cropStartX: actualStartX,
+      cropStartY: actualStartY,
+      cropEndX: actualEndX,
+      cropEndY: actualEndY,
+      originalWidth,
+      originalHeight
     };
   }, [cropBox, videoSize]);
-
-  /**
-   * 处理视频播放/暂停
-   */
-  const handleVideoPlayToggle = useCallback(() => {
-    if (!previewVideoRef.current) return;
-    
-    if (isPlaying) {
-      previewVideoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      previewVideoRef.current.play();
-      setIsPlaying(true);
-    }
-  }, [isPlaying]);
-
-  /**
-   * 处理视频时间更新
-   */
-  const handleVideoTimeUpdate = useCallback(() => {
-    if (previewVideoRef.current && videoElement) {
-      // 同步源视频的当前时间
-      previewVideoRef.current.currentTime = videoElement.currentTime;
-    }
-  }, [videoElement]);
 
   /**
    * 处理确认按钮
@@ -320,13 +317,13 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
 
   // 初始化视频预览和布局
   useEffect(() => {
-    if (visible && videoElement) {
+    if (visible && taskData) {
       setIsLoading(true);
       setError(null);
       
       // 重置状态
       setSelectedRatio(initialCropParams ? 
-        ((initialCropParams.cropEndX - initialCropParams.cropStartX) / (initialCropParams.cropEndY - initialCropParams.cropStartY)) : 1
+        ((initialCropParams.cropEndXRatio - initialCropParams.cropStartXRatio) / (initialCropParams.cropEndYRatio - initialCropParams.cropStartYRatio)) : 1
       );
       
       try {
@@ -334,25 +331,6 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
         if (sizeInfo) {
           const displaySize = calculateVideoDisplay(sizeInfo.width, sizeInfo.height);
           setVideoSize(displaySize);
-          
-          // 设置预览视频
-          if (previewVideoRef.current) {
-            previewVideoRef.current.src = videoElement.src;
-            previewVideoRef.current.currentTime = videoElement.currentTime;
-            
-            // 监听视频加载完成事件
-            previewVideoRef.current.onloadeddata = () => {
-              console.log('预览视频加载完成');
-              if (previewVideoRef.current) {
-                previewVideoRef.current.currentTime = videoElement.currentTime;
-              }
-            };
-            
-            // 监听播放状态变化
-            previewVideoRef.current.onplay = () => setIsPlaying(true);
-            previewVideoRef.current.onpause = () => setIsPlaying(false);
-            previewVideoRef.current.onended = () => setIsPlaying(false);
-          }
           
           // 延迟初始化裁剪框，确保尺寸计算完成
           setTimeout(() => {
@@ -369,7 +347,7 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
         setIsLoading(false);
       }
     }
-  }, [visible, videoElement, getVideoSize, calculateVideoDisplay, initializeCropBox, initialCropParams]);
+  }, [visible, taskData, getVideoSize, calculateVideoDisplay, initializeCropBox, initialCropParams]);
 
   // 绑定全局拖拽事件
   useEffect(() => {
@@ -446,46 +424,43 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
           
           {!isLoading && !error && videoSize.displayWidth > 0 && (
             <div className="crop-video-wrapper">
-              {/* 视频预览 */}
-              <div className="crop-video-container">
-                <video 
-                  ref={previewVideoRef}
-                  className="crop-video"
-                  style={{
-                    width: `${videoSize.displayWidth}px`,
-                    height: `${videoSize.displayHeight}px`
-                  }}
-                  muted
-                  playsInline
-                  onTimeUpdate={handleVideoTimeUpdate}
+              {/* 视频播放器 */}
+              <div 
+                className="crop-video-container"
+                style={{
+                  width: `${videoSize.displayWidth}px`,
+                  height: `${videoSize.displayHeight}px`
+                }}
+              >
+                <VideoPlayer
+                  ref={videoPlayerRef}
+                  videoUrl={taskData.video_url || ''}
+                  coverUrl={taskData.preview_image}
+                  autoPlay={true}
+                  showProgressBar={false}
+                  width={videoSize.displayWidth}
+                  height={videoSize.displayHeight}
+                  className="crop-video-player"
                 />
-                
-                {/* 视频播放控制层 */}
-                <div className="crop-video-controls" onClick={handleVideoPlayToggle}>
-                  {!isPlaying && (
-                    <div className="play-button">
-                      <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)"/>
-                        <path d="M8 5V19L19 12L8 5Z" fill="white"/>
-                      </svg>
-                    </div>
-                  )}
-                </div>
               </div>
               
               {/* 裁剪框 */}
               <div 
-                className="crop-box"
+                className={`crop-box ${isDragging ? 'dragging' : ''}`}
                 style={{
                   left: `${cropBox.x}px`,
                   top: `${cropBox.y}px`,
                   width: `${cropBox.width}px`,
-                  height: `${cropBox.height}px`,
-                  cursor: isDragging ? 'grabbing' : 'grab'
+                  height: `${cropBox.height}px`
                 }}
-                onMouseDown={handleCropBoxMouseDown}
-                onTouchStart={handleCropBoxTouchStart}
               >
+                {/* 裁剪框拖拽边框 */}
+                <div 
+                  className="crop-box-drag-area"
+                  onMouseDown={handleCropBoxMouseDown}
+                  onTouchStart={handleCropBoxTouchStart}
+                />
+                
                 {/* 裁剪框中心指示器 */}
                 <div className="crop-box-center">
                   <div className="crop-box-center-dot"></div>

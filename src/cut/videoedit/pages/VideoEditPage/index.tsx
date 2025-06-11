@@ -1179,11 +1179,10 @@ const VideoEditPage: React.FC = () => {
       />
 
       {/* 视频裁剪浮层 */}
-      {showCropModal && videoPlayerRef.current && videoPlayerRef.current.getVideoElement() && (
+      {showCropModal && (
         <VideoCropModal
-          videoElement={videoPlayerRef.current.getVideoElement()!}
-          videoResolution={taskData.video_info?.resolution || '640x360'}
-          visible={showCropModal}
+          taskData={taskData}
+          visible={showCropModal} 
           onClose={handleCropModalClose}
           onConfirm={handleCropConfirm}
           initialCropParams={cropParams || undefined}

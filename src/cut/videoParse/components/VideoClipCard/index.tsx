@@ -212,11 +212,14 @@ const VideoClipCard: React.FC<VideoClipCardProps> = ({ clip, taskData, onFullScr
               onPlayStateChange={handlePlayStateChange}
               autoPlay={true}
               showProgressBar={true}
+              width="100%"
+              height="100%"
+              className="clip-video-player-component"
             />
             
             {/* 全屏播放按钮 */}
-            <div className="fullscreen-btn" onClick={handleFullScreenClick}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <div className="video_clip_card_fullscreen-btn" onClick={handleFullScreenClick}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                 <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>

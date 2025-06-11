@@ -89,11 +89,69 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   };
 
   /**
-   * 处理预览图片点击
+   * 处理预览图片点击 - 直接全屏播放视频
    */
   const handlePreviewClick = () => {
-    if (onVideoPlay) {
-      onVideoPlay();
+    if (taskData.video_url) {
+      // 创建全屏视频播放器
+      const video = document.createElement('video');
+      video.src = taskData.video_url;
+      video.controls = true;
+      video.autoplay = true;
+      video.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: black;
+        z-index: 10000;
+        object-fit: contain;
+      `;
+      
+      // 添加到页面
+      document.body.appendChild(video);
+      
+      // 进入全屏
+      video.requestFullscreen?.() || 
+      (video as any).webkitRequestFullscreen?.() || 
+      (video as any).mozRequestFullScreen?.();
+      
+      // 监听全屏退出事件
+      const handleFullscreenChange = () => {
+        if (!document.fullscreenElement && 
+            !(document as any).webkitFullscreenElement && 
+            !(document as any).mozFullScreenElement) {
+          // 退出全屏时移除视频元素
+          if (video.parentNode) {
+            video.parentNode.removeChild(video);
+          }
+          document.removeEventListener('fullscreenchange', handleFullscreenChange);
+          document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+          document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+        }
+      };
+      
+      // 绑定全屏变化事件
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      
+      // 视频结束时也移除元素
+      video.addEventListener('ended', () => {
+        if (video.parentNode) {
+          video.parentNode.removeChild(video);
+        }
+      });
+      
+      // 点击视频外区域退出
+      video.addEventListener('click', (e) => {
+        if (e.target === video) {
+          document.exitFullscreen?.() || 
+          (document as any).webkitExitFullscreen?.() || 
+          (document as any).mozCancelFullScreen?.();
+        }
+      });
     }
   };
 

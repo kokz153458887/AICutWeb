@@ -235,15 +235,46 @@
   height: 100%;
 }
 
+/* 确保VideoPlayer组件在VideoClipCard中正确显示 */
+.clip-video-player-component.video-player-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+}
+
+.clip-video-player-component .video-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.clip-video-player-component .edit-video-element {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 0 !important;
+}
+
+.clip-video-player-component .edit-video-cover {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.clip-video-player-component .edit-video-cover img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
 /* 全屏播放按钮 */
-.fullscreen-btn {
+.video_clip_card_fullscreen-btn {
+  z-index: 1000;
   position: absolute;
-  bottom: 12px;
-  right: 12px;
-  padding: 8px;
+  bottom: 10px;
+  right: 2px;
+  padding: 2px;
   background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -253,7 +284,7 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
-.fullscreen-btn:hover {
+.video_clip_card_fullscreen-btn:hover {
   background: rgba(0, 0, 0, 0.9);
   transform: scale(1.05);
 }

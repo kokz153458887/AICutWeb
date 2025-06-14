@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { HomeApiResponse, HomeApiParams } from './homeApiModel';
-import { API_CONFIG, API_PATHS, API_HEADERS, API_RESPONSE_CODE } from '../../../config/api';
+import { API_CONFIG, API_PATHS, getApiHeaders } from '../../../config/api';
 
 /**
  * 首页API服务类
@@ -30,7 +30,7 @@ export class HomeApiService {
         baseURL: API_CONFIG.fullBaseURL,
         params: mergedParams,
         timeout: API_CONFIG.timeout,
-        headers: API_HEADERS
+        headers: getApiHeaders()
       });
       
       // 检查响应状态

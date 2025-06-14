@@ -3,91 +3,162 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #141414;
+  background-color: #000000;
+  color: white;
+  padding: 20px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 /* 页面头部 */
 .mine-header {
-  padding: 20px 16px 16px;
-  background-color: #141414;
-  border-bottom: 1px solid #333;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 4px;
+  position: relative;
 }
 
 .mine-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #fff;
+  font-size: 28px;
+  font-weight: bold;
   margin: 0;
-  text-align: center;
+  color: #FFFFFF;
+  text-align: left;
+}
+
+/* 右侧认证区域 */
+.mine-auth-section {
+  position: absolute;
+  right: 4px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 用户信息容器 */
+.mine-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 用户名显示 */
+.mine-username {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 登录按钮 */
+.mine-login-btn,
+.mine-logout-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mine-login-btn {
+  background: linear-gradient(135deg, #04e762, #00c851);
+  color: white;
+}
+
+.mine-login-btn:hover {
+  background: linear-gradient(135deg, #00c851, #04e762);
+  transform: translateY(-1px);
+}
+
+.mine-logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mine-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* 页面内容区 */
 .mine-content {
   flex: 1;
-  padding: 20px 16px;
-  background-color: #141414;
-  min-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 /* 功能网格容器 */
 .function-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  max-width: 400px;
-  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 10px;
 }
 
 /* 网格项 */
 .grid-item {
-  background-color: #222;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  padding: 20px 16px;
+  padding: 24px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #333;
-  -webkit-tap-highlight-color: transparent;
-  min-height: 120px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .grid-item:hover {
-  background-color: #2a2a2a;
-  border-color: #444;
+  background: rgba(255, 255, 255, 0.08);
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.grid-item:active {
-  transform: translateY(0) scale(0.98);
+.grid-item-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.grid-item-disabled:hover {
+  background: rgba(255, 255, 255, 0.02);
+  transform: none;
+  box-shadow: none;
 }
 
 /* 网格项图标 */
 .item-icon {
   font-size: 32px;
-  margin-bottom: 8px;
-  line-height: 1;
+  margin-bottom: 12px;
+  display: block;
 }
 
 /* 网格项标题 */
 .item-title {
   font-size: 16px;
-  font-weight: 500;
-  color: #fff;
-  margin-bottom: 4px;
-  line-height: 1.2;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: white;
 }
 
 /* 网格项描述 */
 .item-description {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+.item-lock-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  opacity: 0.7;
+  z-index: 1;
 }
 
 /* 特殊项目样式 - 视频切片 */
@@ -111,36 +182,58 @@
 }
 
 /* 移动端适配 */
-@media screen and (max-width: 480px) {
+@media (max-width: 768px) {
+  .mine-page {
+    padding: 16px;
+  }
+  
   .mine-header {
-    padding: 16px 12px 12px;
+    margin-bottom: 24px;
   }
   
   .mine-title {
-    font-size: 20px;
+    font-size: 24px;
   }
   
-  .mine-content {
-    padding: 16px 12px;
+  .mine-auth-section {
+    right: 0;
+  }
+  
+  .mine-user-info {
+    gap: 8px;
+  }
+  
+  .mine-username {
+    font-size: 13px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .mine-login-btn,
+  .mine-logout-btn {
+    padding: 5px 10px;
+    font-size: 11px;
   }
   
   .function-grid {
-    gap: 12px;
-    max-width: none;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    padding: 8px;
   }
   
   .grid-item {
-    padding: 16px 12px;
-    min-height: 100px;
+    padding: 20px;
   }
   
   .item-icon {
     font-size: 28px;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
   
   .item-title {
-    font-size: 14px;
+    font-size: 15px;
   }
   
   .item-description {

@@ -4,15 +4,14 @@
  */
 import axios from 'axios';
 import { ApiResponse, MaterialListResponse, MusicLibItem, StyleListResponse, VideoStyleItem, ImageLibItem } from './types';
-import { API_CONFIG, API_PATHS, API_HEADERS } from '../../config/api';
+import { API_CONFIG, API_PATHS, getApiHeaders } from '../../config/api';
 
 /**
  * 使用与service.ts同样的axios实例
  */
 const apiClient = axios.create({
   baseURL: API_CONFIG.fullBaseURL,
-  timeout: API_CONFIG.timeout,
-  headers: API_HEADERS
+  timeout: API_CONFIG.timeout
 });
 
 /**
@@ -20,7 +19,9 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config) => {
-    // 可以在这里添加认证信息等
+    // 动态获取最新的API headers（包含最新的Token）
+    const currentHeaders = getApiHeaders();
+    Object.assign(config.headers, currentHeaders);
     return config;
   },
   (error) => {

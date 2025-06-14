@@ -517,7 +517,7 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
                 ? "默认切片" 
                 : (clip.text.length > 20 ? clip.text.substring(0, 20) + '...' : clip.text) || `切片 ${index + 1}`
               }
-              className="title-input"
+              className="video-clip-item-title-input"
               onFocus={handleTitleInputFocus}
               onBlur={handleTitleInputBlur}
             />

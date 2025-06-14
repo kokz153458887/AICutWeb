@@ -55,6 +55,11 @@ export const API_CONFIG = {
 
 // 导出常用的API路径
 export const API_PATHS = {
+  // 用户相关
+  user: {
+    login: '/user/login'
+  },
+  
   // 首页相关
   home: {
     getHomeData: '/home/getHomeData'
@@ -118,11 +123,53 @@ export const API_PATHS = {
   }
 };
 
-// 导出请求头配置
-export const API_HEADERS = {
+/**
+ * 获取API请求头，包含认证信息
+ * @returns 请求头对象
+ */
+export const getApiHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = {
   'Content-Type': 'application/json',
-  // 可以添加其他通用请求头
+  };
+
+  // 添加Token到请求头
+  if (typeof window !== 'undefined') {
+    try {
+      const tokenInfo = localStorage.getItem('user_token_info');
+      if (tokenInfo) {
+        const { token, loginTime, expiresIn } = JSON.parse(tokenInfo);
+        
+        // 简单的过期检查
+        const now = Date.now();
+        const parseExpiresIn = (expires: string): number => {
+          const match = expires.match(/^(\d+)([dhms])$/);
+          if (!match) return 0;
+          const [, num, unit] = match;
+          const value = parseInt(num, 10);
+          switch (unit) {
+            case 'd': return value * 24 * 60 * 60 * 1000;
+            case 'h': return value * 60 * 60 * 1000;
+            case 'm': return value * 60 * 1000;
+            case 's': return value * 1000;
+            default: return 0;
+          }
+        };
+        
+        const expireMs = parseExpiresIn(expiresIn);
+        if (expireMs > 0 && (now - loginTime) <= expireMs) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+    } catch (error) {
+      console.error('[API] 获取Token失败:', error);
+    }
+  }
+
+  return headers;
 };
+
+// 导出请求头配置（保持向后兼容）
+export const API_HEADERS = getApiHeaders();
 
 // 导出响应码配置
 export const API_RESPONSE_CODE = {

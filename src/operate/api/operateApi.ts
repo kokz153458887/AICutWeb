@@ -2,7 +2,7 @@
  * 视频操作页API服务
  */
 import axios from 'axios';
-import { API_CONFIG, API_PATHS, API_HEADERS, API_RESPONSE_CODE } from '../../config/api';
+import { API_CONFIG, API_PATHS, getApiHeaders, API_RESPONSE_CODE } from '../../config/api';
 import { ShareTemplateResponse, QueryVideoTaskResponse, VideoOperateData } from './types';
 
 /**
@@ -19,7 +19,7 @@ export const createFromVideoTask = async (videoTaskId: string, videoIndex: numbe
           videoTaskId,
           videoIndex
         },
-        headers: API_HEADERS,
+        headers: getApiHeaders(),
         timeout: API_CONFIG.timeout
       }
     );
@@ -50,7 +50,7 @@ export const queryVideoTask = async (generateId: string): Promise<VideoOperateDa
         params: {
           generateId
         },
-        headers: API_HEADERS,
+        headers: getApiHeaders(),
         timeout: API_CONFIG.timeout
       }
     );

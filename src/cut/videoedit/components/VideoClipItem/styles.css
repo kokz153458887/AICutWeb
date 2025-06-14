@@ -29,19 +29,19 @@
 }
 
 /* 标题输入容器 */
-.title-input-container {
+.video-clip-item-title-input-container {
   position: relative;
   flex: 1;
 }
 
-.title-input {
+.video-clip-item-title-input {
   width: 100%;
   padding: 4px 6px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: #FFFFFF;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 500;
   transition: all 0.2s ease;
 }
@@ -194,12 +194,12 @@
   transform: scale(1.05);
 }
 
-.title-input::placeholder {
+.video-clip-item-title-input::placeholder {
   color: rgba(255, 255, 255, 0.5);
   font-style: italic;
 }
 
-.title-input:focus {
+.video-clip-item-title-input:focus {
   outline: none;
   border-color: rgba(0, 122, 255, 0.5);
   background: rgba(255, 255, 255, 0.06);
@@ -467,9 +467,9 @@
     font-size: 11px;
   }
 
-  .title-input, .folder-input {
+  .video-clip-item-title-input, .folder-input {
     padding: 3px 5px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .folder-input-container {

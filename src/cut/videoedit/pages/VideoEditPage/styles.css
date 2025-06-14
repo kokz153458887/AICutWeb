@@ -424,7 +424,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   flex: 1;
-  max-width: 150px;
+  max-width: 110px;
 }
 
 .material-select-entry:hover {

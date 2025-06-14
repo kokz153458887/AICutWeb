@@ -3,7 +3,7 @@
  * 负责处理视频列表页的所有接口请求
  */
 import axios from 'axios';
-import { API_CONFIG, API_PATHS, API_HEADERS, API_RESPONSE_CODE } from '../../config/api';
+import { API_CONFIG, API_PATHS, getApiHeaders, API_RESPONSE_CODE } from '../../config/api';
 
 // 视频信息接口
 export interface VideoItem {
@@ -78,7 +78,7 @@ export const getVideoList = async (params?: PaginationParams): Promise<{
       baseURL: API_CONFIG.fullBaseURL,
       params,
       timeout: API_CONFIG.timeout,
-      headers: API_HEADERS
+      headers: getApiHeaders()
     });
 
     if (response.data.code === API_RESPONSE_CODE.SUCCESS && response.data.data && response.data.data.videolist) {
@@ -110,7 +110,7 @@ export const getVideoDetail = async (id: string): Promise<VideoCardData | null> 
     const response = await axios.get<DetailResponse>(API_PATHS.videoList.getDetail(id), {
       baseURL: API_CONFIG.fullBaseURL,
       timeout: API_CONFIG.timeout,
-      headers: API_HEADERS
+      headers: getApiHeaders()
     });
 
     if (response.data.code === API_RESPONSE_CODE.SUCCESS && response.data.data) {
@@ -135,7 +135,7 @@ export const regenerateVideo = async (generateId: string): Promise<RegenerateRes
       {
         baseURL: API_CONFIG.fullBaseURL,
         timeout: API_CONFIG.timeout,
-        headers: API_HEADERS
+        headers: getApiHeaders()
       }
     );
 

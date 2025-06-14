@@ -9,6 +9,7 @@ import { debugConfig } from './config/debug'
 import Toast from './components/Toast'
 import LoadingView from './components/LoadingView'
 import { VideoOperateData } from './operate/api/types'
+import { LoginPage, useAuth } from './user'
 
 // 只导入首页需要的组件
 const Home = React.lazy(() => import('./pages/home/Home'));
@@ -20,26 +21,46 @@ const ContentContainer: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab') || 'home';
+  
+  // 使用权限控制Hook
+  const { isAuthenticated, requireLogin } = useAuth();
+  
+  // 检查VideoList页面权限
+  React.useEffect(() => {
+    if (currentTab === 'videolist' && !isAuthenticated) {
+      console.log('[ContentContainer] VideoList需要登录，跳转到登录页');
+      requireLogin();
+    }
+  }, [currentTab, isAuthenticated, requireLogin]);
 
   return (
     <div className="content">
+      {/* Home页面 - 始终渲染，通过CSS控制显示 */}
       <div style={{ display: currentTab === 'home' ? 'block' : 'none', height: '100%' }}>
         <Suspense fallback={<LoadingView />}>
           <Home />
         </Suspense>
       </div>
+      
+      {/* Mine页面 - 始终渲染，通过CSS控制显示 */}
       <div style={{ display: currentTab === 'mine' ? 'block' : 'none', height: '100%' }}>
         <Suspense fallback={<LoadingView />}>
           <Mine />
         </Suspense>
       </div>
+      
+      {/* VideoList页面 - 登录后始终渲染，通过CSS控制显示 */}
       <div style={{ 
         display: currentTab === 'videolist' ? 'block' : 'none', 
         height: '100%'
       }}>
-        <Suspense fallback={<LoadingView />}>
-          <VideoListPage />
-        </Suspense>
+        {isAuthenticated ? (
+          <Suspense fallback={<LoadingView />}>
+            <VideoListPage />
+          </Suspense>
+        ) : currentTab === 'videolist' ? (
+          <LoadingView />
+        ) : null}
       </div>
     </div>
   );
@@ -54,6 +75,9 @@ const AppContainer: React.FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const isVideoOperateVisible = Boolean(searchParams.get('videoId'));
   const state = location.state as { videoData?: VideoOperateData };
+  
+  // 使用权限控制Hook
+  const { isLoading } = useAuth();
 
   useEffect(() => {
     // 初始化设备信息收集
@@ -81,45 +105,60 @@ const AppContainer: React.FC = () => {
     console.groupEnd();
   }, []);
 
+  // 如果权限检查中，显示加载界面
+  if (isLoading) {
+    return <LoadingView />;
+  }
+
   return (
     <div className="app-container">
       <Suspense fallback={<LoadingView />}>
         <Routes>
+          {/* 登录页面路由 */}
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* 首页路由 - 无需登录 */}
           <Route path="/" element={<>
             <ContentContainer />
             {!isVideoOperateVisible && <TabBar />}
           </>} />
-          {/* 视频播放页路由 - 按需加载 */}
+          
+          {/* 视频播放页路由 - 无需登录，按需加载 */}
           <Route path="/video/:id" element={
             <Suspense fallback={<LoadingView />}>
               {React.createElement(React.lazy(() => import('./detail').then(module => ({ default: module.VideoDetail }))))}
             </Suspense>
           } />
-          {/* 视频编辑页路由 - 按需加载 */}
+          
+          {/* 视频编辑页路由 - 需要登录，按需加载 */}
           <Route path="/edit" element={
             <Suspense fallback={<LoadingView />}>
               {React.createElement(React.lazy(() => import('./edit')))}
             </Suspense>
           } />
-          {/* 视频切片页路由 - 按需加载 */}
+          
+          {/* 视频切片页路由 - 需要登录，按需加载 */}
           <Route path="/video-slice" element={
             <Suspense fallback={<LoadingView />}>
               {React.createElement(React.lazy(() => import('./cut/videoSlice/page')))}
             </Suspense>
           } />
-          {/* 视频剪辑页路由 - 按需加载 */}
+          
+          {/* 视频剪辑页路由 - 需要登录，按需加载 */}
           <Route path="/video-edit/:id" element={
             <Suspense fallback={<LoadingView />}>
               {React.createElement(React.lazy(() => import('./cut/videoedit/pages/VideoEditPage')))}
             </Suspense>
           } />
-          {/* 视频解析结果页路由 - 按需加载 */}
+          
+          {/* 视频解析结果页路由 - 需要登录，按需加载 */}
           <Route path="/video-parse-result/:id" element={
             <Suspense fallback={<LoadingView />}>
               {React.createElement(React.lazy(() => import('./cut/videoParse/pages/VideoParseResultPage')))}
             </Suspense>
           } />
-          {/* 素材库详情页路由 - 按需加载 */}
+          
+          {/* 素材库详情页路由 - 需要登录，按需加载 */}
           <Route path="/material-library/:materialId" element={
             <Suspense fallback={<LoadingView />}>
               {React.createElement(React.lazy(() => import('./edit/components/meterialSelect/MaterialLibraryPage')))}

@@ -19,6 +19,15 @@ const FilterIcon: React.FC = () => (
   </svg>
 );
 
+/**
+ * 刷新图标组件
+ */
+const RefreshIcon: React.FC = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 3V9M3 9H9M3 9L6 6C7.5 4.5 9.5 4 12 4C16.5 4 20 7.5 20 12S16.5 20 12 20C9.5 20 7.5 19 6 17.5L8 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 // 默认分页大小
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -43,6 +52,10 @@ const VideoListPage: React.FC = () => {
   const [pageNum, setPageNum] = useState<number>(savedState?.pageNum || 1);
   const [showToast, setShowToast] = useState<boolean>(false);
   const [lastAttemptedRange, setLastAttemptedRange] = useState<{start: number, end: number} | null>(null);
+  
+  // 添加数据缓存标记
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [lastLoadTime, setLastLoadTime] = useState<number>(0);
 
   // 使用 Set 来跟踪正在加载的页码
   const loadingPages = useRef<Set<number>>(new Set());
@@ -54,13 +67,26 @@ const VideoListPage: React.FC = () => {
     pageNum,
     reset = false,
     startIndex,
-    stopIndex
+    stopIndex,
+    forceReload = false
   }: {
     pageNum: number;
     reset?: boolean;
     startIndex?: number;
     stopIndex?: number;
+    forceReload?: boolean;
   }) => {
+    // 检查是否需要跳过加载（已有缓存数据且不是强制重新加载）
+    if (reset && !forceReload && isDataLoaded && videos.length > 0) {
+      const timeSinceLastLoad = Date.now() - lastLoadTime;
+      // 如果距离上次加载不超过5分钟，使用缓存数据
+      if (timeSinceLastLoad < 5 * 60 * 1000) {
+        console.log('[VideoListPage] 使用缓存数据，跳过重新加载');
+        setLoading(false);
+        return;
+      }
+    }
+
     // 如果该页面正在加载中，则跳过
     if (loadingPages.current.has(pageNum)) {
       console.log(`页码 ${pageNum} 正在加载中，跳过重复请求`);
@@ -90,7 +116,7 @@ const VideoListPage: React.FC = () => {
         pageSize: DEFAULT_PAGE_SIZE,
       };
 
-      console.log(`加载数据: pageNum=${pageNum}, reset=${reset}`);
+      console.log(`加载数据: pageNum=${pageNum}, reset=${reset}, forceReload=${forceReload}`);
       const { videoList, hasMore: moreData } = await getVideoList(params);
 
       if (!videoList || videoList.length === 0) {
@@ -122,6 +148,12 @@ const VideoListPage: React.FC = () => {
       setPageNum(pageNum + 1);
       setLastAttemptedRange(null);
       setLoadMoreError(false);
+      
+      // 标记数据已加载
+      if (reset) {
+        setIsDataLoaded(true);
+        setLastLoadTime(Date.now());
+      }
 
     } catch (error) {
       console.error('加载数据失败:', error);
@@ -141,14 +173,28 @@ const VideoListPage: React.FC = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, []);
+  }, [isDataLoaded, videos.length, lastLoadTime]);
 
-  // 首次加载
+  // 首次加载 - 检查是否需要加载数据
   useEffect(() => {
-    if (!savedState?.videos) {
+    if (!savedState?.videos && !isDataLoaded) {
+      console.log('[VideoListPage] 首次加载数据');
       loadData({ pageNum: 1, reset: true });
+    } else if (savedState?.videos) {
+      // 如果有savedState数据，标记为已加载
+      setIsDataLoaded(true);
+      setLastLoadTime(Date.now());
     }
-  }, []);
+  }, []); // 保持空依赖数组，避免重复加载
+
+  /**
+   * 强制刷新数据的方法
+   */
+  const forceRefresh = useCallback(() => {
+    console.log('[VideoListPage] 强制刷新数据');
+    setIsDataLoaded(false);
+    loadData({ pageNum: 1, reset: true, forceReload: true });
+  }, [loadData]);
 
   /**
    * 检查项目是否已加载
@@ -300,10 +346,16 @@ const VideoListPage: React.FC = () => {
       {/* 顶部栏 */}
       <div className="top-bar">
         <h1 className="top-bar-title">我的视频</h1>
-        <button className="filter-button" onClick={handleShowToast}>
-          <FilterIcon />
-          筛选
-        </button>
+        <div className="top-bar-actions">
+          <button className="refresh-button" onClick={forceRefresh} disabled={loading}>
+            <RefreshIcon />
+            刷新
+          </button>
+          <button className="filter-button" onClick={handleShowToast}>
+            <FilterIcon />
+            筛选
+          </button>
+        </div>
       </div>
       
       {/* Toast提示 */}

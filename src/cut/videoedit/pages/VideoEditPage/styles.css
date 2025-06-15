@@ -459,7 +459,7 @@
 
   /* 裁剪控制区域移动端优化 */
   .video-crop-controls {
-    top: 6px;
+    top: 38px;
     right: 6px;
     gap: 6px;
   }
@@ -481,7 +481,7 @@
 
   /* 时间偏移控制区域移动端优化 */
   .video-time-offset-controls {
-    top: 40px; /* 调整移动端位置 */
+    top: 5px; /* 调整移动端位置 */
     right: 6px;
     gap: 6px;
   }

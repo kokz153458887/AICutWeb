@@ -331,7 +331,7 @@ const VideoDetail: React.FC = () => {
             <div className="user-avatar">
               <img src="https://picsum.photos/50/50" alt="用户头像" />
             </div>
-            <div className="user-name">吾明亮</div>
+            <div className="user-name">问问</div>
             <button className="follow-button">关注</button>
           </div>
 

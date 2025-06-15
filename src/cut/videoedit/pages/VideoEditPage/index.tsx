@@ -1144,11 +1144,13 @@ const VideoEditPage: React.FC = () => {
           </div>
 
           {/* 时间偏移控制区域 - 只有当segments[0].words不为空时才显示 */}
-          {timeOffset !== 0 && taskData?.segments && taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0 && (
+          {taskData?.segments && taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0 && (
             <div className="video-time-offset-controls">
-              <div className="time-offset-status-text">
-                时间偏移: {timeOffset.toFixed(1)}s
-              </div>
+              {timeOffset !== 0 && (
+                <div className="time-offset-status-text">
+                  时间偏移: {timeOffset.toFixed(1)}s
+                </div>
+              )}
               <div className="time-offset-button" onClick={handleTimeOffsetClick}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>

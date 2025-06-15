@@ -80,6 +80,7 @@ export const buildTextToWordsIndex = (segments: SegmentInfo[]) => {
     segment.words.forEach((word, wordIndex) => {
       // 为每个字符建立索引 - 基于纯字符，与segments.words保持一致
       for (let i = 0; i < word.word.length; i++) {
+        word.word = word.word.replace(/[\s，。！？；：]/g, ''); // 移除空格和符号
         indexMap.push({
           char: word.word[i],
           charIndex: globalCharIndex + i,
@@ -245,13 +246,19 @@ export const convertSpacedPositionToPurePosition = (textWithSpaces: string, posi
   for (let i = 0; i < Math.min(positionWithSpaces, textWithSpaces.length); i++) {
     const char = textWithSpaces[i];
     // 只计算非空格、非符号的字符
-    if (char !== ' ' && char !== '，' && char !== '。' && char !== '！' && char !== '？' && char !== '；' && char !== '：') {
+    if (isAllowChar(char)) {
       purePosition++;
     }
   }
   
   return purePosition;
 };
+
+
+export const isAllowChar = (char: string): boolean => {
+  return char !== ' ' && char !== '，' && char !== '。' && char !== '！' && char !== '？' && char !== '；' && char !== '：';
+}
+
 
 /**
  * 将纯字符文本位置转换为带空格符号的文本位置

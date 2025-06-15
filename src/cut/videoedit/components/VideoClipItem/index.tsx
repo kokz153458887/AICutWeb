@@ -435,18 +435,26 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
    * 处理时间微调 - 优化，减少不必要的重新创建
    */
   const handleStartTimeAdjustBack = useCallback(() => {
+    //startInputRef失去焦点
+    startInputRef.current?.blur();
     onTimeAdjust(clip.id, 'start', -0.1);
   }, [clip.id, onTimeAdjust]);
 
   const handleStartTimeAdjustForward = useCallback(() => {
+    //startInputRef失去焦点
+    startInputRef.current?.blur();
     onTimeAdjust(clip.id, 'start', 0.1);
   }, [clip.id, onTimeAdjust]);
 
   const handleEndTimeAdjustBack = useCallback(() => {
+    //endInputRef失去焦点
+    endInputRef.current?.blur();
     onTimeAdjust(clip.id, 'end', -0.1);
   }, [clip.id, onTimeAdjust]);
 
   const handleEndTimeAdjustForward = useCallback(() => {
+    //endInputRef失去焦点
+    endInputRef.current?.blur();
     onTimeAdjust(clip.id, 'end', 0.1);
   }, [clip.id, onTimeAdjust]);
 

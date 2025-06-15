@@ -1,0 +1,302 @@
+/* 时间偏移设置浮层样式 */
+.time-offset-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 背景遮罩 */
+.time-offset-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.3s ease-out;
+}
+
+/* 主容器 */
+.time-offset-modal-content {
+  position: relative;
+  width: 90vw;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: slide-up 0.3s ease-out;
+}
+
+/* 头部 */
+.time-offset-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.time-offset-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.time-offset-modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.time-offset-modal-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+/* 内容区域 */
+.time-offset-modal-body {
+  padding: 24px;
+}
+
+.time-offset-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #007AFF;
+}
+
+/* 输入组 */
+.time-offset-input-group {
+  margin-bottom: 24px;
+}
+
+.time-offset-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.time-offset-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.time-offset-input-wrapper:focus-within {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.time-offset-step-btn {
+  width: 40px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-right: 1px solid #ddd;
+}
+
+.time-offset-step-btn:last-child {
+  border-right: none;
+  border-left: 1px solid #ddd;
+}
+
+.time-offset-step-btn:hover:not(:disabled) {
+  background: #e9ecef;
+  color: #333;
+}
+
+.time-offset-step-btn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.time-offset-input {
+  flex: 1;
+  height: 48px;
+  border: none;
+  outline: none;
+  padding: 0 16px;
+  font-size: 16px;
+  text-align: center;
+  background: transparent;
+  color: #333;
+}
+
+.time-offset-input::-webkit-outer-spin-button,
+.time-offset-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.time-offset-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.time-offset-unit {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* 预览区域 */
+.time-offset-preview {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.time-offset-preview-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.time-offset-preview-item:last-child {
+  margin-bottom: 0;
+}
+
+.time-offset-preview-label {
+  font-size: 14px;
+  color: #666;
+  min-width: 80px;
+}
+
+.time-offset-preview-value {
+  font-size: 14px;
+  color: #007AFF;
+  font-weight: 500;
+}
+
+/* 底部按钮 */
+.time-offset-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.time-offset-btn {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.time-offset-btn-cancel {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.time-offset-btn-cancel:hover {
+  background: #e9ecef;
+  color: #333;
+  transform: translateY(-1px);
+}
+
+.time-offset-btn-confirm {
+  background: #007AFF;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.time-offset-btn-confirm:hover {
+  background: #0056CC;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+/* 动画效果 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .time-offset-modal-content {
+    width: 95vw;
+    max-width: none;
+    margin: 20px;
+  }
+
+  .time-offset-modal-header {
+    padding: 16px 20px;
+  }
+
+  .time-offset-modal-title {
+    font-size: 16px;
+  }
+
+  .time-offset-modal-body {
+    padding: 20px;
+  }
+
+  .time-offset-modal-footer {
+    padding: 16px 20px;
+  }
+
+  .time-offset-btn {
+    height: 48px;
+    font-size: 16px;
+  }
+} 

@@ -10,6 +10,7 @@ import VideoClipItemComponent, { VideoClipItemRef } from '../../../videoedit/com
 import MaterialSelectModal from '../../../../edit/components/meterialSelect/MaterialSelectModal';
 import ConfirmDialog from '../../../../components/ConfirmDialog';
 import VideoCropModal from '../../components/VideoCropModal';
+import TimeOffsetModal from '../../components/TimeOffsetModal';
 import { getParseTaskDetail, addMaterialVideo, translateText, CropParams } from '../../api';
 import { deleteTask } from '../../../../cut/videoSlice/api';
 import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFileItem, MaterialFileStore } from '../..';
@@ -81,6 +82,10 @@ const VideoEditPage: React.FC = () => {
   const [showCropModal, setShowCropModal] = useState<boolean>(false);
   const [cropParams, setCropParams] = useState<CropParams | null>(null);
 
+  // 时间偏移相关状态
+  const [showTimeOffsetModal, setShowTimeOffsetModal] = useState<boolean>(false);
+  const [timeOffset, setTimeOffset] = useState<number>(0.0);
+
   // 素材库记忆键
   const getMaterialStorageKey = (taskId: string) => `selected_material_${taskId}`;
 
@@ -111,6 +116,14 @@ const VideoEditPage: React.FC = () => {
           // 使用保存的状态
           setClips(savedState.clips);
           setMode(savedState.mode);
+          // 恢复时间偏移设置
+          if (savedState.timeOffset !== undefined) {
+            setTimeOffset(savedState.timeOffset);
+          }
+          // 恢复裁剪参数
+          if (savedState.cropParams) {
+            setCropParams(savedState.cropParams);
+          }
         } else {
           // 初始化默认状态 - 直接使用获取的data创建默认切片
           const text = data.text || '';
@@ -156,13 +169,15 @@ const VideoEditPage: React.FC = () => {
         text: '', // 不再使用主文本框
         clips,
         mode,
-        cursorPosition: 0 // 不再需要光标位置
+        cursorPosition: 0, // 不再需要光标位置
+        timeOffset,
+        cropParams: cropParams || undefined
       };
       saveVideoEditState(id, state);
     }, 500); // 500ms防抖
     
     return () => clearTimeout(timer);
-  }, [id, clips, mode]);
+  }, [id, clips, mode, timeOffset, cropParams]);
 
   /**
    * 计算切片在完整文本中的位置 - 无外部依赖，不需要useCallback
@@ -236,6 +251,8 @@ const VideoEditPage: React.FC = () => {
    */
   const handleTextClip = (clipId: string, position: number) => {
     if (!taskData?.segments) return;
+
+    stopPlay();
     
     // 如果有激活的定位模式，先退出
     if (locationActiveClipId) {
@@ -257,13 +274,17 @@ const VideoEditPage: React.FC = () => {
     //处理 SegmentInfo.words为空的情况，切片的 startTime 和 endTime为0
     let timeRange = { startTime: 0, endTime: taskData?.video_info?.file_duration || 0};
     if (taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0) {
-    // 使用精确的时间算法
+      // 使用精确的时间算法
       timeRange = findPreciseTimeRangeByText(
         fullOriginalText,
         textBeforeCursor,
         clipStartInFullText,
         taskData.segments
       );
+      
+      // 应用时间偏移修正
+      timeRange.startTime = Math.max(0, timeRange.startTime + timeOffset); // 开始时间向后偏移
+      timeRange.endTime = Math.max(timeRange.startTime, timeRange.endTime - timeOffset); // 结束时间向前偏移
     }
     
     // 创建新切片
@@ -272,7 +293,8 @@ const VideoEditPage: React.FC = () => {
       title: textBeforeCursor.length > 20 ? textBeforeCursor.substring(0, 20) + '...' : textBeforeCursor,
       text: textBeforeCursor,
       startTime: timeRange.startTime,
-      endTime: timeRange.endTime
+      endTime: timeRange.endTime,
+      folder: currentClip.folder
     };
     
     // 计算剩余文本的开始时间
@@ -284,6 +306,9 @@ const VideoEditPage: React.FC = () => {
       clipStartInFullText + textBeforeCursor.length,
       taskData.segments
       ).startTime;
+      
+      // 应用时间偏移修正 - 剩余文本的开始时间向后偏移
+      remainingStartTime = Math.max(0, remainingStartTime + timeOffset);
     }
     
     // 为剩余文本设置新的标题
@@ -372,6 +397,8 @@ const VideoEditPage: React.FC = () => {
       toast.error(conflicts.join('\n'));
       return;
     }
+
+    stopPlay();
     
     setIsSubmitting(true);
     
@@ -405,6 +432,8 @@ const VideoEditPage: React.FC = () => {
    */
   const handleResetClick = () => {
     if (!id) return;
+
+    stopPlay();
     
     // 清空本地存储
     try {
@@ -498,6 +527,8 @@ const VideoEditPage: React.FC = () => {
    */
   const handleTimeInputCommit = useCallback((clipId: string, field: 'start' | 'end', value: string) => {
     try {
+      stopPlay();
+
       const newTime = parseTime(value);
       
       setClips(prevClips => 
@@ -521,16 +552,20 @@ const VideoEditPage: React.FC = () => {
    * 处理时间微调
    */
   const handleTimeAdjust = useCallback((clipId: string, field: 'start' | 'end', delta: number) => {
+    stopPlay();
     setClips(prevClips => 
       prevClips.map(clip => {
         if (clip.id === clipId) {
-          const currentTime = field === 'start' ? clip.startTime : clip.endTime;
-          const newTime = Math.max(0, currentTime + delta);
+          
+          const currentTime = field === 'start' ? Math.round(clip.startTime * 10) / 10 : Math.round(clip.endTime * 10) / 10;
+          //四舍五入
+          const newTime = Math.round(Math.max(0, currentTime + delta) * 10) / 10;
+
           
           // 如果处于定位模式，并且是当前激活的切片，则跳转到视频对应时间
-          if (locationActiveClipId === clipId && locationActiveField === field) {
+          // if (locationActiveClipId === clipId && locationActiveField === field) {
             setVideoSeekTime(newTime);
-          }
+          // }
           
           return { ...clip, [field === 'start' ? 'startTime' : 'endTime']: newTime };
         }
@@ -563,6 +598,7 @@ const VideoEditPage: React.FC = () => {
    * 处理拖拽过程中的时间更新
    */
   const handleDragging = useCallback((time: number) => {
+    stopPlay();
     if (locationActiveClipId && locationActiveField) {
       // 拖拽过程中实时更新时间
       setClips(prevClips => 
@@ -579,6 +615,7 @@ const VideoEditPage: React.FC = () => {
    * 离开定位模式
    */
   const exitLocationMode = useCallback(() => {
+    stopPlay();
     if (locationActiveClipId) {
       setLocationActiveClipId(null);
       setLocationActiveField(null);
@@ -594,6 +631,8 @@ const VideoEditPage: React.FC = () => {
    * 处理定位按钮点击
    */
   const handleLocationClick = useCallback((clipId: string, field: 'start' | 'end') => {
+    stopPlay();
+   
     const isCurrentlyActive = locationActiveClipId === clipId && locationActiveField === field;
     
     if (isCurrentlyActive) {
@@ -622,6 +661,7 @@ const VideoEditPage: React.FC = () => {
    * 处理时间输入框聚焦
    */
   const handleTimeFocus = useCallback((time: number) => {
+    stopPlay();
     // if (!locationActiveClipId) {
       setVideoSeekTime(time);
     // }
@@ -636,7 +676,7 @@ const VideoEditPage: React.FC = () => {
       toast.error('至少需要保留一个切片');
       return;
     }
-    
+    stopPlay();
     setClips(prevClips => prevClips.filter(clip => clip.id !== clipId));
     
     // 如果删除的是正在播放的切片，停止播放
@@ -650,16 +690,26 @@ const VideoEditPage: React.FC = () => {
     toast.success('切片已删除');
   }, [clips.length, currentPlayingClipId]);
 
+  const stopPlay = () => {
+    if (delayTimer) {
+      clearTimeout(delayTimer);
+      delayTimer = null;
+    }
+
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.pauseVideo();
+    }
+    setCurrentPlayingClipId(null);
+  }
+
+  let delayTimer: NodeJS.Timeout | null = null;
   /**
    * 处理播放切片
    */
   const handlePlayClip = useCallback((clipId: string, startTime: number, endTime: number) => {
     // 如果当前正在播放，直接暂停
     if (isVideoPlaying) {
-      if (videoPlayerRef.current) {
-        videoPlayerRef.current.pauseVideo();
-      }
-      setCurrentPlayingClipId(null);
+      stopPlay();
       return;
     }
     
@@ -681,8 +731,9 @@ const VideoEditPage: React.FC = () => {
     setCurrentPlayingClipId(clipId);
     
     // 延迟一点时间确保视频跳转完成（如果有跳转的话）
+    
     const delay = isInRange ? 0 : 200;
-    setTimeout(() => {
+    delayTimer = setTimeout(() => {
       if (videoPlayerRef.current) {
         videoPlayerRef.current.playVideo();
       }
@@ -837,7 +888,9 @@ const VideoEditPage: React.FC = () => {
           text: '',
           clips: newClips,
           mode,
-          cursorPosition: 0
+          cursorPosition: 0,
+          timeOffset,
+          cropParams: cropParams || undefined
         };
         saveVideoEditState(taskData.id, state);
       }
@@ -989,6 +1042,29 @@ const VideoEditPage: React.FC = () => {
     toast.success('裁剪范围已设置');
   }, []);
 
+  /**
+   * 处理时间偏移按钮点击
+   */
+  const handleTimeOffsetClick = useCallback(() => {
+    setShowTimeOffsetModal(true);
+  }, []);
+
+  /**
+   * 处理时间偏移浮层关闭
+   */
+  const handleTimeOffsetModalClose = useCallback(() => {
+    setShowTimeOffsetModal(false);
+  }, []);
+
+  /**
+   * 处理时间偏移确认
+   */
+  const handleTimeOffsetConfirm = useCallback((offset: number) => {
+    setTimeOffset(offset);
+    setShowTimeOffsetModal(false);
+    toast.success(`时间偏移已设置为 ${offset} 秒`);
+  }, []);
+
   if (loading) {
     return (
       <div className="video-edit-page">
@@ -1066,6 +1142,28 @@ const VideoEditPage: React.FC = () => {
               </svg>
             </div>
           </div>
+
+          {/* 时间偏移控制区域 - 只有当segments[0].words不为空时才显示 */}
+          {timeOffset !== 0 && taskData?.segments && taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0 && (
+            <div className="video-time-offset-controls">
+              <div className="time-offset-status-text">
+                时间偏移: {timeOffset.toFixed(1)}s
+              </div>
+              <div className="time-offset-button" onClick={handleTimeOffsetClick}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M12 18L12 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M4.93 4.93L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M16.24 16.24L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M2 12L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M18 12L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M4.93 19.07L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M16.24 7.76L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -1188,6 +1286,14 @@ const VideoEditPage: React.FC = () => {
           initialCropParams={cropParams || undefined}
         />
       )}
+
+      {/* 时间偏移设置浮层 */}
+      <TimeOffsetModal
+        visible={showTimeOffsetModal}
+        initialOffset={timeOffset}
+        onClose={handleTimeOffsetModalClose}
+        onConfirm={handleTimeOffsetConfirm}
+      />
     </div>
   );
 };

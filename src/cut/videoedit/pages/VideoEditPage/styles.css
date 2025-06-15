@@ -176,6 +176,73 @@
   transform: scale(1.05);
 }
 
+/* 时间偏移控制区域 */
+.video-time-offset-controls {
+  position: absolute;
+  top: 48px; /* 在裁剪控制区域下方 */
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  pointer-events: none; /* 避免遮挡视频播放器操作 */
+}
+
+.video-time-offset-controls > * {
+  pointer-events: auto; /* 恢复子元素的点击事件 */
+}
+
+/* 时间偏移状态文字 */
+.time-offset-status-text {
+  font-size: 11px;
+  color: rgba(255, 149, 0, 0.9);
+  background: rgba(255, 149, 0, 0.15);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+  animation: timeOffsetStatusGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes timeOffsetStatusGlow {
+  0% {
+    background: rgba(255, 149, 0, 0.15);
+    border-color: rgba(255, 149, 0, 0.3);
+  }
+  100% {
+    background: rgba(255, 149, 0, 0.25);
+    border-color: rgba(255, 149, 0, 0.5);
+  }
+}
+
+/* 时间偏移按钮 */
+.time-offset-button {
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.time-offset-button:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+}
+
 /* 切片列表区域 - 可滚动 */
 .clips-section {
   flex: 1;
@@ -411,6 +478,28 @@
     width: 14px;
     height: 14px;
   }
+
+  /* 时间偏移控制区域移动端优化 */
+  .video-time-offset-controls {
+    top: 40px; /* 调整移动端位置 */
+    right: 6px;
+    gap: 6px;
+  }
+
+  .time-offset-status-text {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .time-offset-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .time-offset-button svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .material-select-entry {
@@ -453,7 +542,9 @@
 /* 去字幕选项样式 */
 .subtitle-remove-option {
   display: flex;
-  align-items: center;
+  align-items: right;
+  justify-content: right;
+
 }
 
 .subtitle-checkbox {

@@ -207,7 +207,7 @@
 
 /* 文本编辑区域 */
 .clip-text {
-  margin-bottom: 6px;
+  margin-bottom: 1px;
 }
 
 .clip-text textarea {
@@ -462,7 +462,7 @@
   }
 
   .clip-text textarea {
-    min-height: 36px;
+    min-height: 78px;
     padding: 6px;
     font-size: 11px;
   }

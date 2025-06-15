@@ -2,6 +2,8 @@
  * 视频剪辑相关类型定义
  */
 
+import { CropParams } from './api';
+
 /**
  * 视频信息接口
  */
@@ -71,6 +73,8 @@ export interface VideoEditState {
   clips: VideoClipItem[]; // 切片内容
   mode: 'clip' | 'edit'; // 切片/编辑模式
   cursorPosition: number; // 光标位置
+  timeOffset?: number; // 时间偏移设置（秒）
+  cropParams?: CropParams; // 裁剪参数
 }
 
 /**

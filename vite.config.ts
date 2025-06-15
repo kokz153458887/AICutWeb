@@ -110,6 +110,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 500
   },
   server: {
+    allowedHosts: ['deepswift.cn', 'www.deepswift.cn'],
     sourcemapIgnoreList: false,
     proxy: {
       '/api': {

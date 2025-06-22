@@ -144,47 +144,88 @@
   display: none !important;
 }
 
-/* 裁剪框 - 确保与视频播放器完全重合，支持点透 */
-.crop-box {
+/* 裁剪框容器 */
+.crop-box-container {
   position: absolute;
-  border: 2px solid #ff4757;
-  background: transparent;
-  box-shadow: 
-    0 0 0 9999px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  pointer-events: none; /* 默认不阻止点击事件 */
-  transition: box-shadow 0.2s ease;
   z-index: 10;
 }
 
-/* 裁剪框的拖拽区域 - 只有边框可以拖拽 */
-.crop-box-drag-area {
+/* 裁剪框主体 */
+.crop-box {
   position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  pointer-events: all;
-  cursor: grab;
-  border: 10px solid transparent;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid #ff4757;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  transition: box-shadow 0.2s ease;
 }
 
-.crop-box.dragging .crop-box-drag-area {
+/* 裁剪框的拖拽区域 */
+.crop-box-drag-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: all;
+  cursor: grab;
+}
+
+.crop-box-container.dragging .crop-box-drag-area {
   cursor: grabbing;
 }
 
-.crop-box:hover {
+.crop-box-container:hover .crop-box {
   box-shadow: 
-    0 0 0 9999px rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px rgba(255, 255, 255, 0.3),
     0 0 20px rgba(255, 71, 87, 0.4);
 }
 
-.crop-box:active {
+.crop-box-container:active .crop-box {
   box-shadow: 
-    0 0 0 9999px rgba(0, 0, 0, 0.6),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4),
     0 0 25px rgba(255, 71, 87, 0.6);
+}
+
+/* 边框容器 */
+.crop-border {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.crop-border-top {
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.crop-border-bottom {
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.crop-border-left {
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.crop-border-right {
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
 }
 
 /* 裁剪框中心指示器 */
@@ -495,6 +536,10 @@
     height: 12px;
   }
   
+  .crop-resize-handle {
+    opacity: 0.8;
+  }
+  
   .crop-ratio-btn {
     padding: 10px 16px;
     font-size: 14px;
@@ -504,4 +549,127 @@
     padding: 14px 24px;
     font-size: 16px;
   }
+}
+
+/* 裁剪框调整控制点样式 */
+.crop-resize-handle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 122, 255, 0.9);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 20;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: all;
+}
+
+.crop-box-container:hover .crop-resize-handle {
+  opacity: 1;
+}
+
+.crop-box-container.dragging .crop-resize-handle {
+  opacity: 1;
+}
+
+/* 顶部调整点 - 调整高度 */
+.crop-resize-handle-top {
+  width: 32px;
+  height: 16px;
+  cursor: ns-resize;
+}
+
+/* 底部调整点 - 调整高度 */
+.crop-resize-handle-bottom {
+  width: 32px;
+  height: 16px;
+  cursor: ns-resize;
+}
+
+/* 左侧调整点 - 调整宽度 */
+.crop-resize-handle-left {
+  width: 16px;
+  height: 32px;
+  cursor: ew-resize;
+}
+
+/* 右侧调整点 - 调整宽度 */
+.crop-resize-handle-right {
+  width: 16px;
+  height: 32px;
+  cursor: ew-resize;
+}
+
+/* 控制点hover效果 */
+.crop-resize-handle:hover {
+  opacity: 1 !important;
+  background: rgba(0, 122, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+}
+
+/* 拖拽时的视觉反馈 */
+.crop-resize-handle:active {
+  background: rgba(0, 122, 255, 1);
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.6);
+}
+
+/* 移动端优化 */
+@media screen and (max-width: 768px) {
+  .crop-resize-handle {
+    opacity: 0.8; /* 移动端默认显示控制点 */
+  }
+  
+  .crop-resize-handle-top,
+  .crop-resize-handle-bottom {
+    width: 40px; /* 移动端增加触摸区域 */
+    height: 20px;
+  }
+  
+  .crop-resize-handle-left,
+  .crop-resize-handle-right {
+    width: 20px; /* 移动端增加触摸区域 */
+    height: 40px;
+  }
+  
+  .crop-border-top,
+  .crop-border-bottom {
+    height: 8px; /* 增加边框区域 */
+    top: -4px;
+    bottom: -4px;
+  }
+  
+  .crop-border-left,
+  .crop-border-right {
+    width: 8px; /* 增加边框区域 */
+    left: -4px;
+    right: -4px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .crop-resize-handle {
+    opacity: 0.7;
+  }
+  
+  .crop-resize-handle:active {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* 自定义比例按钮样式 */
+.crop-ratio-btn.custom {
+  background: linear-gradient(135deg, #007AFF, #34C759);
+  color: white;
+}
+
+.crop-ratio-btn.custom.active {
+  background: linear-gradient(135deg, #005bb5, #28a745);
+  transform: scale(1.05);
 } 

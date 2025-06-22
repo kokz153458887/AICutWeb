@@ -17,7 +17,7 @@ import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFi
 import { MaterialLibItem, MaterialModel } from '../../../../edit/api/types';
 import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, convertSpacedPositionToPurePosition, removePunctuationAndSpaces } from '../../../videoedit/utils';
 import { toast } from '../../../../components/Toast';
-import { CacheStatus } from '../../../../utils/videoCacheManager';
+import { CacheStatus, videoCacheManager } from '../../../../utils/videoCacheManager';
 import './styles.css';
 
 /**
@@ -118,6 +118,22 @@ const VideoEditPage: React.FC = () => {
         setTaskData(data);
         console.log('initData taskData:', data); // 修复：使用获取的data而不是状态中的taskData
         console.log('initData language:', data.video_info?.language);
+        
+        // 检查视频缓存状态（默认启用缓存功能）
+        if (data.video_url) {
+          const initialCacheStatus = videoCacheManager.getCacheStatus(data.video_url);
+          setCacheStatus(initialCacheStatus);
+          console.log('初始缓存状态:', initialCacheStatus);
+          
+          // 如果已经缓存过，隐藏缓存按钮并显示提示
+          if (initialCacheStatus === CacheStatus.CACHED) {
+            setShowCacheButton(false);
+            toast.info('检测到视频已缓存，将使用本地播放');
+          } else if (initialCacheStatus === CacheStatus.CACHE_FAILED) {
+            // 如果之前缓存失败，重置为未缓存状态，允许重新缓存
+            setCacheStatus(CacheStatus.NOT_CACHED);
+          }
+        }
         
         if (savedState) {
           // 使用保存的状态
@@ -329,12 +345,6 @@ const VideoEditPage: React.FC = () => {
       // 应用时间偏移修正 - 剩余文本的开始时间向后偏移
       remainingStartTime = Math.max(0, remainingStartTime + timeOffset);
     }
-    
-    // 特殊处理：如果计算出的剩余开始时间为0，且当前切片的起始时间被修正过，则使用新切片的结束时间
-    // if (remainingStartTime === 0 && currentClip.startTime === 0 && currentClipIndex > 0) {
-    //   remainingStartTime = timeRange.endTime;
-    //   console.log(`剩余文本开始时间使用新切片的结束时间: ${timeRange.endTime}`);
-    // }
     
     // 为剩余文本设置新的标题
     const remainingTitle = textAfterCursor.length > 20 
@@ -1138,14 +1148,27 @@ const VideoEditPage: React.FC = () => {
       const newValue = !prev;
       if (newValue) {
         toast.info('已启用视频缓存功能');
-        setShowCacheButton(true);
+        // 启用缓存时，检查当前视频是否已缓存
+        if (taskData?.video_url) {
+          const currentStatus = videoCacheManager.getCacheStatus(taskData.video_url);
+          setCacheStatus(currentStatus);
+          if (currentStatus === CacheStatus.CACHED) {
+            setShowCacheButton(false);
+            toast.info('视频已缓存，将使用本地播放');
+          } else {
+            setShowCacheButton(true);
+          }
+        } else {
+          setShowCacheButton(true);
+        }
       } else {
         toast.info('已关闭视频缓存功能');
         setShowCacheButton(false);
+        setCacheStatus(CacheStatus.NOT_CACHED);
       }
       return newValue;
     });
-  }, []);
+  }, [taskData]);
 
   if (loading) {
     return (

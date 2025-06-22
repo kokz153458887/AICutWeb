@@ -14,8 +14,12 @@ const CROP_RATIOS = [
   { label: '4:3', ratio: 4/3 },
   { label: '3:4', ratio: 3/4 },
   { label: '16:9', ratio: 16/9 },
-  { label: '9:16', ratio: 9/16 }
+  { label: '9:16', ratio: 9/16 },
+  { label: '自定义', ratio: -1 } // 特殊标记用于自定义比例
 ];
+
+// 本地存储键名
+const LAST_CROP_RATIO_KEY = 'video_crop_last_ratio';
 
 interface VideoCropModalProps {
   taskData: ParseTaskDetail;
@@ -46,6 +50,39 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // 新增状态用于控制拖拽模式
+  const [dragMode, setDragMode] = useState<'move' | 'resize-width' | 'resize-height' | null>(null);
+  const [isCustomRatio, setIsCustomRatio] = useState(false); // 是否为自定义比例
+
+  /**
+   * 保存上次选择的比例到本地存储
+   */
+  const saveLastRatio = useCallback((ratio: number) => {
+    try {
+      localStorage.setItem(LAST_CROP_RATIO_KEY, ratio.toString());
+    } catch (error) {
+      console.warn('保存裁剪比例失败:', error);
+    }
+  }, []);
+
+  /**
+   * 从本地存储读取上次选择的比例
+   */
+  const getLastRatio = useCallback((): number => {
+    try {
+      const saved = localStorage.getItem(LAST_CROP_RATIO_KEY);
+      if (saved) {
+        const ratio = parseFloat(saved);
+        // 检查是否为有效的预设比例
+        const isPresetRatio = CROP_RATIOS.some(r => r.ratio === ratio && r.ratio !== -1);
+        return isPresetRatio ? ratio : 1; // 如果不是预设比例，使用默认1:1
+      }
+    } catch (error) {
+      console.warn('读取裁剪比例失败:', error);
+    }
+    return 1; // 默认1:1
+  }, []);
 
   /**
    * 解析视频分辨率
@@ -112,7 +149,11 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
    * 初始化裁剪框
    */
   const initializeCropBox = useCallback((displayWidth: number, displayHeight: number) => {
-    if (initialCropParams) {
+    if (initialCropParams && 
+        typeof initialCropParams.cropStartXRatio === 'number' &&
+        typeof initialCropParams.cropStartYRatio === 'number' &&
+        typeof initialCropParams.cropEndXRatio === 'number' &&
+        typeof initialCropParams.cropEndYRatio === 'number') {
       // 使用传入的初始参数
       const { cropStartXRatio: cropStartX, cropStartYRatio: cropStartY, cropEndXRatio: cropEndX, cropEndYRatio: cropEndY } = initialCropParams;
       const width = cropEndX - cropStartX;
@@ -138,10 +179,11 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
         height: displayHeight
       });
       
-      // 设置默认比例为视频本身的比例
-      setSelectedRatio(displayWidth / displayHeight);
+      // 从本地存储读取上次选择的比例
+      const lastRatio = getLastRatio();
+      setSelectedRatio(lastRatio);
     }
-  }, [initialCropParams]);
+  }, [initialCropParams, getLastRatio]);
 
   /**
    * 更新裁剪框比例 - 以视频宽度为基准计算高度
@@ -183,17 +225,72 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
    * 处理比例选择
    */
   const handleRatioSelect = useCallback((ratio: number) => {
+    if (ratio === -1) {
+      // 选择自定义比例，不更新裁剪框
+      setIsCustomRatio(true);
+      return;
+    }
+    
     setSelectedRatio(ratio);
+    setIsCustomRatio(false);
     updateCropBoxRatio(ratio, videoSize.displayWidth, videoSize.displayHeight);
-  }, [videoSize.displayWidth, videoSize.displayHeight, updateCropBoxRatio]);
+    saveLastRatio(ratio); // 保存选择的比例
+  }, [videoSize.displayWidth, videoSize.displayHeight, updateCropBoxRatio, saveLastRatio]);
 
   /**
-   * 处理裁剪框拖拽开始
+   * 处理X轴边框拖拽开始（调整高度）
+   */
+  const handleXBorderMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragMode('resize-height');
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  /**
+   * 处理Y轴边框拖拽开始（调整宽度）
+   */
+  const handleYBorderMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragMode('resize-width');
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  /**
+   * 处理X轴边框拖拽开始 - 移动端支持（调整高度）
+   */
+  const handleXBorderTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragMode('resize-height');
+    const touch = e.touches[0];
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+  }, []);
+
+  /**
+   * 处理Y轴边框拖拽开始 - 移动端支持（调整宽度）
+   */
+  const handleYBorderTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragMode('resize-width');
+    const touch = e.touches[0];
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+  }, []);
+
+  /**
+   * 处理裁剪框拖拽开始（移动位置）
    */
   const handleCropBoxMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
+    setDragMode('move');
     setDragStart({ 
       x: e.clientX - cropBox.x, 
       y: e.clientY - cropBox.y 
@@ -207,6 +304,7 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
+    setDragMode('move');
     const touch = e.touches[0];
     setDragStart({ 
       x: touch.clientX - cropBox.x, 
@@ -218,49 +316,125 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
    * 处理拖拽移动
    */
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !dragMode) return;
 
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
+    if (dragMode === 'move') {
+      // 移动裁剪框
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
 
-    // 计算边界限制
-    const maxX = videoSize.displayWidth - cropBox.width;
-    const maxY = videoSize.displayHeight - cropBox.height;
+      // 计算边界限制
+      const maxX = videoSize.displayWidth - cropBox.width;
+      const maxY = videoSize.displayHeight - cropBox.height;
 
-    setCropBox(prev => ({
-      ...prev,
-      x: Math.max(0, Math.min(maxX, newX)),
-      y: Math.max(0, Math.min(maxY, newY))
-    }));
-  }, [isDragging, dragStart, videoSize.displayWidth, videoSize.displayHeight, cropBox.width, cropBox.height]);
+      setCropBox(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(maxX, newX)),
+        y: Math.max(0, Math.min(maxY, newY))
+      }));
+    } else if (dragMode === 'resize-width') {
+      // 调整宽度
+      const deltaX = e.clientX - dragStart.x;
+      const newWidth = Math.max(50, Math.min(videoSize.displayWidth - cropBox.x, cropBox.width + deltaX));
+      
+      setCropBox(prev => ({
+        ...prev,
+        width: newWidth
+      }));
+      
+      // 标记为自定义比例
+      if (!isCustomRatio) {
+        setIsCustomRatio(true);
+        setSelectedRatio(-1);
+      }
+      
+      setDragStart({ x: e.clientX, y: e.clientY });
+    } else if (dragMode === 'resize-height') {
+      // 调整高度
+      const deltaY = e.clientY - dragStart.y;
+      const newHeight = Math.max(50, Math.min(videoSize.displayHeight - cropBox.y, cropBox.height + deltaY));
+      
+      setCropBox(prev => ({
+        ...prev,
+        height: newHeight
+      }));
+      
+      // 标记为自定义比例
+      if (!isCustomRatio) {
+        setIsCustomRatio(true);
+        setSelectedRatio(-1);
+      }
+      
+      setDragStart({ x: e.clientX, y: e.clientY });
+    }
+  }, [isDragging, dragMode, dragStart, videoSize.displayWidth, videoSize.displayHeight, cropBox, isCustomRatio]);
 
   /**
    * 处理触摸拖拽移动
    */
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !dragMode) return;
     e.preventDefault();
 
     const touch = e.touches[0];
-    const newX = touch.clientX - dragStart.x;
-    const newY = touch.clientY - dragStart.y;
 
-    // 计算边界限制
-    const maxX = videoSize.displayWidth - cropBox.width;
-    const maxY = videoSize.displayHeight - cropBox.height;
+    if (dragMode === 'move') {
+      // 移动裁剪框
+      const newX = touch.clientX - dragStart.x;
+      const newY = touch.clientY - dragStart.y;
 
-    setCropBox(prev => ({
-      ...prev,
-      x: Math.max(0, Math.min(maxX, newX)),
-      y: Math.max(0, Math.min(maxY, newY))
-    }));
-  }, [isDragging, dragStart, videoSize.displayWidth, videoSize.displayHeight, cropBox.width, cropBox.height]);
+      // 计算边界限制
+      const maxX = videoSize.displayWidth - cropBox.width;
+      const maxY = videoSize.displayHeight - cropBox.height;
+
+      setCropBox(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(maxX, newX)),
+        y: Math.max(0, Math.min(maxY, newY))
+      }));
+    } else if (dragMode === 'resize-width') {
+      // 调整宽度
+      const deltaX = touch.clientX - dragStart.x;
+      const newWidth = Math.max(50, Math.min(videoSize.displayWidth - cropBox.x, cropBox.width + deltaX));
+      
+      setCropBox(prev => ({
+        ...prev,
+        width: newWidth
+      }));
+      
+      // 标记为自定义比例
+      if (!isCustomRatio) {
+        setIsCustomRatio(true);
+        setSelectedRatio(-1);
+      }
+      
+      setDragStart({ x: touch.clientX, y: touch.clientY });
+    } else if (dragMode === 'resize-height') {
+      // 调整高度
+      const deltaY = touch.clientY - dragStart.y;
+      const newHeight = Math.max(50, Math.min(videoSize.displayHeight - cropBox.y, cropBox.height + deltaY));
+      
+      setCropBox(prev => ({
+        ...prev,
+        height: newHeight
+      }));
+      
+      // 标记为自定义比例
+      if (!isCustomRatio) {
+        setIsCustomRatio(true);
+        setSelectedRatio(-1);
+      }
+      
+      setDragStart({ x: touch.clientX, y: touch.clientY });
+    }
+  }, [isDragging, dragMode, dragStart, videoSize.displayWidth, videoSize.displayHeight, cropBox, isCustomRatio]);
 
   /**
    * 处理拖拽结束
    */
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
+    setDragMode(null);
   }, []);
 
   /**
@@ -308,12 +482,17 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
    * 处理确认按钮
    */
   const handleConfirm = useCallback(() => {
+    // 保存当前选择的比例
+    if (!isCustomRatio && selectedRatio !== -1) {
+      saveLastRatio(selectedRatio);
+    }
+    
     const cropParams = calculateCropParams();
     console.log('裁剪参数:', cropParams);
     console.log('当前裁剪框状态:', cropBox);
     console.log('视频尺寸:', videoSize);
     onConfirm(cropParams);
-  }, [calculateCropParams, onConfirm, cropBox, videoSize]);
+  }, [calculateCropParams, onConfirm, cropBox, videoSize, isCustomRatio, selectedRatio, saveLastRatio]);
 
   // 初始化视频预览和布局
   useEffect(() => {
@@ -322,9 +501,28 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
       setError(null);
       
       // 重置状态
-      setSelectedRatio(initialCropParams ? 
-        ((initialCropParams.cropEndXRatio - initialCropParams.cropStartXRatio) / (initialCropParams.cropEndYRatio - initialCropParams.cropStartYRatio)) : 1
-      );
+
+      if (initialCropParams && initialCropParams.cropEndXRatio && initialCropParams.cropStartXRatio && initialCropParams.cropEndYRatio && initialCropParams.cropStartYRatio) {
+        console.log('初始化裁剪参数:', initialCropParams);
+        const ratio = ((initialCropParams.cropEndXRatio - initialCropParams.cropStartXRatio) / (initialCropParams.cropEndYRatio - initialCropParams.cropStartYRatio)) || 1; 
+        console.log('初始化裁剪比例:', ratio);
+        
+        // 检查是否为预设比例
+        const matchedRatio = CROP_RATIOS.find(r => r.ratio !== -1 && Math.abs(r.ratio - ratio) < 0.01);
+        if (matchedRatio) {
+          setSelectedRatio(matchedRatio.ratio);
+          setIsCustomRatio(false);
+        } else {
+          setSelectedRatio(-1);
+          setIsCustomRatio(true);
+        }
+      } else {
+        // 使用上次保存的比例
+        const lastRatio = getLastRatio();
+        console.log('恢复上次保存的比例:', lastRatio);
+        setSelectedRatio(lastRatio);
+        setIsCustomRatio(lastRatio === -1);
+      }
       
       try {
         const sizeInfo = getVideoSize();
@@ -444,9 +642,9 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
                 />
               </div>
               
-              {/* 裁剪框 */}
+              {/* 裁剪框容器 */}
               <div 
-                className={`crop-box ${isDragging ? 'dragging' : ''}`}
+                className={`crop-box-container ${isDragging ? 'dragging' : ''}`}
                 style={{
                   left: `${cropBox.x}px`,
                   top: `${cropBox.y}px`,
@@ -454,16 +652,76 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
                   height: `${cropBox.height}px`
                 }}
               >
-                {/* 裁剪框拖拽边框 */}
-                <div 
-                  className="crop-box-drag-area"
-                  onMouseDown={handleCropBoxMouseDown}
-                  onTouchStart={handleCropBoxTouchStart}
-                />
+                {/* 裁剪框主体 */}
+                <div className="crop-box">
+                  {/* 裁剪框拖拽区域 */}
+                  <div 
+                    className="crop-box-drag-area"
+                    onMouseDown={handleCropBoxMouseDown}
+                    onTouchStart={handleCropBoxTouchStart}
+                  />
+                  
+                  {/* 裁剪框中心指示器 */}
+                  <div className="crop-box-center">
+                    <div className="crop-box-center-dot"></div>
+                  </div>
+                </div>
                 
-                {/* 裁剪框中心指示器 */}
-                <div className="crop-box-center">
-                  <div className="crop-box-center-dot"></div>
+                {/* 边框和调整控制点 */}
+                {/* 顶部边框 */}
+                <div className="crop-border crop-border-top">
+                  <div 
+                    className="crop-resize-handle crop-resize-handle-top"
+                    onMouseDown={handleXBorderMouseDown}
+                    onTouchStart={handleXBorderTouchStart}
+                    title="拖拽调整高度"
+                  >
+                    <svg width="16" height="8" viewBox="0 0 16 8" fill="none">
+                      <path d="M2 6L8 2L14 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* 底部边框 */}
+                <div className="crop-border crop-border-bottom">
+                  <div 
+                    className="crop-resize-handle crop-resize-handle-bottom"
+                    onMouseDown={handleXBorderMouseDown}
+                    onTouchStart={handleXBorderTouchStart}
+                    title="拖拽调整高度"
+                  >
+                    <svg width="16" height="8" viewBox="0 0 16 8" fill="none">
+                      <path d="M2 2L8 6L14 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* 左侧边框 */}
+                <div className="crop-border crop-border-left">
+                  <div 
+                    className="crop-resize-handle crop-resize-handle-left"
+                    onMouseDown={handleYBorderMouseDown}
+                    onTouchStart={handleYBorderTouchStart}
+                    title="拖拽调整宽度"
+                  >
+                    <svg width="8" height="16" viewBox="0 0 8 16" fill="none">
+                      <path d="M6 2L2 8L6 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* 右侧边框 */}
+                <div className="crop-border crop-border-right">
+                  <div 
+                    className="crop-resize-handle crop-resize-handle-right"
+                    onMouseDown={handleYBorderMouseDown}
+                    onTouchStart={handleYBorderTouchStart}
+                    title="拖拽调整宽度"
+                  >
+                    <svg width="8" height="16" viewBox="0 0 8 16" fill="none">
+                      <path d="M2 2L6 8L2 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
               
@@ -511,7 +769,10 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
             {CROP_RATIOS.map((item) => (
               <div
                 key={item.label}
-                className={`crop-ratio-btn ${selectedRatio === item.ratio ? 'active' : ''}`}
+                className={`crop-ratio-btn ${
+                  (isCustomRatio && item.ratio === -1) || (!isCustomRatio && selectedRatio === item.ratio) 
+                    ? 'active' : ''
+                }`}
                 onClick={() => handleRatioSelect(item.ratio)}
               >
                 {item.label}

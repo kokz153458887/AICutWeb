@@ -282,6 +282,16 @@
   animation: locationStatusPulse 2s infinite;
 }
 
+.edit-video-player-container {
+  width: 100%;
+  height: 350px;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+
+}
+
 @keyframes locationStatusPulse {
   0%, 100% {
     background: rgba(0, 122, 255, 0.1);

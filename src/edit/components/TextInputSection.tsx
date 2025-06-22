@@ -213,8 +213,20 @@ const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(
 
   /**
    * 检测标签输入并触发自动联想
+   * 算法优化：在联想时过滤掉已存在的标签，避免重复输入
    */
   const detectTagInput = (text: string, cursorPos: number) => {
+    // 提取已存在的标签，用于过滤联想结果
+    const existingTags = MaterialService.extractExistingTags(text);
+    
+    // 调试信息：显示当前已存在的标签
+    if (existingTags.directories.length > 0 || existingTags.files.length > 0) {
+      console.log('当前文本中已存在的标签:', {
+        directories: existingTags.directories,
+        files: existingTags.files
+      });
+    }
+    
     // 检查光标前的文字，寻找 [%...] 或 [@...] 模式
     const beforeCursor = text.substring(0, cursorPos);
     const afterCursor = text.substring(cursorPos);
@@ -248,8 +260,8 @@ const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(
         input
       });
       
-      // 获取目录建议（空输入时也显示所有目录）
-      const dirSuggestions = MaterialService.getDirectorySuggestions(input);
+      // 获取目录建议，传入已存在的目录标签进行过滤，避免重复显示
+      const dirSuggestions = MaterialService.getDirectorySuggestions(input, existingTags.directories);
       setSuggestions(dirSuggestions);
       
       // 只要在目录标签内就显示建议
@@ -267,8 +279,8 @@ const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(
         input
       });
       
-      // 获取文件建议（空输入时也显示所有文件）
-      const fileSuggestions = MaterialService.getFileSuggestions(input);
+      // 获取文件建议，传入已存在的文件标签进行过滤，避免重复显示
+      const fileSuggestions = MaterialService.getFileSuggestions(input, existingTags.files);
       setSuggestions(fileSuggestions);
       
       // 只要在文件标签内就显示建议
@@ -293,7 +305,7 @@ const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(
           input
         });
         
-        const dirSuggestions = MaterialService.getDirectorySuggestions(input);
+        const dirSuggestions = MaterialService.getDirectorySuggestions(input, existingTags.directories);
         setSuggestions(dirSuggestions);
         updateSuggestionPosition();
         setShowSuggestions(true);
@@ -310,7 +322,7 @@ const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(
           input
         });
         
-        const fileSuggestions = MaterialService.getFileSuggestions(input);
+        const fileSuggestions = MaterialService.getFileSuggestions(input, existingTags.files);
         setSuggestions(fileSuggestions);
         updateSuggestionPosition();
         setShowSuggestions(true);

@@ -313,15 +313,27 @@ const VideoEditPage: React.FC = () => {
       timeRange.endTime = Math.max(timeRange.startTime, timeRange.endTime - timeOffset); // 结束时间向前偏移
     }
     
-    // 特殊处理：如果当前选中要切割的Item的开始时间为0，则使用上一个Item的结束时间作为起始时间
-    if (currentClip.startTime === 0 && currentClipIndex > 0) {
-      const previousClip = clips[currentClipIndex - 1];
-      if (previousClip && previousClip.endTime > 0) {
-        timeRange.startTime = previousClip.endTime;
-        console.log(`当前切片开始时间为0，使用上一个切片的结束时间作为起始时间: ${previousClip.endTime}`);
+    //如果 taskData.segments[0].words 没有内容，则使用特殊逻辑 
+    if (taskData.segments.length == 0 || taskData.segments[0].words == null || taskData.segments[0].words.length == 0) {
+      // 特殊处理：如果当前选中要切割的Item的开始时间为0，则使用上一个Item的结束时间作为起始时间
+      if (currentClip.startTime === 0 && currentClipIndex > 0) {
+        const previousClip = clips[currentClipIndex - 1];
+        if (previousClip && previousClip.endTime > 0) {
+          timeRange.startTime = previousClip.endTime;
+          console.log(`当前切片开始时间为0，使用上一个切片的结束时间作为起始时间: ${previousClip.endTime}`);
+        }
+      }
+
+      //如果当前选中的Item的结束时间等于视频总时长，则使用上一个Item的结束时间+3秒作为结束时间
+      if (currentClip.endTime === taskData.video_info?.file_duration) {
+        const previousClip = clips[currentClipIndex - 1];
+        if (previousClip && previousClip.endTime > 0) {
+          timeRange.endTime = previousClip.endTime + 3;
+          console.log(`当前切片结束时间等于视频总时长，使用上一个切片的结束时间+3秒作为结束时间: ${previousClip.endTime + 3}`);
+        }
       }
     }
-    
+
     // 创建新切片
     const newClip: VideoClipItem = {
       id: generateId(),
@@ -1218,6 +1230,7 @@ const VideoEditPage: React.FC = () => {
       <div className="video-section">
         <div className="video-player-wrapper">
           <VideoPlayer
+            className="edit-video-player-container"
             videoUrl={taskData.video_url || ''}
             coverUrl={taskData.preview_image}
             seekToTime={videoSeekTime}

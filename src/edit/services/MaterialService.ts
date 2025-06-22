@@ -191,13 +191,29 @@ export class MaterialService {
   /**
    * 获取目录自动联想建议
    * @param input 输入的字符串，空字符串时返回所有目录
+   * @param existingTags 已存在的标签列表，用于过滤重复
    */
-  static getDirectorySuggestions(input: string): SuggestionItem[] {
+  static getDirectorySuggestions(input: string, existingTags: string[] = []): SuggestionItem[] {
     const trimmedInput = input.trim();
     
-    // 如果输入为空，返回所有目录
+    // 过滤掉已存在的目录标签
+    const availableDirectories = this.directories.filter(dir => 
+      !existingTags.includes(dir)
+    );
+    
+    // 调试信息：显示过滤结果
+    if (existingTags.length > 0) {
+      console.log('目录联想过滤结果:', {
+        totalDirectories: this.directories.length,
+        existingTags,
+        availableDirectories: availableDirectories.length,
+        filteredOut: this.directories.length - availableDirectories.length
+      });
+    }
+    
+    // 如果输入为空，返回所有未使用的目录
     if (!trimmedInput) {
-      return this.directories.map(dir => ({
+      return availableDirectories.map(dir => ({
         name: dir,
         type: 'directory' as const,
         matchType: 'startWith' as const
@@ -207,7 +223,7 @@ export class MaterialService {
     const lowerInput = trimmedInput.toLowerCase();
 
     // startWith 匹配
-    const startWithMatches = this.directories.filter(dir => 
+    const startWithMatches = availableDirectories.filter(dir => 
       dir.toLowerCase().startsWith(lowerInput)
     ).map(dir => ({
       name: dir,
@@ -216,7 +232,7 @@ export class MaterialService {
     }));
 
     // contains 模糊匹配
-    const containsMatches = this.directories.filter(dir => 
+    const containsMatches = availableDirectories.filter(dir => 
       !dir.toLowerCase().startsWith(lowerInput) && 
       dir.toLowerCase().includes(lowerInput)
     ).map(dir => ({
@@ -231,13 +247,29 @@ export class MaterialService {
   /**
    * 获取文件自动联想建议
    * @param input 输入的字符串，空字符串时返回所有文件（按创建时间排序）
+   * @param existingTags 已存在的标签列表，用于过滤重复
    */
-  static getFileSuggestions(input: string): SuggestionItem[] {
+  static getFileSuggestions(input: string, existingTags: string[] = []): SuggestionItem[] {
     const trimmedInput = input.trim();
     
-    // 如果输入为空，返回所有文件（已按创建时间排序）
+    // 过滤掉已存在的文件标签
+    const availableFiles = this.files.filter(file => 
+      !existingTags.includes(file.name)
+    );
+    
+    // 调试信息：显示过滤结果
+    if (existingTags.length > 0) {
+      console.log('文件联想过滤结果:', {
+        totalFiles: this.files.length,
+        existingTags,
+        availableFiles: availableFiles.length,
+        filteredOut: this.files.length - availableFiles.length
+      });
+    }
+    
+    // 如果输入为空，返回所有未使用的文件（已按创建时间排序）
     if (!trimmedInput) {
-      return this.files.map(file => {
+      return availableFiles.map(file => {
         const isVideo = this.isVideoFile(file.originalName);
         return {
           name: file.name,
@@ -253,7 +285,7 @@ export class MaterialService {
     const lowerInput = trimmedInput.toLowerCase();
 
     // startWith 匹配（保持创建时间排序）
-    const startWithMatches = this.files.filter(file => 
+    const startWithMatches = availableFiles.filter(file => 
       file.name.toLowerCase().startsWith(lowerInput)
     ).map(file => {
       const isVideo = this.isVideoFile(file.originalName);
@@ -268,7 +300,7 @@ export class MaterialService {
     });
 
     // contains 模糊匹配（保持创建时间排序）
-    const containsMatches = this.files.filter(file => 
+    const containsMatches = availableFiles.filter(file => 
       !file.name.toLowerCase().startsWith(lowerInput) && 
       file.name.toLowerCase().includes(lowerInput)
     ).map(file => {
@@ -298,5 +330,50 @@ export class MaterialService {
    */
   static getCurrentData(): MaterialNode | null {
     return this.materialData;
+  }
+
+  /**
+   * 从文本中提取已存在的标签
+   * 算法优化：用于过滤联想词中的重复标签，避免用户重复输入相同的标签
+   * 
+   * 实现原理：
+   * 1. 使用正则表达式匹配文本中所有完整的标签（[%...] 和 [@...]）
+   * 2. 提取标签内容并去重，分别存储目录标签和文件标签
+   * 3. 在获取联想建议时，过滤掉这些已存在的标签
+   * 
+   * 支持的标签格式：
+   * - 目录标签：[%目录名]
+   * - 文件标签：[@文件名]
+   * 
+   * @param text 要解析的文本
+   * @returns 包含目录和文件标签的对象
+   */
+  static extractExistingTags(text: string): { directories: string[], files: string[] } {
+    const directories: string[] = [];
+    const files: string[] = [];
+    
+    // 匹配所有目录标签 [%...] 
+    const directoryMatches = text.match(/\[%([^\]]+)\]/g);
+    if (directoryMatches) {
+      directoryMatches.forEach(match => {
+        const tagContent = match.substring(2, match.length - 1); // 去掉 [% 和 ]
+        if (tagContent && !directories.includes(tagContent)) {
+          directories.push(tagContent);
+        }
+      });
+    }
+    
+    // 匹配所有文件标签 [@...]
+    const fileMatches = text.match(/\[@([^\]]+)\]/g);
+    if (fileMatches) {
+      fileMatches.forEach(match => {
+        const tagContent = match.substring(2, match.length - 1); // 去掉 [@ 和 ]
+        if (tagContent && !files.includes(tagContent)) {
+          files.push(tagContent);
+        }
+      });
+    }
+    
+    return { directories, files };
   }
 } 

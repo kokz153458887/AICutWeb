@@ -17,6 +17,7 @@ import { ParseTaskDetail, VideoClipItem, VideoEditState, SegmentInfo, MaterialFi
 import { MaterialLibItem, MaterialModel } from '../../../../edit/api/types';
 import { formatTime, parseTime, findPreciseTimeRangeByText, generateId, saveVideoEditState, loadVideoEditState, convertSpacedPositionToPurePosition, removePunctuationAndSpaces } from '../../../videoedit/utils';
 import { toast } from '../../../../components/Toast';
+import { CacheStatus } from '../../../../utils/videoCacheManager';
 import './styles.css';
 
 /**
@@ -85,6 +86,12 @@ const VideoEditPage: React.FC = () => {
   // 时间偏移相关状态
   const [showTimeOffsetModal, setShowTimeOffsetModal] = useState<boolean>(false);
   const [timeOffset, setTimeOffset] = useState<number>(0.0);
+
+  // 视频缓存相关状态
+  const [enableVideoCache, setEnableVideoCache] = useState<boolean>(true); // 默认启用缓存
+  const [cacheStatus, setCacheStatus] = useState<CacheStatus>(CacheStatus.NOT_CACHED);
+  const [cacheProgress, setCacheProgress] = useState<number>(0);
+  const [showCacheButton, setShowCacheButton] = useState<boolean>(true);
 
   // 素材库记忆键
   const getMaterialStorageKey = (taskId: string) => `selected_material_${taskId}`;
@@ -271,6 +278,9 @@ const VideoEditPage: React.FC = () => {
     const clipStartInFullText = calculateClipPositionInFullText(clipId, clips);
     const fullOriginalText = getFullOriginalText();
     
+    // 获取当前切片在clips数组中的索引
+    const currentClipIndex = clips.findIndex(clip => clip.id === clipId);
+    
     //处理 SegmentInfo.words为空的情况，切片的 startTime 和 endTime为0
     let timeRange = { startTime: 0, endTime: taskData?.video_info?.file_duration || 0};
     if (taskData.segments.length > 0 && taskData.segments[0].words && taskData.segments[0].words.length > 0) {
@@ -285,6 +295,15 @@ const VideoEditPage: React.FC = () => {
       // 应用时间偏移修正
       timeRange.startTime = Math.max(0, timeRange.startTime + timeOffset); // 开始时间向后偏移
       timeRange.endTime = Math.max(timeRange.startTime, timeRange.endTime - timeOffset); // 结束时间向前偏移
+    }
+    
+    // 特殊处理：如果当前选中要切割的Item的开始时间为0，则使用上一个Item的结束时间作为起始时间
+    if (currentClip.startTime === 0 && currentClipIndex > 0) {
+      const previousClip = clips[currentClipIndex - 1];
+      if (previousClip && previousClip.endTime > 0) {
+        timeRange.startTime = previousClip.endTime;
+        console.log(`当前切片开始时间为0，使用上一个切片的结束时间作为起始时间: ${previousClip.endTime}`);
+      }
     }
     
     // 创建新切片
@@ -310,6 +329,12 @@ const VideoEditPage: React.FC = () => {
       // 应用时间偏移修正 - 剩余文本的开始时间向后偏移
       remainingStartTime = Math.max(0, remainingStartTime + timeOffset);
     }
+    
+    // 特殊处理：如果计算出的剩余开始时间为0，且当前切片的起始时间被修正过，则使用新切片的结束时间
+    // if (remainingStartTime === 0 && currentClip.startTime === 0 && currentClipIndex > 0) {
+    //   remainingStartTime = timeRange.endTime;
+    //   console.log(`剩余文本开始时间使用新切片的结束时间: ${timeRange.endTime}`);
+    // }
     
     // 为剩余文本设置新的标题
     const remainingTitle = textAfterCursor.length > 20 
@@ -1065,6 +1090,63 @@ const VideoEditPage: React.FC = () => {
     toast.success(`时间偏移已设置为 ${offset} 秒`);
   }, []);
 
+  /**
+   * 处理视频缓存状态变化
+   */
+  const handleCacheStatusChange = useCallback((status: CacheStatus, progress?: number) => {
+    setCacheStatus(status);
+    if (progress !== undefined) {
+      setCacheProgress(progress);
+    }
+
+    // 根据状态显示不同的提示
+    switch (status) {
+      case CacheStatus.CACHING:
+        if (progress === 0) {
+          toast.info('开始缓存视频...');
+        }
+        break;
+      case CacheStatus.CACHED:
+        toast.success('视频缓存完成，已切换到本地播放');
+        setShowCacheButton(false); // 缓存完成后隐藏缓存按钮
+        break;
+      case CacheStatus.CACHE_FAILED:
+        toast.error('视频缓存失败，将继续使用在线播放');
+        break;
+    }
+  }, []);
+
+  /**
+   * 开始缓存视频
+   */
+  const handleStartCaching = useCallback(async () => {
+    if (videoPlayerRef.current) {
+      try {
+        await videoPlayerRef.current.startCaching();
+      } catch (error) {
+        console.error('启动视频缓存失败:', error);
+        toast.error('启动视频缓存失败');
+      }
+    }
+  }, []);
+
+  /**
+   * 切换缓存模式
+   */
+  const handleToggleCacheMode = useCallback(() => {
+    setEnableVideoCache(prev => {
+      const newValue = !prev;
+      if (newValue) {
+        toast.info('已启用视频缓存功能');
+        setShowCacheButton(true);
+      } else {
+        toast.info('已关闭视频缓存功能');
+        setShowCacheButton(false);
+      }
+      return newValue;
+    });
+  }, []);
+
   if (loading) {
     return (
       <div className="video-edit-page">
@@ -1118,6 +1200,7 @@ const VideoEditPage: React.FC = () => {
             seekToTime={videoSeekTime}
             showProgressBar={showProgressBar}
             isLocationMode={isLocationMode}
+            enableCache={enableVideoCache}
             onTimeUpdate={handleVideoTimeUpdate}
             onDragging={handleDragging}
             onSeekEnd={() => {
@@ -1127,6 +1210,7 @@ const VideoEditPage: React.FC = () => {
               }
             }}
             onPlayStateChange={handleVideoPlayStateChange}
+            onCacheStatusChange={handleCacheStatusChange}
             ref={videoPlayerRef}
           />
           
@@ -1166,6 +1250,55 @@ const VideoEditPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* 视频缓存控制区域 */}
+          <div className="video-cache-controls">
+            {/* 缓存状态显示 */}
+            {cacheStatus !== CacheStatus.NOT_CACHED && (
+              <div className={`cache-status-display ${cacheStatus.toLowerCase().replace('_', '-')}`}>
+                {cacheStatus === CacheStatus.CACHING && (
+                  <span className="cache-progress-text">缓存中 {Math.round(cacheProgress)}%</span>
+                )}
+                {cacheStatus === CacheStatus.CACHED && (
+                  <span className="cache-status-text">已缓存</span>
+                )}
+                {cacheStatus === CacheStatus.CACHE_FAILED && (
+                  <span className="cache-status-text">缓存失败</span>
+                )}
+              </div>
+            )}
+
+            {/* 缓存模式切换按钮 */}
+            <div 
+              className={`cache-mode-toggle ${enableVideoCache ? 'enabled' : 'disabled'}`}
+              onClick={handleToggleCacheMode}
+              title={enableVideoCache ? '点击关闭缓存模式' : '点击开启缓存模式'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="2"/>
+                <polyline points="7.5,4.21 12,6.81 16.5,4.21" stroke="currentColor" strokeWidth="2"/>
+                <polyline points="7.5,19.79 7.5,14.6 3,12" stroke="currentColor" strokeWidth="2"/>
+                <polyline points="21,12 16.5,14.6 16.5,19.79" stroke="currentColor" strokeWidth="2"/>
+                <polyline points="12,22.81 12,17" stroke="currentColor" strokeWidth="2"/>
+                <line x1="12" y1="6.81" x2="12" y2="12" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </div>
+
+            {/* 缓存按钮 - 只在启用缓存且未缓存时显示 */}
+            {enableVideoCache && showCacheButton && cacheStatus === CacheStatus.NOT_CACHED && (
+              <div 
+                className="cache-button"
+                onClick={handleStartCaching}
+                title="开始缓存视频到本地"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       

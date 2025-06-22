@@ -1,8 +1,9 @@
 /**
  * 视频播放器组件
- * 支持进度控制、拖拽和时间显示
+ * 支持进度控制、拖拽和时间显示，以及视频缓存功能
  */
 import React, { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { videoCacheManager, CacheStatus } from '../../utils/videoCacheManager';
 import './styles.css';
 
 // 格式化时间工具函数
@@ -35,17 +36,21 @@ interface VideoPlayerProps {
   width?: string | number; // 自定义宽度
   height?: string | number; // 自定义高度
   className?: string; // 自定义类名
+  enableCache?: boolean; // 是否启用缓存功能
+  onCacheStatusChange?: (status: CacheStatus, progress?: number) => void; // 缓存状态变化回调
 }
 
 export interface VideoPlayerRef {
   pauseVideo: () => void;
   playVideo: () => void;
   getVideoElement: () => HTMLVideoElement | null;
+  startCaching: () => Promise<void>; // 开始缓存视频
+  getCacheStatus: () => CacheStatus; // 获取缓存状态
 }
 
 /**
  * 视频播放器组件
- * 提供视频播放、进度控制和拖拽功能
+ * 提供视频播放、进度控制和拖拽功能，支持视频缓存
  */
 const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   videoUrl,
@@ -61,7 +66,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   autoPlay = false,
   width,
   height,
-  className
+  className,
+  enableCache = false,
+  onCacheStatusChange
 }, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -73,6 +80,68 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   const [dragTime, setDragTime] = useState(0);
   const [showCover, setShowCover] = useState(true);
   const [showPauseButton, setShowPauseButton] = useState(false);
+  
+  // 缓存相关状态
+  const [cacheStatus, setCacheStatus] = useState<CacheStatus>(CacheStatus.NOT_CACHED);
+  const [cacheProgress, setCacheProgress] = useState(0);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState(videoUrl);
+
+  /**
+   * 初始化缓存状态
+   */
+  useEffect(() => {
+    if (enableCache && videoUrl) {
+      const status = videoCacheManager.getCacheStatus(videoUrl);
+      setCacheStatus(status);
+      onCacheStatusChange?.(status);
+      
+      // 如果已经缓存，使用缓存的URL
+      if (status === CacheStatus.CACHED) {
+        const cachedUrl = videoCacheManager.getCachedUrl(videoUrl);
+        setCurrentVideoUrl(cachedUrl);
+      } else {
+        setCurrentVideoUrl(videoUrl);
+      }
+    } else {
+      setCurrentVideoUrl(videoUrl);
+    }
+  }, [videoUrl, enableCache, onCacheStatusChange]);
+
+  /**
+   * 开始缓存视频
+   */
+  const startCaching = useCallback(async (): Promise<void> => {
+    if (!enableCache || !videoUrl) return;
+    
+    const currentStatus = videoCacheManager.getCacheStatus(videoUrl);
+    if (currentStatus === CacheStatus.CACHED || currentStatus === CacheStatus.CACHING) {
+      return;
+    }
+
+    try {
+      setCacheStatus(CacheStatus.CACHING);
+      setCacheProgress(0);
+      onCacheStatusChange?.(CacheStatus.CACHING, 0);
+
+      const cachedUrl = await videoCacheManager.cacheVideo(videoUrl, (progress) => {
+        setCacheProgress(progress);
+        onCacheStatusChange?.(CacheStatus.CACHING, progress);
+      });
+
+      setCacheStatus(CacheStatus.CACHED);
+      setCacheProgress(100);
+      setCurrentVideoUrl(cachedUrl);
+      onCacheStatusChange?.(CacheStatus.CACHED, 100);
+
+      console.log('视频缓存完成，切换到本地播放');
+      
+    } catch (error) {
+      console.error('视频缓存失败:', error);
+      setCacheStatus(CacheStatus.CACHE_FAILED);
+      setCacheProgress(0);
+      onCacheStatusChange?.(CacheStatus.CACHE_FAILED, 0);
+    }
+  }, [enableCache, videoUrl, onCacheStatusChange]);
 
   // 暴露给父组件的方法
   useImperativeHandle(ref, () => ({
@@ -88,8 +157,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
     },
     getVideoElement: () => {
       return videoRef.current;
-    }
-  }), []);
+    },
+    startCaching,
+    getCacheStatus: () => cacheStatus
+  }), [startCaching, cacheStatus]);
 
   /**
    * 处理视频播放 - 无依赖，无需useCallback
@@ -392,7 +463,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
         <video
           ref={videoRef}
           className="edit-video-element"
-          src={videoUrl}
+          src={currentVideoUrl}
           onTimeUpdate={handleTimeUpdate}
           onPlay={handlePlay}
           onPause={handlePause}
@@ -433,6 +504,52 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
             <div className="drag-time-display">
               {formatTime(dragTime)}
             </div>
+          </div>
+        )}
+        
+        {/* 缓存状态指示器 */}
+        {enableCache && cacheStatus !== CacheStatus.NOT_CACHED && (
+          <div className="cache-status-indicator">
+            {cacheStatus === CacheStatus.CACHING && (
+              <div className="cache-progress-indicator">
+                <div className="cache-icon caching">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L12 6M12 18L12 22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12L6 12M18 12L22 12M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div className="cache-progress-text">
+                  缓存中 {Math.round(cacheProgress)}%
+                </div>
+                <div className="cache-progress-bar">
+                  <div 
+                    className="cache-progress-fill"
+                    style={{ width: `${cacheProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {cacheStatus === CacheStatus.CACHED && (
+              <div className="cache-status-display cached">
+                <div className="cache-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span>已缓存</span>
+              </div>
+            )}
+            
+            {cacheStatus === CacheStatus.CACHE_FAILED && (
+              <div className="cache-status-display failed">
+                <div className="cache-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span>缓存失败</span>
+              </div>
+            )}
           </div>
         )}
         

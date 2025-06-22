@@ -196,9 +196,10 @@ const TextInputSection = forwardRef<TextInputSectionRef, TextInputSectionProps>(
   // 加载材料数据
   useEffect(() => {
     const loadMaterialData = async () => {
-      if (materialUrl && !MaterialService.hasData()) {
+      if (materialUrl) {
         try {
           console.log('开始加载材料数据:', materialUrl);
+          // 当materialUrl变化时，重新加载数据（不检查hasData）
           await MaterialService.fetchMaterialData(materialUrl);
           console.log('材料数据加载完成');
         } catch (error) {

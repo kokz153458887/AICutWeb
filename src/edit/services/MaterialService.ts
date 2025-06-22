@@ -43,12 +43,27 @@ export class MaterialService {
   private static baseUrl: string = ''; // 保存原始URL的基础地址
 
   /**
+   * 清理当前材料数据
+   */
+  static clearData(): void {
+    this.materialData = null;
+    this.directories = [];
+    this.files = [];
+    this.baseUrl = '';
+    console.log('材料数据已清理');
+  }
+
+  /**
    * 获取材料目录数据
    * @param url 材料URL
    */
   static async fetchMaterialData(url: string): Promise<MaterialNode> {
     try {
       console.log('获取材料数据:', url);
+      
+      // 清理之前的数据
+      this.clearData();
+      
       // 保存基础URL
       const urlObj = new URL(url);
       this.baseUrl = `${urlObj.protocol}//${urlObj.host}`;

@@ -569,6 +569,8 @@ const EditPage: React.FC = () => {
           onMaterialSelect={(material) => {
             if (configData) {
               console.log('选择素材:', material);
+              console.log('素材ID更新:', material.materialID);
+              console.log('素材URL更新:', material.url);
               setConfigData({
                 ...configData,
                 material: {

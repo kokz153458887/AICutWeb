@@ -35,6 +35,7 @@ class VideoCacheManager {
   private cache: Map<string, CacheItem> = new Map();
   private config: CacheConfig;
   private cachePromises: Map<string, Promise<string>> = new Map(); // 正在进行的缓存Promise
+  private readonly STORAGE_KEY = 'video_cache_metadata'; // 本地存储键名
 
   constructor(config?: Partial<CacheConfig>) {
     this.config = {
@@ -42,6 +43,9 @@ class VideoCacheManager {
       maxAge: 24 * 60 * 60 * 1000, // 默认24小时
       ...config
     };
+    
+    // 初始化时从本地存储恢复缓存元数据
+    this.loadCacheMetadata();
     
     // 定期清理过期缓存
     this.startCleanupInterval();
@@ -132,6 +136,9 @@ class VideoCacheManager {
     };
     
     this.cache.set(originalUrl, cacheItem);
+    
+    // 保存缓存状态到本地存储
+    this.saveCacheMetadata();
 
     try {
       // 使用fetch下载视频
@@ -190,6 +197,9 @@ class VideoCacheManager {
       cacheItem.size = downloadedSize;
       cacheItem.status = CacheStatus.CACHED;
 
+      // 保存元数据到本地存储
+      this.saveCacheMetadata();
+
       console.log(`视频缓存完成: ${originalUrl} -> ${cachedUrl} (${this.formatSize(downloadedSize)})`);
       
       return cachedUrl;
@@ -197,6 +207,10 @@ class VideoCacheManager {
     } catch (error) {
       console.error('视频缓存失败:', error);
       cacheItem.status = CacheStatus.CACHE_FAILED;
+      
+      // 保存失败状态到本地存储
+      this.saveCacheMetadata();
+      
       throw new Error(`视频缓存失败: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -238,6 +252,9 @@ class VideoCacheManager {
       URL.revokeObjectURL(item.cachedUrl);
     }
     this.cache.delete(originalUrl);
+    
+    // 更新本地存储
+    this.saveCacheMetadata();
   }
 
   /**
@@ -256,7 +273,7 @@ class VideoCacheManager {
   private startCleanupInterval(): void {
     setInterval(() => {
       this.cleanupExpiredCache();
-    }, 60 * 60 * 1000); // 每小时清理一次
+    }, 6 * 60 * 60 * 1000); // 每小时清理一次
   }
 
   /**
@@ -286,7 +303,63 @@ class VideoCacheManager {
     for (const [url] of this.cache.entries()) {
       this.removeCacheItem(url);
     }
+    this.saveCacheMetadata();
     console.log('所有视频缓存已清理');
+  }
+
+  /**
+   * 加载缓存元数据从本地存储
+   */
+  private loadCacheMetadata(): void {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (stored) {
+        const metadata: Array<{url: string; status: CacheStatus; size: number; createdAt: number; accessedAt: number}> = JSON.parse(stored);
+        
+        for (const item of metadata) {
+          // 只恢复元数据，不恢复cachedUrl（因为页面刷新后Blob URL会失效）
+          const cacheItem: CacheItem = {
+            originalUrl: item.url,
+            cachedUrl: '', // 页面刷新后需要重新缓存
+            size: item.size,
+            createdAt: item.createdAt,
+            accessedAt: item.accessedAt,
+            status: item.status === CacheStatus.CACHED ? CacheStatus.CACHED : item.status // 已缓存的重置为未缓存
+          };
+          
+          // 检查是否过期
+          const now = Date.now();
+          if (now - cacheItem.createdAt > this.config.maxAge) {
+            continue; // 跳过过期项
+          }
+          
+          this.cache.set(item.url, cacheItem);
+        }
+        
+        console.log('从本地存储恢复缓存元数据:', this.cache.size, '项');
+      }
+    } catch (error) {
+      console.warn('加载缓存元数据失败:', error);
+    }
+  }
+
+  /**
+   * 保存缓存元数据到本地存储
+   */
+  private saveCacheMetadata(): void {
+    try {
+      const metadata = Array.from(this.cache.entries()).map(([url, item]) => ({
+        url,
+        status: item.status,
+        size: item.size,
+        createdAt: item.createdAt,
+        accessedAt: item.accessedAt
+      }));
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(metadata));
+    } catch (error) {
+      console.warn('保存缓存元数据失败:', error);
+    }
   }
 
   /**

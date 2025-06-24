@@ -123,15 +123,42 @@ const VideoEditPage: React.FC = () => {
         if (data.video_url) {
           const initialCacheStatus = videoCacheManager.getCacheStatus(data.video_url);
           setCacheStatus(initialCacheStatus);
-          console.log('初始缓存状态:', initialCacheStatus);
+          console.log('页面刷新后恢复缓存状态:', initialCacheStatus);
           
-          // 如果已经缓存过，隐藏缓存按钮并显示提示
+          // 根据缓存状态设置UI状态
           if (initialCacheStatus === CacheStatus.CACHED) {
             setShowCacheButton(false);
             toast.info('检测到视频已缓存，将使用本地播放');
+          } else if (initialCacheStatus === CacheStatus.CACHING) {
+            // 如果正在缓存中，显示缓存状态但不启动新的缓存进程
+            setShowCacheButton(false);
+            toast.info('检测到视频正在缓存中...');
+            
+            // 定期检查缓存状态是否变化
+            const statusCheckInterval = setInterval(() => {
+              if (data.video_url) {
+                const currentStatus = videoCacheManager.getCacheStatus(data.video_url);
+                if (currentStatus !== CacheStatus.CACHING) {
+                  setCacheStatus(currentStatus);
+                  clearInterval(statusCheckInterval);
+                  
+                  if (currentStatus === CacheStatus.CACHED) {
+                    toast.success('视频缓存完成');
+                    setShowCacheButton(false);
+                  } else if (currentStatus === CacheStatus.CACHE_FAILED) {
+                    toast.error('视频缓存失败');
+                    setShowCacheButton(true);
+                  }
+                }
+              }
+            }, 1000);
+            
+            // 清理定时器
+            return () => clearInterval(statusCheckInterval);
           } else if (initialCacheStatus === CacheStatus.CACHE_FAILED) {
             // 如果之前缓存失败，重置为未缓存状态，允许重新缓存
             setCacheStatus(CacheStatus.NOT_CACHED);
+            setShowCacheButton(true);
           }
         }
         
@@ -334,11 +361,31 @@ const VideoEditPage: React.FC = () => {
       }
     }
 
+    /**
+     * 清理文本内容 - 移除多余的空格、空行和数字编号
+     */
+    const cleanText = (text: string): string => {
+      return text
+        // 移除多余的空格和制表符
+        .replace(/\s+/g, ' ')
+        // 移除开头和结尾的空白字符
+        .trim()
+        // 移除空行
+        .replace(/\n\s*\n/g, '\n')
+        // 移除开头的数字编号（如 "1." "2." "123." 等）
+        .replace(/^\d+\.\s*/, '')
+        // 再次清理可能产生的多余空格
+        .trim();
+    };
+
+    // 清理文本内容
+    const cleanedTextBeforeCursor = cleanText(textBeforeCursor);
+    
     // 创建新切片
     const newClip: VideoClipItem = {
       id: generateId(),
-      title: textBeforeCursor.length > 20 ? textBeforeCursor.substring(0, 20) + '...' : textBeforeCursor,
-      text: textBeforeCursor,
+      title: cleanedTextBeforeCursor.length > 20 ? cleanedTextBeforeCursor.substring(0, 12) : cleanedTextBeforeCursor,
+      text: cleanedTextBeforeCursor,
       startTime: timeRange.startTime,
       endTime: timeRange.endTime,
       folder: currentClip.folder
@@ -359,8 +406,8 @@ const VideoEditPage: React.FC = () => {
     }
     
     // 为剩余文本设置新的标题
-    const remainingTitle = textAfterCursor.length > 20 
-      ? textAfterCursor.substring(0, 20) 
+    const remainingTitle = textAfterCursor.length > 15 
+      ? textAfterCursor.substring(0, 15) + '...'
       : textAfterCursor;
     
     // 更新切片列表

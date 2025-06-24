@@ -181,7 +181,7 @@ export const translateText = async (text: string): Promise<{text: string}> => {
       '/ai/translate',
       {
         text,
-        aiModel: 'qwen-turbo'
+        aiModel: 'qwen-plus'
       },
       {
         baseURL: API_CONFIG.fullBaseURL,

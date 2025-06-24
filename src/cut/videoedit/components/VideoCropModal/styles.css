@@ -301,6 +301,61 @@
   gap: 16px;
 }
 
+/* 风格选择区域 */
+.crop-style-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crop-style-label {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.crop-style-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  justify-content: space-between;
+}
+
+.crop-style-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.crop-style-btn:active {
+  transform: translateY(1px);
+}
+
+.crop-style-name {
+  flex: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.crop-style-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.crop-style-btn:hover svg {
+  transform: translateY(1px);
+}
+
 /* 比例选择器 */
 .crop-ratios {
   display: flex;

@@ -289,8 +289,12 @@
 
 /* 通用按钮样式 */
 .video-parse-action-btn {
-  padding: 8px 16px;
-  border-radius: 12px;
+  padding: 4px 4px;
+  border-radius: 6px;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
   font-size: 12px;
   font-weight: 600;
   border: none;
@@ -300,26 +304,25 @@
   align-items: center;
   gap: 6px;
   -webkit-tap-highlight-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 /* 主要按钮（原链接） */
 .video-parse-action-btn.primary {
-  background: linear-gradient(135deg, #007AFF, #0056CC);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
 .video-parse-action-btn.primary:hover {
   background: linear-gradient(135deg, #0056CC, #003D99);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
 }
 
 /* 次要按钮（视频地址） */
 .video-parse-action-btn.secondary {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .video-parse-action-btn.secondary:hover {
@@ -329,15 +332,26 @@
 
 /* 素材库按钮 */
 .video-parse-action-btn.material {
-  background: linear-gradient(135deg, #00d6c9, #00b8ab);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 214, 201, 0.3);
 }
 
 .video-parse-action-btn.material:hover {
   background: linear-gradient(135deg, #00b8ab, #009688);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 214, 201, 0.4);
+}
+
+/* 重新编辑按钮 */
+.video-parse-action-btn.re-edit {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
+}
+
+.video-parse-action-btn.re-edit:hover {
+  background: linear-gradient(135deg, #f5576c, #e73c7e);
+  transform: translateY(-1px);
 }
 
 /* 视频地址下拉包装层 */
@@ -433,11 +447,6 @@
 
   .video-parse-task-actions {
     gap: 8px;
-  }
-
-  .video-parse-action-btn {
-    padding: 6px 12px;
-    font-size: 11px;
   }
 
   .video-parse-play-button svg {

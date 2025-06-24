@@ -4,8 +4,10 @@
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import VideoPlayer, { VideoPlayerRef } from '../../../../components/VideoPlayer';
+import StyleSelectModal from '../../../../edit/components/styleSelect/StyleSelectModal';
 import { CropParams } from '../../api';
 import { ParseTaskDetail } from '../..';
+import { StyleModel } from '../../../../edit/api/types';
 import './styles.css';
 
 // 裁剪比例选项
@@ -20,6 +22,7 @@ const CROP_RATIOS = [
 
 // 本地存储键名
 const LAST_CROP_RATIO_KEY = 'video_crop_last_ratio';
+const LAST_SELECTED_STYLE_KEY = 'video_crop_last_style';
 
 interface VideoCropModalProps {
   taskData: ParseTaskDetail;
@@ -54,6 +57,11 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
   // 新增状态用于控制拖拽模式
   const [dragMode, setDragMode] = useState<'move' | 'resize-width' | 'resize-height' | null>(null);
   const [isCustomRatio, setIsCustomRatio] = useState(false); // 是否为自定义比例
+  
+  // 视频风格选择相关状态
+  const [showStyleModal, setShowStyleModal] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState<StyleModel | null>(null);
+  const [currentStyleName, setCurrentStyleName] = useState<string>('未选择风格');
 
   /**
    * 保存上次选择的比例到本地存储
@@ -83,6 +91,122 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
     }
     return 1; // 默认1:1
   }, []);
+
+  /**
+   * 保存选中的风格到本地存储
+   */
+  const saveSelectedStyle = useCallback((style: StyleModel) => {
+    try {
+      localStorage.setItem(LAST_SELECTED_STYLE_KEY, JSON.stringify({
+        _id: style._id,
+        styleName: style.styleName,
+        ratio: style.ratio,
+        videoShowRatio: style.videoShowRatio
+      }));
+    } catch (error) {
+      console.warn('保存风格失败:', error);
+    }
+  }, []);
+
+  /**
+   * 从本地存储读取上次选择的风格
+   */
+  const getLastSelectedStyle = useCallback((): StyleModel | null => {
+    try {
+      const saved = localStorage.getItem(LAST_SELECTED_STYLE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.warn('读取风格失败:', error);
+    }
+    return null;
+  }, []);
+
+  /**
+   * 解析风格比例字符串为数值
+   */
+  const parseStyleRatio = useCallback((ratioStr: string): number => {
+    try {
+      // 处理 "1:1", "16:9", "1:0.9" 等格式
+      const [width, height] = ratioStr.split(':').map(parseFloat);
+      if (width > 0 && height > 0) {
+        return width / height;
+      }
+    } catch (error) {
+      console.warn('解析风格比例失败:', ratioStr, error);
+    }
+    return 1; // 默认1:1
+  }, []);
+
+  /**
+   * 更新裁剪框比例 - 以视频宽度为基准计算高度
+   */
+  const updateCropBoxRatio = useCallback((ratio: number, displayWidth: number, displayHeight: number) => {
+    setCropBox(() => {
+      // 以视频宽度的80%为基准
+      const baseWidth = displayWidth;
+      let newWidth = baseWidth;
+      let newHeight = baseWidth / ratio;
+
+      // 如果计算出的高度超出视频高度，则以高度为准重新计算宽度
+      if (newHeight > displayHeight) {
+        newHeight = displayHeight ;
+        newWidth = newHeight * ratio;
+      }
+
+      // 居中显示
+      const newX = (displayWidth - newWidth) / 2;
+      const newY = (displayHeight - newHeight) / 2;
+
+      console.log('更新裁剪框比例:', {
+        ratio,
+        displaySize: { displayWidth, displayHeight },
+        cropSize: { newWidth, newHeight },
+        position: { newX, newY }
+      });
+
+      return {
+        x: Math.max(0, newX),
+        y: Math.max(0, newY),
+        width: newWidth,
+        height: newHeight
+      };
+    });
+  }, []);
+
+  /**
+   * 处理风格选择
+   */
+  const handleStyleSelect = useCallback((style: StyleModel) => {
+    setSelectedStyle(style);
+    setCurrentStyleName(style.styleName || '自定义风格');
+    saveSelectedStyle(style);
+    
+    // 根据风格的videoShowRatio计算裁剪比例
+    if (style.videoShowRatio?.ratio) {
+      const styleRatio = parseStyleRatio(style.videoShowRatio.ratio);
+      setSelectedRatio(styleRatio);
+      saveLastRatio(styleRatio);
+      
+      // 检查是否为预设比例
+      const matchedPreset = CROP_RATIOS.find(r => r.ratio !== -1 && Math.abs(r.ratio - styleRatio) < 0.01);
+      if (matchedPreset) {
+        setIsCustomRatio(false);
+      } else {
+        setIsCustomRatio(true);
+      }
+      
+      // 立即更新裁剪框以应用新比例
+      if (videoSize.displayWidth > 0 && videoSize.displayHeight > 0) {
+        updateCropBoxRatio(styleRatio, videoSize.displayWidth, videoSize.displayHeight);
+      }
+      
+      console.log('应用风格比例:', style.videoShowRatio.ratio, '计算结果:', styleRatio);
+    }
+    
+    setShowStyleModal(false);
+  }, [parseStyleRatio, saveLastRatio, saveSelectedStyle, videoSize, updateCropBoxRatio]);
 
   /**
    * 解析视频分辨率
@@ -184,42 +308,6 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
       setSelectedRatio(lastRatio);
     }
   }, [initialCropParams, getLastRatio]);
-
-  /**
-   * 更新裁剪框比例 - 以视频宽度为基准计算高度
-   */
-  const updateCropBoxRatio = useCallback((ratio: number, displayWidth: number, displayHeight: number) => {
-    setCropBox(prev => {
-      // 以视频宽度的80%为基准
-      const baseWidth = displayWidth;
-      let newWidth = baseWidth;
-      let newHeight = baseWidth / ratio;
-
-      // 如果计算出的高度超出视频高度，则以高度为准重新计算宽度
-      if (newHeight > displayHeight) {
-        newHeight = displayHeight ;
-        newWidth = newHeight * ratio;
-      }
-
-      // 居中显示
-      const newX = (displayWidth - newWidth) / 2;
-      const newY = (displayHeight - newHeight) / 2;
-
-      console.log('更新裁剪框比例:', {
-        ratio,
-        displaySize: { displayWidth, displayHeight },
-        cropSize: { newWidth, newHeight },
-        position: { newX, newY }
-      });
-
-      return {
-        x: Math.max(0, newX),
-        y: Math.max(0, newY),
-        width: newWidth,
-        height: newHeight
-      };
-    });
-  }, []);
 
   /**
    * 处理比例选择
@@ -524,6 +612,14 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
         setIsCustomRatio(lastRatio === -1);
       }
       
+      // 恢复上次选择的风格
+      const lastStyle = getLastSelectedStyle();
+      if (lastStyle) {
+        setSelectedStyle(lastStyle);
+        setCurrentStyleName(lastStyle.styleName || '自定义风格');
+        console.log('恢复上次选择的风格:', lastStyle.styleName);
+      }
+      
       try {
         const sizeInfo = getVideoSize();
         if (sizeInfo) {
@@ -764,6 +860,21 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
 
         {/* 控制区域 */}
         <div className="crop-controls">
+          {/* 视频风格选择 */}
+          <div className="crop-style-section">
+            <div className="crop-style-label">视频风格:</div>
+            <div 
+              className="crop-style-btn"
+              onClick={() => setShowStyleModal(true)}
+              title="选择视频风格"
+            >
+              <span className="crop-style-name">{currentStyleName}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
           {/* 比例选择 */}
           <div className="crop-ratios">
             {CROP_RATIOS.map((item) => (
@@ -794,6 +905,15 @@ const VideoCropModal: React.FC<VideoCropModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 风格选择弹窗 */}
+      {showStyleModal && (
+        <StyleSelectModal
+          onClose={() => setShowStyleModal(false)}
+          onSelect={handleStyleSelect}
+          currentStyleId={selectedStyle?._id}
+        />
+      )}
     </div>
   );
 };

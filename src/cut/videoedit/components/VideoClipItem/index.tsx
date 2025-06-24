@@ -286,6 +286,18 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
     setShowTitleSuggestions(false);
   };
 
+  /**
+   * 处理清除标题按钮点击
+   */
+  const handleClearTitle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onTitleChange(clip.id, '');
+    // 聚焦到输入框
+    if (titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  };
+
   // 更新文件夹输入框的值
   useEffect(() => {
     setFolderInput(clip.folder || '');
@@ -529,6 +541,18 @@ const VideoClipItemComponent = forwardRef<VideoClipItemRef, VideoClipItemProps>(
               onFocus={handleTitleInputFocus}
               onBlur={handleTitleInputBlur}
             />
+            {/* 清除标题按钮 */}
+            {(clip.title && clip.title.trim()) && (
+              <button 
+                className="clear-title-btn"
+                onClick={handleClearTitle}
+                title="清除标题"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            )}
             {/* 标题自动提示下拉框 */}
             {showTitleSuggestions && filteredFiles.length > 0 && (
               <div ref={titleSuggestionsRef} className="suggestions-dropdown">

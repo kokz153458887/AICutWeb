@@ -29,6 +29,13 @@
 }
 
 /* 标题输入容器 */
+.title-input-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
 .video-clip-item-title-input-container {
   position: relative;
   flex: 1;
@@ -37,6 +44,7 @@
 .video-clip-item-title-input {
   width: 100%;
   padding: 4px 6px;
+  padding-right: 30px; /* 为清除按钮留出空间 */
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
@@ -44,6 +52,33 @@
   font-size: 10px;
   font-weight: 500;
   transition: all 0.2s ease;
+}
+
+/* 清除标题按钮 */
+.clear-title-btn {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.clear-title-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: rgba(255, 59, 48, 0.9);
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
 }
 
 /* 文件夹输入容器 */

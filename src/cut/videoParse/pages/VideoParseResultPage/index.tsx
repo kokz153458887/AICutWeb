@@ -138,6 +138,16 @@ const VideoParseResultPage: React.FC = () => {
   }, [taskData, navigate]);
 
   /**
+   * 处理重新编辑点击
+   */
+  const handleReEditClick = useCallback(() => {
+    if (taskData?.id) {
+      // 跳转到视频编辑页面，传递任务ID
+      navigate(`/video-edit/${taskData.id}`);
+    }
+  }, [taskData, navigate]);
+
+  /**
    * 处理视频片段全屏播放
    */
   const handleFullScreenPlay = useCallback((videoUrl: string) => {
@@ -193,6 +203,7 @@ const VideoParseResultPage: React.FC = () => {
               onVideoPlay={handleMainVideoPlay}
               onOriginalLinkClick={handleOriginalLinkClick}
               onMaterialLibraryClick={handleMaterialLibraryClick}
+              onReEditClick={handleReEditClick}
             />
           ) : (
             <div className="main-video-player">

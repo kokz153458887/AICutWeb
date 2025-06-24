@@ -12,6 +12,7 @@ interface TaskInfoCardProps {
   onVideoPlay?: () => void;
   onOriginalLinkClick?: () => void;
   onMaterialLibraryClick?: () => void;
+  onReEditClick?: () => void; // 重新编辑按钮点击事件
 }
 
 /**
@@ -22,7 +23,8 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
   taskData,
   onVideoPlay,
   onOriginalLinkClick,
-  onMaterialLibraryClick
+  onMaterialLibraryClick,
+  onReEditClick
 }) => {
   const [showFileUrls, setShowFileUrls] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -315,6 +317,10 @@ const TaskInfoCard: React.FC<TaskInfoCardProps> = ({
         
         <button className="video-parse-action-btn material" onClick={onMaterialLibraryClick}>
           {taskData.materialName || '素材库'}
+        </button>
+        
+        <button className="video-parse-action-btn re-edit" onClick={onReEditClick}>
+          重新编辑
         </button>
       </div>
     </div>
